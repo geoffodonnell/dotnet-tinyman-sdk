@@ -6,10 +6,12 @@
 
   <ItemGroup>
     <None Remove="V1\asc.json" />
+    <None Remove="V1\Teal4\langspec.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="V1\asc.json" />
+    <EmbeddedResource Include="V1\Teal4\langspec.json" />
   </ItemGroup>
 
   <ItemGroup>

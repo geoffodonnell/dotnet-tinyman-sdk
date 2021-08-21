@@ -20,6 +20,14 @@ namespace Tinyman.V1 {
 		private static LogicSigContract PoolLogicSigDef;
 		private static AppContract ValidatorAppDef;
 
+		public static byte[] ValidatorAppApprovalProgramBytes {
+			get => Util.GetProgram(ValidatorAppDef.ApprovalProgram, null);
+		}
+
+		public static byte[] ValidatorAppClearProgramBytes {
+			get => Util.GetProgram(ValidatorAppDef.ClearProgram, null);
+		}
+
 		static Contract() {
 			LoadContractsFromResource();
 		}
@@ -36,32 +44,63 @@ namespace Tinyman.V1 {
 				{ "asset_id_2", assetIdMin }
 			});
 
+			return GetLogicSig(bytes);
+		}
+
+		public static LogicsigSignature GetLogicSig(byte[] bytes) {
+
+			if (TryCreateLogicSig(bytes, out var result, out var exception)) {
+				return result;
+			}
+
+			if (TryCreateLogicSigWithManualCheck(bytes, out result, out exception)) {
+				return result;
+			}
+
+			throw exception;
+		}
+
+		private static bool TryCreateLogicSig(
+			byte[] bytes, out LogicsigSignature result, out Exception exception) {
+
 			try {
-				return new LogicsigSignature(logic: bytes);
 
-			} catch (ArgumentException ex) {
+				result = new LogicsigSignature(logic: bytes);
+				exception = null;
 
-				if (String.Equals(ex.Message, UnsupportedVersionErrorMessageFromSdk)) {
-					throw new ArgumentException(UnsupportedVersionErrorMessage, ex);
-				}
+				return true;
 
-				throw;
+			} catch (Exception ex) {
+
+				result = null;
+				exception = ex;
+
+				return false;
 			}
 		}
 
-		public static LogicsigSignature4 GetPoolLogicSig4(
-			long validatorAppId, long assetIdA, long assetIdB) {
+		private static bool TryCreateLogicSigWithManualCheck(
+			byte[] bytes, out LogicsigSignature result, out Exception exception) {
 
-			var assetIdMax = Math.Max(assetIdA, assetIdB);
-			var assetIdMin = Math.Min(assetIdA, assetIdB);
+			try {
 
-			var bytes = Util.GetProgram(PoolLogicSigDef.Logic, new Dictionary<string, object> {
-				{ "validator_app_id", validatorAppId },
-				{ "asset_id_1", assetIdMax },
-				{ "asset_id_2", assetIdMin }
-			});
+				result = new LogicsigSignature {
+					logic = bytes
+				};
 
-			return new LogicsigSignature4(logic: bytes);
+				//Teal4.Logic.CheckProgram(bytes, null);
+
+				exception = null;
+
+				return true;
+
+			} catch (Exception ex) {
+
+				result = null;
+				exception = ex;
+
+				return false;
+			}
 		}
 
 		private static void LoadContractsFromResource() {

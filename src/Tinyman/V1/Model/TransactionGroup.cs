@@ -38,7 +38,7 @@ namespace Tinyman.V1.Model {
 
 		public void SignWithLogicSig(LogicsigSignature logicsig) {
 
-			PerformSign(s => Account.SignLogicsigTransaction(logicsig, s));
+			PerformSign(s => SignLogicsigTransaction(logicsig, s));
 		}
 
 		public void SignWithPrivateKey(byte[] privateKey) {
@@ -84,6 +84,21 @@ namespace Tinyman.V1.Model {
 			mSignedTransactions = mTransactions
 				.Select(s => action(s))
 				.ToList();
+		}
+
+		private static SignedTransaction SignLogicsigTransaction(
+			LogicsigSignature logicsig, Transaction tx) {
+
+			try {
+				return Account.SignLogicsigTransaction(logicsig, tx);
+			} catch (Exception ex) {
+				if (tx.sender == logicsig.Address) {
+					return new SignedTransaction(tx, logicsig, tx.TxID());
+				}
+
+				throw;
+			}
+			
 		}
 
 	}

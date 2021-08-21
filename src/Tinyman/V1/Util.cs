@@ -2,6 +2,7 @@
 using Algorand.V2.Algod;
 using Algorand.V2.Model;
 using Newtonsoft.Json.Linq;
+using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Buffers.Binary;
@@ -133,6 +134,8 @@ namespace Tinyman.V1 {
 
             if (state.TryGetValue(key, out var value)) {
                 return value.Uint;
+            } else if (state.TryGetValue(EncodeKey(key), out value)) {
+                return value.Uint;
             }
 
             return null;
@@ -142,6 +145,8 @@ namespace Tinyman.V1 {
             Dictionary<string, TealValue> state, string key) {
 
             if (state.TryGetValue(key, out var value)) {
+                return value.Bytes;
+            } else if (state.TryGetValue(EncodeKey(key), out value)) {
                 return value.Bytes;
             }
 
@@ -155,12 +160,18 @@ namespace Tinyman.V1 {
 
         public static string IntToStateKey(long value) {
 
-            var paddingBytes = Encoding.ASCII.GetBytes("o");
+            var paddingBytes = Encoding.UTF8.GetBytes("o");
             var valueBytes = IntToBytes(value);
             var bytes = Join(paddingBytes, valueBytes);
             var result = Base64.ToBase64String(bytes);
 
             return result;
+        }
+
+        public static string EncodeKey(string key) {
+
+            var bytes = Strings.ToUtf8ByteArray(key);
+            return Base64.ToBase64String(bytes);
         }
 
         public static T[] Join<T>(IEnumerable<T> a, IEnumerable<T> b) {
