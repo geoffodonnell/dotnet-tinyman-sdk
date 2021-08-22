@@ -12,7 +12,7 @@ namespace Tinyman.V1.Model {
 
 		public AssetAmount AmountOut { get; internal set; }
 
-		public int SwapFees { get; internal set; }
+		public AssetAmount SwapFees { get; internal set; }
 
 		public double Slippage { get; internal set;	}
 

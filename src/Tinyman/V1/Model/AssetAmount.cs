@@ -11,7 +11,11 @@ namespace Tinyman.V1.Model {
 
 		public long Amount { get; internal set; }
 
-		internal AssetAmount() {
+		public AssetAmount() { }
+
+		public AssetAmount(Asset asset, long amount) {
+			Asset = asset;
+			Amount = amount;
 		}
 
 		public static bool operator >(AssetAmount a, AssetAmount b) {
@@ -114,7 +118,7 @@ namespace Tinyman.V1.Model {
 
 		public override string ToString() {
 
-			var amount = (double)Amount / (double)(10 * Asset.Decimals);
+			var amount = (double)Amount / (double)(Math.Pow(10, Asset.Decimals));
 
 			return $"{amount} {Asset.UnitName}";
 		}

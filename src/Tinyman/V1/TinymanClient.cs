@@ -33,10 +33,11 @@ namespace Tinyman.V1 {
 			var poolAddress = poolLogicSig.Address.ToString();
 			var accountInfo = mAlgodApi.AccountInformation(poolAddress);
 
-			return FetchPoolInfoFromAccountInfo(accountInfo);
+			return FetchPoolInfoFromAccountInfo(accountInfo, asset1, asset2);
 		}
 
-		protected virtual Pool FetchPoolInfoFromAccountInfo(Account accountInfo) {
+		protected virtual Pool FetchPoolInfoFromAccountInfo(
+			Account accountInfo, Asset asset1, Asset asset2) {
 
 			var validatorAppId = accountInfo.AppsLocalState[0].Id;
 			var validatorAppState = accountInfo.AppsLocalState[0]
@@ -70,10 +71,8 @@ namespace Tinyman.V1 {
 			var outstandingLiquidityAssetAmount = Util.GetStateInt(
 				validatorAppState, Util.IntToStateKey(liquidityAssetId.GetValueOrDefault()));
 
-			var result = new Pool {
+			var result = new Pool(asset1, asset2) {
 				Address = poolAddress,
-				Asset1Id = Convert.ToInt64(asset1Id.GetValueOrDefault()),
-				Asset2Id = Convert.ToInt64(asset2Id.GetValueOrDefault()),
 				LiquidityAssetId = liquidityAsset.Index.GetValueOrDefault(),
 				LiquidityAssetName = liquidityAsset.Params.Name,
 				Asset1Reserves = Convert.ToInt64(asset1Reserves.GetValueOrDefault()),
@@ -87,6 +86,14 @@ namespace Tinyman.V1 {
 				AlgoBalance = accountInfo.Amount.GetValueOrDefault(),
 				Round = accountInfo.Round.GetValueOrDefault()
 			};
+
+			if (result.Asset1.Id != Convert.ToInt64(asset1Id.GetValueOrDefault())) {
+				throw new Exception("tbd message");
+			}
+
+			if (result.Asset2.Id != Convert.ToInt64(asset2Id.GetValueOrDefault())) {
+				throw new Exception("tbd message");
+			}
 
 			return result;
 		}
