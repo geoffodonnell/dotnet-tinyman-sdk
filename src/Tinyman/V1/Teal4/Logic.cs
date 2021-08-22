@@ -20,6 +20,8 @@ namespace Tinyman.V1.Teal4 {
         private static int MAX_LENGTH = 1000;
         private const int INTCBLOCK_OPCODE = 32;
         private const int BYTECBLOCK_OPCODE = 38;
+        private const int PUSHBYTES_OPCODE = 128;
+        private const int PUSHINT_OPCODE = 129;
         private static LangSpec langSpec;
         private static Operation[] opcodes;
 
@@ -82,12 +84,15 @@ namespace Tinyman.V1.Teal4 {
                             size = op.Size;
                             if (size == 0) {
                                 switch (op.Opcode) {
-                                    case 32:
+                                    case INTCBLOCK_OPCODE:
                                         size = CheckIntConstBlock(program, pc);
                                         break;
-                                    case 38:
+                                    case BYTECBLOCK_OPCODE:
                                         size = CheckByteConstBlock(program, pc);
                                         break;
+                                    case PUSHBYTES_OPCODE:
+                                    case PUSHINT_OPCODE:
+                                        throw new NotImplementedException("TEAL4 opcode checking not yet implemented");
                                     default:
                                         throw new ArgumentException("invalid instruction: " + op.Opcode);
                                 }
@@ -339,6 +344,9 @@ namespace Tinyman.V1.Teal4 {
                             size += bytesBlock.size;
                             bytes.AddRange(bytesBlock.results);
                             break;
+                        case PUSHBYTES_OPCODE:
+                        case PUSHINT_OPCODE:
+                            throw new NotImplementedException("TEAL4 opcode reading not yet implemented");
                         default:
                             throw new ArgumentException("invalid instruction: " + op.Opcode);
                     }
