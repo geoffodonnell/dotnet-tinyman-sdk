@@ -95,6 +95,55 @@ namespace Tinyman.V1.Model {
 			return result;
 		}
 
+		public SwapQuote FetchFixedOutputSwapQuote(
+			AssetAmount amountOut, double slippage = 0.05) {
+
+			Asset assetIn;
+			long inputSupply;
+			long outputSupply;
+
+			if (amountOut.Asset == Asset1) {
+				assetIn = Asset2;
+				inputSupply = Asset2Reserves;
+				outputSupply = Asset1Reserves;
+			} else {
+				assetIn = Asset1;
+				inputSupply = Asset1Reserves;
+				outputSupply = Asset2Reserves;
+			}
+
+			if (inputSupply == 0 || outputSupply == 0) {
+				throw new Exception("Pool has no liquidity!");
+			}
+
+			// k = input_supply * output_supply
+			// ignoring fees, k must remain constant 
+			// (input_supply + asset_in) * (output_supply - amount_out) = k
+			var k = Convert.ToUInt64(inputSupply) * Convert.ToUInt64(outputSupply);
+			var calculatedAmountInWithoutFee = (Convert.ToDouble(k) / Convert.ToDouble(outputSupply - amountOut.Amount)) - Convert.ToDouble(inputSupply);
+			var assetInAmount = calculatedAmountInWithoutFee * 1000 / Convert.ToDouble(997);
+			var swapFees = assetInAmount - calculatedAmountInWithoutFee;
+
+			var amountIn = new AssetAmount {
+				Asset = assetIn,
+				Amount = Convert.ToInt64(assetInAmount)
+			};
+
+			var result = new SwapQuote {
+				SwapType = SwapType.FixedOutput,
+				AmountIn = amountIn,
+				AmountOut = amountOut,
+				SwapFees = new AssetAmount {
+					Asset = amountIn.Asset,
+					Amount = Convert.ToInt64(swapFees)
+				},
+				Slippage = slippage
+			};
+
+			return result;
+		}
+
+
 	}
 
 }
