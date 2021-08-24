@@ -10,13 +10,16 @@ namespace Tinyman.V1.Action {
 
 		public SwapType SwapType { get; set; }
 
+		internal Pool Pool { get; set; }
+
 		public Swap() { }
 
 		public static Swap FromQuote(SwapQuote quote) {
 			return new Swap {
 				AmountIn = quote.AmountInWithSlippage,
 				AmountOut = quote.AmountOutWithSlippage,
-				SwapType = quote.SwapType			
+				SwapType = quote.SwapType,
+				Pool = quote.Pool
 			};
 		}
 

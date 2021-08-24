@@ -17,14 +17,14 @@ namespace Tinyman.V1 {
 	public class TinymanClient {
 
 		protected readonly AlgodApi mAlgodApi;
-		protected readonly long mValidatorAppId;
+		protected readonly ulong mValidatorAppId;
 		protected readonly ConcurrentDictionary<long?, Asset> mAssetCache;
 
 		public AlgodApi AlgodApi { get => mAlgodApi; }
 
-		public long ValidatorAppId { get => mValidatorAppId; }
+		public ulong ValidatorAppId { get => mValidatorAppId; }
 
-		public TinymanClient(AlgodApi algodApi, long validatorAppId) {
+		public TinymanClient(AlgodApi algodApi, ulong validatorAppId) {
 
 			mAlgodApi = algodApi;
 			mValidatorAppId = validatorAppId;
@@ -51,7 +51,7 @@ namespace Tinyman.V1 {
 			var asset2Id = Util.GetStateInt(validatorAppState, "a2");
 
 			var poolLogicSig = Contract.GetPoolLogicSig(
-				validatorAppId.GetValueOrDefault(),
+				Convert.ToUInt64(validatorAppId.GetValueOrDefault()),
 				Convert.ToInt64(asset1Id.GetValueOrDefault()),
 				Convert.ToInt64(asset2Id.GetValueOrDefault()));
 			var poolAddress = poolLogicSig.Address.ToString();
@@ -108,7 +108,7 @@ namespace Tinyman.V1 {
 		}
 
 		public virtual PostTransactionsResponse Submit(
-			TransactionGroup transactionGroup, bool wait = false) {
+			TransactionGroup transactionGroup, bool wait = true) {
 
 			return transactionGroup.Submit(mAlgodApi, wait);
 		}
@@ -125,11 +125,12 @@ namespace Tinyman.V1 {
 		public virtual Dictionary<string, Pool> FetchExcessAmounts(Address userAddress) {
 
 			var result = new Dictionary<string, Pool>();
+			var appId = Convert.ToInt64(mValidatorAppId);
 			var accountInfo = mAlgodApi.AccountInformation(userAddress.EncodeAsString());
 
 			var validatorApp = accountInfo?
 				.AppsLocalState?
-				.FirstOrDefault(s => s.Id == mValidatorAppId);
+				.FirstOrDefault(s => s.Id == appId);
 
 			var validatorAppState = validatorApp?
 				.KeyValue?
@@ -168,10 +169,11 @@ namespace Tinyman.V1 {
 		public virtual bool IsOptedIn(string address) {
 
 			var info = mAlgodApi.AccountInformation(address);
+			var appId = Convert.ToInt64(mValidatorAppId);
 
 			foreach (var entry in info.AppsLocalState) {
 
-				if (entry.Id == mValidatorAppId) {
+				if (entry.Id == appId) {
 					return true;
 				}
 			}

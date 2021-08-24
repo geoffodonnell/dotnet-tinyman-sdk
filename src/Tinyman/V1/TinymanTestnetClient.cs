@@ -10,7 +10,7 @@ namespace Tinyman.V1 {
 		}
 
 		public TinymanTestnetClient(AlgodApi algodApi)
-			: base(algodApi, Constants.TESTNET_VALIDATOR_APP_ID) {
+			: base(algodApi, Constants.TestnetValidatorAppId) {
 		}
 	}
 

@@ -60,7 +60,7 @@ namespace Tinyman.V1 {
         public static byte[] EncodeInt(object value) {
 
             var result = new List<byte>();
-            var number = Convert.ToInt64(value);
+            var number = Convert.ToUInt64(value);
 
             while (true) {
                 var toWrite = number & 0x7F;
@@ -76,7 +76,7 @@ namespace Tinyman.V1 {
             }
 
             return result.ToArray();
-        }     
+        }  
 
         public static PendingTransactionResponse SignAndSubmitTransactions(
             AlgodApi client,
@@ -115,6 +115,15 @@ namespace Tinyman.V1 {
         public static PendingTransactionResponse WaitForConfirmation(AlgodApi client, string txId) {
 
             return Algorand.Utils.WaitTransactionToComplete(client, txId);
+        }
+
+        public static byte[] IntToBytes(ulong value) {
+
+            var result = new byte[8];
+
+            BinaryPrimitives.WriteUInt64BigEndian(result, value);
+
+            return result;
         }
 
         public static byte[] IntToBytes(long value) {
@@ -179,8 +188,7 @@ namespace Tinyman.V1 {
 
             return result.ToArray();
         }
-
-
+        
     }
 
 }

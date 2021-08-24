@@ -14,6 +14,8 @@ namespace Tinyman.V1.Model {
 
 		public double Slippage { get; internal set;	}
 
+		internal Pool Pool { get; set; }
+
 		public AssetAmount AmountOutWithSlippage {
 			get {
 				if (SwapType == SwapType.FixedOutput) {
@@ -50,7 +52,9 @@ namespace Tinyman.V1.Model {
 			get => AmountOutWithSlippage.Amount / (double)AmountInWithSlippage.Amount;
 		}
 
-		internal SwapQuote() { }
+		internal SwapQuote(Pool pool) {
+			Pool = pool;
+		}
 
 	}
 

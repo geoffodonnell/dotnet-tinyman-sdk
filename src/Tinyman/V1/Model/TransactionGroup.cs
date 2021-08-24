@@ -73,7 +73,7 @@ namespace Tinyman.V1.Model {
 			var bytes = new List<byte>();
 
 			foreach (var tx in mSignedTransactions) {
-				bytes.AddRange(Algorand.Encoder.EncodeToMsgPack(tx));
+				 bytes.AddRange(Algorand.Encoder.EncodeToMsgPack(tx));
 			}
 
 			//var bytes = mSignedTransactions

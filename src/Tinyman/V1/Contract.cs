@@ -33,7 +33,7 @@ namespace Tinyman.V1 {
 		}
 
 		public static LogicsigSignature GetPoolLogicSig(
-			long validatorAppId, long assetIdA, long assetIdB) {
+			ulong validatorAppId, long assetIdA, long assetIdB) {
 
 			var assetIdMax = Math.Max(assetIdA, assetIdB);
 			var assetIdMin = Math.Min(assetIdA, assetIdB);

@@ -10,10 +10,16 @@ namespace Tinyman.V1.Model {
 
 		public double Slippage { get; internal set; }
 
+		internal Pool Pool { get; set; }
+
 		public AssetAmount LiquidityAssetAmountWithSlippage {
 			get {
 				return LiquidityAssetAmount - (LiquidityAssetAmount * Slippage);
 			}
+		}
+
+		public MintQuote(Pool pool) {
+			Pool = pool;
 		}
 
 	}

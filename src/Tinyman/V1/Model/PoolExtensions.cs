@@ -43,7 +43,7 @@ namespace Tinyman.V1.Model {
 				Amount = assetOutAmount
 			};
 
-			var result = new SwapQuote {
+			var result = new SwapQuote(pool) {
 				SwapType = SwapType.FixedInput,
 				AmountIn = amountIn,
 				AmountOut = amountOut,
@@ -93,7 +93,7 @@ namespace Tinyman.V1.Model {
 				Amount = Convert.ToUInt64(assetInAmount)
 			};
 
-			var result = new SwapQuote {
+			var result = new SwapQuote(pool) {
 				SwapType = SwapType.FixedOutput,
 				AmountIn = amountIn,
 				AmountOut = amountOut,

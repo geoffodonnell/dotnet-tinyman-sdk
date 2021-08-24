@@ -10,7 +10,7 @@ namespace Tinyman.V1 {
 		}
 
 		public TinymanMainnetClient(AlgodApi algodApi)
-			: base(algodApi, Constants.MAINNET_VALIDATOR_APP_ID) {
+			: base(algodApi, Constants.MainnetValidatorAppId) {
 		}
 	}
 

@@ -4,6 +4,7 @@ using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Tinyman.V1.Model;
 using Asset = Tinyman.V1.Model.Asset;
 using Transaction = Algorand.Transaction;
@@ -13,7 +14,7 @@ namespace Tinyman.V1 {
 	public static class TinymanTransaction {
 
 		public static TransactionGroup PrepareAppOptinTransactions(
-			long validatorAppId, Address sender, TransactionParametersResponse suggestedParams) {
+			ulong validatorAppId, Address sender, TransactionParametersResponse suggestedParams) {
 
 			var transaction = Algorand.Utils.GetApplicationOptinTransaction(
 				sender, Convert.ToUInt64(validatorAppId), suggestedParams);
@@ -22,7 +23,7 @@ namespace Tinyman.V1 {
 		}
 
 		public static TransactionGroup PrepareAppOptoutTransactions(
-			long validatorAppId, Address sender, TransactionParametersResponse suggestedParams) {
+			ulong validatorAppId, Address sender, TransactionParametersResponse suggestedParams) {
 
 			var transaction = Algorand.Utils.GetApplicationClearTransaction(
 				sender, Convert.ToUInt64(validatorAppId), suggestedParams);
@@ -40,7 +41,7 @@ namespace Tinyman.V1 {
 		}
 
 		public static TransactionGroup PrepareBootstrapTransactions(
-			long validatorAppId,
+			ulong validatorAppId,
 			Asset asset1,
 			Asset asset2,
 			Address sender,
@@ -93,7 +94,7 @@ namespace Tinyman.V1 {
 		}
 
 		public static TransactionGroup PrepareBurnTransaction(
-			long validatorAppId,
+			ulong validatorAppId,
 			AssetAmount assetAmount1,
 			AssetAmount assetAmount2,
 			AssetAmount assetAmountLiquidity,
@@ -161,7 +162,7 @@ namespace Tinyman.V1 {
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
 				suggestedParams));
 
-			var result = new TransactionGroup(transactions.ToArray());
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 
@@ -169,7 +170,7 @@ namespace Tinyman.V1 {
 		}
 
 		public static TransactionGroup PrepareMintTransactions(
-			long validatorAppId,
+			ulong validatorAppId,
 			AssetAmount assetAmount1,
 			AssetAmount assetAmount2,
 			AssetAmount assetAmountLiquidity,
@@ -237,7 +238,7 @@ namespace Tinyman.V1 {
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
 				suggestedParams));
 
-			var result = new TransactionGroup(transactions.ToArray());
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 
@@ -245,7 +246,7 @@ namespace Tinyman.V1 {
 		}
 
 		public static TransactionGroup PrepareRedeemTransactions(
-			long validatorAppId,
+			ulong validatorAppId,
 			Asset asset1,
 			Asset asset2,
 			Asset assetLiquidity,
@@ -298,7 +299,7 @@ namespace Tinyman.V1 {
 					suggestedParams));
 			}
 
-			var result = new TransactionGroup(transactions.ToArray());
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 
@@ -306,7 +307,7 @@ namespace Tinyman.V1 {
 		}
 
 		public static TransactionGroup PrepareSwapTransactions(
-			long validatorAppId,
+			ulong validatorAppId,
 			AssetAmount amountIn,
 			AssetAmount amountOut,
 			Asset assetLiquidity,
@@ -321,8 +322,15 @@ namespace Tinyman.V1 {
 			var transactions = new List<Transaction>();
 
 			// PaymentTxn
-			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constants.SwapFee, "fee", suggestedParams));
+			transactions.Add(Algorand.Utils.GetPaymentTransactionWithFlatFee(
+					sender,
+					poolAddress,
+					Constants.SwapFee,
+					BitConverter.ToString(new byte[] { 0x01 }),
+					1000,
+					(ulong?)suggestedParams.LastRound,
+					suggestedParams.GenesisId,
+					Convert.ToBase64String(suggestedParams.GenesisHash)));
 
 			// ApplicationNoOpTxn
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
@@ -347,29 +355,39 @@ namespace Tinyman.V1 {
 
 			// AssetTransferTxn - Send to pool
 			if (amountIn.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, amountIn.Amount, null, suggestedParams));
+				transactions.Add(Algorand.Utils.GetPaymentTransactionWithFlatFee(
+					sender, poolAddress, amountIn.Amount, "payment", 1000,
+					(ulong?)suggestedParams.LastRound,
+					suggestedParams.GenesisId,
+					Convert.ToBase64String(suggestedParams.GenesisHash)));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					sender,
 					poolAddress,
 					amountIn.Asset.Id,
 					amountIn.Amount,
-					suggestedParams));
+					suggestedParams,
+					flatFee: 1000));
 			}
 
 			// AssetTransferTxn - Receive from pool
 			if (amountOut.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, amountOut.Amount, null, suggestedParams));
+				transactions.Add(Algorand.Utils.GetPaymentTransactionWithFlatFee(
+					poolAddress, sender, amountOut.Amount, "payment", 1000,
+					(ulong?)suggestedParams.LastRound,
+					suggestedParams.GenesisId,
+					Convert.ToBase64String(suggestedParams.GenesisHash)));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
 					amountOut.Asset.Id,
 					amountOut.Amount,
-					suggestedParams));
+					suggestedParams,
+					flatFee: 1000));
 			}
+
+			var tmp = transactions.Select(s => s.fee).ToList();
 
 			var result = new TransactionGroup(transactions);
 
