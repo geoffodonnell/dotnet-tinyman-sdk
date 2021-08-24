@@ -9,11 +9,11 @@ namespace Tinyman.V1.Model {
 
 		public Asset Asset { get; internal set; }
 
-		public long Amount { get; internal set; }
+		public ulong Amount { get; internal set; }
 
 		public AssetAmount() { }
 
-		public AssetAmount(Asset asset, long amount) {
+		public AssetAmount(Asset asset, ulong amount) {
 			Asset = asset;
 			Amount = amount;
 		}
@@ -26,7 +26,7 @@ namespace Tinyman.V1.Model {
 			return a.Amount > b.Amount;
 		}
 
-		public static bool operator >(AssetAmount a, long b) {
+		public static bool operator >(AssetAmount a, ulong b) {
 			return a.Amount > b;
 		}
 
@@ -38,7 +38,7 @@ namespace Tinyman.V1.Model {
 			return a.Amount < b.Amount;
 		}
 
-		public static bool operator <(AssetAmount a, long b) {
+		public static bool operator <(AssetAmount a, ulong b) {
 			return a.Amount < b;
 		}
 
@@ -47,10 +47,10 @@ namespace Tinyman.V1.Model {
 				throw new ArgumentException(AssetMismatchMessage);
 			}
 
-			return a.Amount < b.Amount;
+			return a.Amount == b.Amount;
 		}
 
-		public static bool operator ==(AssetAmount a, long b) {
+		public static bool operator ==(AssetAmount a, ulong b) {
 			return a.Amount == b;
 		}
 		
@@ -62,7 +62,7 @@ namespace Tinyman.V1.Model {
 			return a.Amount != b.Amount;
 		}
 
-		public static bool operator !=(AssetAmount a, long b) {
+		public static bool operator !=(AssetAmount a, ulong b) {
 			return a.Amount != b;
 		}
 
@@ -88,37 +88,37 @@ namespace Tinyman.V1.Model {
 			};
 		}
 
-		public static AssetAmount operator *(AssetAmount a, int b) {
+		public static AssetAmount operator *(AssetAmount a, ulong b) {
 			return new AssetAmount {
 				Asset = a.Asset,
-				Amount = Convert.ToInt64(a.Amount * b)
-			};
-		}
-
-		public static AssetAmount operator *(AssetAmount a, long b) {
-			return new AssetAmount {
-				Asset = a.Asset,
-				Amount = Convert.ToInt64(a.Amount * b)
+				Amount = a.Amount * b
 			};
 		}
 
 		public static AssetAmount operator *(AssetAmount a, double b) {
 			return new AssetAmount {
 				Asset = a.Asset,
-				Amount = Convert.ToInt64(a.Amount * b)
+				Amount = Convert.ToUInt64(a.Amount * b)
 			};
 		}
 
-		public static AssetAmount operator *(AssetAmount a, float b) {
+		public static AssetAmount operator /(AssetAmount a, ulong b) {
 			return new AssetAmount {
 				Asset = a.Asset,
-				Amount = Convert.ToInt64(a.Amount * b)
+				Amount = a.Amount / b
+			};
+		}
+
+		public static AssetAmount operator /(AssetAmount a, double b) {
+			return new AssetAmount {
+				Asset = a.Asset,
+				Amount = Convert.ToUInt64(a.Amount / b)
 			};
 		}
 
 		public override string ToString() {
 
-			var amount = (double)Amount / (double)(Math.Pow(10, Asset.Decimals));
+			var amount = Amount / (Math.Pow(10, Asset.Decimals));
 
 			return $"{amount} {Asset.UnitName}";
 		}

@@ -20,6 +20,10 @@ namespace Tinyman.V1 {
 		protected readonly long mValidatorAppId;
 		protected readonly ConcurrentDictionary<long?, Asset> mAssetCache;
 
+		public AlgodApi AlgodApi { get => mAlgodApi; }
+
+		public long ValidatorAppId { get => mValidatorAppId; }
+
 		public TinymanClient(AlgodApi algodApi, long validatorAppId) {
 
 			mAlgodApi = algodApi;
@@ -75,13 +79,13 @@ namespace Tinyman.V1 {
 				Address = poolAddress,
 				LiquidityAssetId = liquidityAsset.Index.GetValueOrDefault(),
 				LiquidityAssetName = liquidityAsset.Params.Name,
-				Asset1Reserves = Convert.ToInt64(asset1Reserves.GetValueOrDefault()),
-				Asset2Reserves = Convert.ToInt64(asset2Reserves.GetValueOrDefault()),
-				IssuedLiquidity = Convert.ToInt64(issuedLiquidity.GetValueOrDefault()),
-				UnclaimedProtocolFees = Convert.ToInt64(unclaimedProtocolFees.GetValueOrDefault()),
-				OutstandingAsset1Amount = Convert.ToInt64(outstandingAsset1Amount.GetValueOrDefault()),
-				OutstandingAsset2Amount = Convert.ToInt64(outstandingAsset2Amount.GetValueOrDefault()),
-				OutstandingLiquidityAssetAmount = Convert.ToInt64(outstandingLiquidityAssetAmount.GetValueOrDefault()),
+				Asset1Reserves = asset1Reserves.GetValueOrDefault(),
+				Asset2Reserves = asset2Reserves.GetValueOrDefault(),
+				IssuedLiquidity = issuedLiquidity.GetValueOrDefault(),
+				UnclaimedProtocolFees = unclaimedProtocolFees.GetValueOrDefault(),
+				OutstandingAsset1Amount = outstandingAsset1Amount.GetValueOrDefault(),
+				OutstandingAsset2Amount = outstandingAsset2Amount.GetValueOrDefault(),
+				OutstandingLiquidityAssetAmount = outstandingLiquidityAssetAmount.GetValueOrDefault(),
 				ValidatorAppId = validatorAppId.GetValueOrDefault(),
 				AlgoBalance = accountInfo.Amount.GetValueOrDefault(),
 				Round = accountInfo.Round.GetValueOrDefault()
@@ -167,7 +171,7 @@ namespace Tinyman.V1 {
 
 			foreach (var entry in info.AppsLocalState) {
 
-				if(entry.Id == mValidatorAppId) {
+				if (entry.Id == mValidatorAppId) {
 					return true;
 				}
 			}

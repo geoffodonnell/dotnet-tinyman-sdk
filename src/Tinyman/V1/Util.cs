@@ -11,10 +11,7 @@ using System.Linq;
 using System.Text;
 using Tinyman.V1.Asc;
 using Account = Algorand.Account;
-using Address = Algorand.Address;
-
 using SignedTransaction = Algorand.SignedTransaction;
-
 using Transaction = Algorand.Transaction;
 
 namespace Tinyman.V1 {

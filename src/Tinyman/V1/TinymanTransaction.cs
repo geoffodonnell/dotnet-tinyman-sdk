@@ -1,9 +1,9 @@
 ﻿using Algorand;
 using Algorand.V2.Model;
 using Org.BouncyCastle.Utilities;
+using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Tinyman.V1.Model;
 using Asset = Tinyman.V1.Model.Asset;
 using Transaction = Algorand.Transaction;
@@ -328,6 +328,8 @@ namespace Tinyman.V1 {
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
 				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
 
+			callTx.onCompletion = OnCompletion.Noop;
+			callTx.applicationArgs = new List<byte[]>();
 			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("swap"));
 			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray(swapType == SwapType.FixedInput ? "fi" : "fo"));
 			callTx.accounts.Add(sender);
@@ -336,6 +338,7 @@ namespace Tinyman.V1 {
 			if (amountIn.Asset.Id != 0) {
 				callTx.foreignAssets.Add(amountIn.Asset.Id);
 			}
+
 			if (amountOut.Asset.Id != 0) {
 				callTx.foreignAssets.Add(amountOut.Asset.Id);
 			}
@@ -345,30 +348,30 @@ namespace Tinyman.V1 {
 			// AssetTransferTxn - Send to pool
 			if (amountIn.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress,  Convert.ToUInt64(amountIn.Amount), "", suggestedParams));
+					sender, poolAddress, amountIn.Amount, null, suggestedParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					sender,
 					poolAddress,
-					Convert.ToInt64(amountIn.Asset.Id),
-					Convert.ToUInt64(amountIn.Amount),
+					amountIn.Asset.Id,
+					amountIn.Amount,
 					suggestedParams));
 			}
 
 			// AssetTransferTxn - Receive from pool
 			if (amountOut.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, Convert.ToUInt64(amountOut.Amount), "", suggestedParams));
+					poolAddress, sender, amountOut.Amount, null, suggestedParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
-					Convert.ToInt64(amountOut.Asset.Id),
-					Convert.ToUInt64(amountOut.Amount),
+					amountOut.Asset.Id,
+					amountOut.Amount,
 					suggestedParams));
 			}
 
-			var result = new TransactionGroup(transactions.ToArray());
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 

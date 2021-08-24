@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Tinyman.V1.Model {
 
@@ -44,12 +42,12 @@ namespace Tinyman.V1.Model {
 			}
 		}
 
-		public float Price {
-			get => AmountOut.Amount / AmountIn.Amount;
+		public double Price {
+			get => AmountOut.Amount / (double)AmountIn.Amount;
 		}
 
-		public float PriceWithSlippage {
-			get => AmountOutWithSlippage.Amount / AmountInWithSlippage.Amount;
+		public double PriceWithSlippage {
+			get => AmountOutWithSlippage.Amount / (double)AmountInWithSlippage.Amount;
 		}
 
 		internal SwapQuote() { }

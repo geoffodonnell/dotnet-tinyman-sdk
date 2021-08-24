@@ -19,7 +19,7 @@
 		public const long BurnFee = 4000;
 		public const long MintFee = 2000;
 		public const long RedeemFee = 2000;
-		public const long SwapFee = 2000;
+		public const long SwapFee = 4000;
 
 	}
 
