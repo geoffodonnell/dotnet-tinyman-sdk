@@ -322,15 +322,12 @@ namespace Tinyman.V1 {
 			var transactions = new List<Transaction>();
 
 			// PaymentTxn
-			transactions.Add(Algorand.Utils.GetPaymentTransactionWithFlatFee(
+			transactions.Add(Algorand.Utils.GetPaymentTransaction(
 					sender,
 					poolAddress,
 					Constants.SwapFee,
-					BitConverter.ToString(new byte[] { 0x01 }),
-					1000,
-					(ulong?)suggestedParams.LastRound,
-					suggestedParams.GenesisId,
-					Convert.ToBase64String(suggestedParams.GenesisHash)));
+					"fee",
+					suggestedParams));
 
 			// ApplicationNoOpTxn
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
@@ -355,39 +352,29 @@ namespace Tinyman.V1 {
 
 			// AssetTransferTxn - Send to pool
 			if (amountIn.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransactionWithFlatFee(
-					sender, poolAddress, amountIn.Amount, "payment", 1000,
-					(ulong?)suggestedParams.LastRound,
-					suggestedParams.GenesisId,
-					Convert.ToBase64String(suggestedParams.GenesisHash)));
+				transactions.Add(Algorand.Utils.GetPaymentTransaction(
+					sender, poolAddress, amountIn.Amount, "payment", suggestedParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					sender,
 					poolAddress,
 					amountIn.Asset.Id,
 					amountIn.Amount,
-					suggestedParams,
-					flatFee: 1000));
+					suggestedParams));
 			}
 
 			// AssetTransferTxn - Receive from pool
 			if (amountOut.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransactionWithFlatFee(
-					poolAddress, sender, amountOut.Amount, "payment", 1000,
-					(ulong?)suggestedParams.LastRound,
-					suggestedParams.GenesisId,
-					Convert.ToBase64String(suggestedParams.GenesisHash)));
+				transactions.Add(Algorand.Utils.GetPaymentTransaction(
+					poolAddress, sender, amountOut.Amount, "payment", suggestedParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
 					amountOut.Asset.Id,
 					amountOut.Amount,
-					suggestedParams,
-					flatFee: 1000));
+					suggestedParams));
 			}
-
-			var tmp = transactions.Select(s => s.fee).ToList();
 
 			var result = new TransactionGroup(transactions);
 

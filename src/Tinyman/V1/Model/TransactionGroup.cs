@@ -2,6 +2,7 @@
 using Algorand.Client;
 using Algorand.V2;
 using Algorand.V2.Model;
+using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,6 +76,10 @@ namespace Tinyman.V1.Model {
 			foreach (var tx in mSignedTransactions) {
 				 bytes.AddRange(Algorand.Encoder.EncodeToMsgPack(tx));
 			}
+
+			var tmp1 = mSignedTransactions.Select(Algorand.Encoder.EncodeToMsgPack).ToList();
+			var tmp2 = tmp1.SelectMany(s => s).ToList();
+			var tmp3 = tmp1.Select(s => Strings.FromByteArray(s)).ToList();
 
 			//var bytes = mSignedTransactions
 			//	.SelectMany(s => Algorand.Encoder.EncodeToMsgPack(s))
