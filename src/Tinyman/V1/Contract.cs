@@ -44,10 +44,14 @@ namespace Tinyman.V1 {
 				{ "asset_id_2", assetIdMin }
 			});
 
-			return GetLogicSig(bytes);
+			var result = GetLogicSig(bytes);
+
+			result.args = new List<byte[]>();
+
+			return result;
 		}
 
-		public static LogicsigSignature GetLogicSig(byte[] bytes) {
+		private static LogicsigSignature GetLogicSig(byte[] bytes) {
 
 			if (TryCreateLogicSig(bytes, out var result, out var exception)) {
 				return result;

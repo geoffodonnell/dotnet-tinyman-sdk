@@ -58,6 +58,16 @@ namespace Tinyman.V1 {
 			return client.Submit(txs, true);
 		}
 
+		public static PostTransactionsResponse Redeem(
+			this TinymanClient client, Account account, Redeem action) {
+
+			var txs = PrepareRedeemTransactions(
+				client, account.Address, action);
+
+			txs.Sign(account);
+
+			return client.Submit(txs, true);
+		}
 
 		public static TransactionGroup PrepareSwapTransactions(
 			this TinymanClient client,
@@ -73,6 +83,29 @@ namespace Tinyman.V1 {
 				action.AmountOut,
 				liquidityAsset,
 				action.SwapType,
+				sender,
+				txParams);
+
+			return result;
+		}
+
+		public static TransactionGroup PrepareRedeemTransactions(
+			this TinymanClient client, Address sender, Redeem action) {
+
+			// TODO: Store a cache instance w/o the amounts?
+			if (action.Pool == null) {
+				action.Pool = client.FetchPool(action.PoolAddress);
+			}
+
+			var liquidityAsset = client.FetchAsset(action.Pool.LiquidityAssetId);
+			var txParams = client.AlgodApi.TransactionParams();
+
+			var result = TinymanTransaction.PrepareRedeemTransactions(
+				client.ValidatorAppId,
+				action.Pool.Asset1,
+				action.Pool.Asset2,
+				liquidityAsset,
+				action.Amount,
 				sender,
 				txParams);
 

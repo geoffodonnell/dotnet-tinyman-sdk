@@ -1,5 +1,6 @@
 ﻿using Algorand;
 using Algorand.V2.Model;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
@@ -269,12 +270,13 @@ namespace Tinyman.V1 {
 					   			 		  		  		 	   			
 			// PaymentTxn
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constants.RedeemFee, "fee", suggestedParams));
+					sender, poolAddress, Constants.RedeemFee, null, suggestedParams));
 
 			// ApplicationNoOpTxn
-			var callTx = Algorand.Utils.GetApplicationOptinTransaction(
+			var callTx = Algorand.Utils.GetApplicationCallTransaction(
 				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
 
+			callTx.applicationArgs = new List<byte[]>();
 			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("redeem"));
 			callTx.accounts.Add(sender);
 			callTx.foreignAssets.Add(asset1.Id);
@@ -289,17 +291,29 @@ namespace Tinyman.V1 {
 			// AssetTransferTxn
 			if (assetAmount.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, Convert.ToUInt64(assetAmount.Amount), "", suggestedParams));
+					poolAddress, sender, Convert.ToUInt64(assetAmount.Amount), null, suggestedParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
-					Convert.ToInt64(assetAmount.Asset.Id),
-					Convert.ToUInt64(assetAmount.Amount),
+					assetAmount.Asset.Id,
+					assetAmount.Amount,
 					suggestedParams));
+			}
+			
+			foreach (var tx in transactions) {
+				if (String.IsNullOrWhiteSpace(tx.genesisID)) {
+					tx.genesisID = suggestedParams.GenesisId;
+				}
 			}
 
 			var result = new TransactionGroup(transactions);
+
+			var tmp1 = JsonConvert.SerializeObject(transactions, new JsonSerializerSettings() {
+				DefaultValueHandling = DefaultValueHandling.Ignore,
+				ContractResolver = AlgorandContractResolver.Instance,
+				Formatting = Formatting.None
+			});
 
 			result.SignWithLogicSig(poolLogicSig);
 
@@ -318,6 +332,9 @@ namespace Tinyman.V1 {
 			var poolLogicSig = Contract.GetPoolLogicSig(
 				validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
 			var poolAddress = poolLogicSig.Address;
+
+			System.Console.WriteLine(
+				$"TinymanTransaction.PrepareSwapTransactions() poolAddress={poolAddress}");
 
 			var transactions = new List<Transaction>();
 
@@ -360,7 +377,8 @@ namespace Tinyman.V1 {
 					poolAddress,
 					amountIn.Asset.Id,
 					amountIn.Amount,
-					suggestedParams));
+					suggestedParams,
+					message: "payment"));
 			}
 
 			// AssetTransferTxn - Receive from pool
@@ -373,10 +391,23 @@ namespace Tinyman.V1 {
 					sender,
 					amountOut.Asset.Id,
 					amountOut.Amount,
-					suggestedParams));
+					suggestedParams,
+					message: "payment"));
+			}
+
+			foreach (var tx in transactions) {
+				if (String.IsNullOrWhiteSpace(tx.genesisID)) {
+					tx.genesisID = suggestedParams.GenesisId;
+				}
 			}
 
 			var result = new TransactionGroup(transactions);
+
+			var tmp1 = JsonConvert.SerializeObject(transactions, new JsonSerializerSettings () {
+				DefaultValueHandling = DefaultValueHandling.Ignore,
+				ContractResolver = AlgorandContractResolver.Instance,
+				Formatting = Formatting.None
+			});
 
 			result.SignWithLogicSig(poolLogicSig);
 

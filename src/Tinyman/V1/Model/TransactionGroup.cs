@@ -2,6 +2,7 @@
 using Algorand.Client;
 using Algorand.V2;
 using Algorand.V2.Model;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace Tinyman.V1.Model {
 
 			var gid = Algorand.TxGroup.ComputeGroupID(mTransactions);
 
-			foreach(var tx in mTransactions) {
+			foreach (var tx in mTransactions) {
 				tx.AssignGroupID(gid);
 			}
 		}
@@ -81,9 +82,14 @@ namespace Tinyman.V1.Model {
 			var tmp2 = tmp1.SelectMany(s => s).ToList();
 			var tmp3 = tmp1.Select(s => Strings.FromByteArray(s)).ToList();
 
-			//var bytes = mSignedTransactions
-			//	.SelectMany(s => Algorand.Encoder.EncodeToMsgPack(s))
-			//	.ToArray();
+			var tmp4 = JsonConvert.SerializeObject(mSignedTransactions, new JsonSerializerSettings() {
+				DefaultValueHandling = DefaultValueHandling.Ignore,
+				ContractResolver = AlgorandContractResolver.Instance,
+				Formatting = Formatting.None
+			});
+
+			//var tmp5 = Encoder.DecodeFromMsgPack<SignedTransaction[]>(bytes.ToArray());
+
 
 			ApiResponse<PostTransactionsResponse> response;
 			
@@ -134,7 +140,9 @@ namespace Tinyman.V1.Model {
 				return Account.SignLogicsigTransaction(logicsig, tx);
 			} catch (Exception ex) {
 				if (tx.sender.Equals(logicsig.Address)) {
-					return new SignedTransaction(tx, logicsig, tx.TxID());
+					var stx = new SignedTransaction(tx, logicsig, tx.TxID());
+					stx.SetAuthAddr(tx.sender.Bytes);
+					return stx;
 				}
 
 				throw;

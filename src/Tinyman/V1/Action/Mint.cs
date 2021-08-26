@@ -9,7 +9,7 @@ namespace Tinyman.V1.Action {
 
 		internal Pool Pool { get; set; }
 
-		public Mint() { }
+		internal Mint() { }
 
 		public static Mint FromQuote(MintQuote quote) {
 			return new Mint {

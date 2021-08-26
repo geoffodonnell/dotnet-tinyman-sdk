@@ -12,7 +12,7 @@ namespace Tinyman.V1.Action {
 
 		internal Pool Pool { get; set; }
 
-		public Swap() { }
+		internal Swap() { }
 
 		public static Swap FromQuote(SwapQuote quote) {
 			return new Swap {

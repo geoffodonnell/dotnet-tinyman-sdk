@@ -9,7 +9,7 @@ namespace Tinyman.V1.Action {
 
 		internal Pool Pool { get; set; }
 
-		public Burn() { }
+		internal Burn() { }
 
 		public static Burn FromQuote(BurnQuote quote) {
 			return new Burn {

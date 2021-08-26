@@ -4,6 +4,7 @@ using Algorand.V2.Model;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,8 +35,31 @@ namespace Tinyman.V1 {
 		public virtual Pool FetchPool(Asset asset1, Asset asset2) {
 
 			var poolLogicSig = Contract.GetPoolLogicSig(mValidatorAppId, asset1.Id, asset2.Id);
-			var poolAddress = poolLogicSig.Address.ToString();
+			var poolAddress = poolLogicSig.Address.EncodeAsString();
 			var accountInfo = mAlgodApi.AccountInformation(poolAddress);
+
+			return FetchPoolInfoFromAccountInfo(accountInfo, asset1, asset2);
+		}
+
+		public virtual Pool FetchPool(Address poolAddress) {
+
+			var accountInfo = mAlgodApi
+				.AccountInformation(poolAddress.EncodeAsString());
+
+			return FetchPoolFromAccountInfo(accountInfo);
+		}
+
+		protected virtual Pool FetchPoolFromAccountInfo(Account accountInfo) {
+
+			var validatorAppId = accountInfo.AppsLocalState[0].Id;
+			var validatorAppState = accountInfo.AppsLocalState[0]
+				.KeyValue.ToDictionary(s => s.Key, s => s.Value);
+
+			var asset1Id = Util.GetStateInt(validatorAppState, "a1");
+			var asset2Id = Util.GetStateInt(validatorAppState, "a2");
+
+			var asset1 = FetchAsset(Convert.ToInt64(asset1Id));
+			var asset2 = FetchAsset(Convert.ToInt64(asset2Id));
 
 			return FetchPoolInfoFromAccountInfo(accountInfo, asset1, asset2);
 		}
@@ -122,9 +146,9 @@ namespace Tinyman.V1 {
 			return transactionGroup;
 		}
 
-		public virtual Dictionary<string, Pool> FetchExcessAmounts(Address userAddress) {
+		public virtual List<RedeemQuote> FetchExcessAmounts(Address userAddress) {
 
-			var result = new Dictionary<string, Pool>();
+			var result = new List<RedeemQuote>();
 			var appId = Convert.ToInt64(mValidatorAppId);
 			var accountInfo = mAlgodApi.AccountInformation(userAddress.EncodeAsString());
 
@@ -147,19 +171,15 @@ namespace Tinyman.V1 {
 
 				if (base64Bytes[base64Bytes.Count - 9] == splitOn) {
 
-					var value = validatorAppState[entry.Key]?.Uint;
-					var poolAddress = new Address(base64Bytes.GetRange(base64Bytes.Count - 9, 9).ToArray());
+					var value = (validatorAppState[entry.Key]?.Uint).GetValueOrDefault();
+					var poolAddress = new Address(base64Bytes.GetRange(0, base64Bytes.Count - 9).ToArray());
+					var assetId = BinaryPrimitives.ReadInt64BigEndian(base64Bytes.GetRange(base64Bytes.Count - 8, 8).ToArray());
+					var asset = FetchAsset(assetId);
 
-					throw new NotImplementedException("Not implemented yet.");
-
-					/*
-				value = validator_app_state[key]['uint']
-                pool_address = encode_address(b[:-9])
-                pools[pool_address] = pools.get(pool_address, {})
-                asset_id = int.from_bytes(b[-8:], 'big')
-                asset = self.fetch_asset(asset_id)
-                pools[pool_address][asset] = AssetAmount(asset, value)
-					 */
+					result.Add(new RedeemQuote {
+						Amount = new AssetAmount(asset, value),
+						PoolAddress = poolAddress
+					});
 				}
 			}
 
