@@ -3,6 +3,7 @@ using System;
 using Newtonsoft.Json;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 
 namespace Tinyman.V1.Teal4 {
 
@@ -91,8 +92,11 @@ namespace Tinyman.V1.Teal4 {
                                         size = CheckByteConstBlock(program, pc);
                                         break;
                                     case PUSHBYTES_OPCODE:
+                                        size = CheckPushBytesBlock(program, pc);
+                                        break;
                                     case PUSHINT_OPCODE:
-                                        throw new NotImplementedException("TEAL4 opcode checking not yet implemented");
+                                        size = CheckPushIntBlock(program, pc);
+                                        break;
                                     default:
                                         throw new ArgumentException("invalid instruction: " + op.Opcode);
                                 }
@@ -118,6 +122,7 @@ namespace Tinyman.V1.Teal4 {
                 }
             }
         }
+
         static int CheckIntConstBlock(byte[] program, int pc) {
             int size = 1;
             VarintResult result = Uvarint.GetUvarint(JavaHelper<byte>.ArrayCopyRange(program, pc + size, program.Length));
@@ -173,6 +178,16 @@ namespace Tinyman.V1.Teal4 {
             }
         }
 
+        static int CheckPushIntBlock(byte[] program, int pc) {
+            var read = ReadPushIntBlock(program, pc);
+            return read.size;
+        }
+
+        static int CheckPushBytesBlock(byte[] program, int pc) {
+            var read = ReadPushBytesBlock(program, pc);
+            return read.size;
+        }
+                     
         private class Operation {
             public int Opcode;
             public string Name;
@@ -275,6 +290,41 @@ namespace Tinyman.V1.Teal4 {
             return new ByteConstBlock(size, results);
         }
 
+        public static ByteConstBlock ReadPushBytesBlock(byte[] program, int pc) {
+            List<byte[]> results = new List<byte[]>();
+            int size = 1;
+            VarintResult result = GetUVarint(program, pc + size);
+            if (result.length <= 0) {
+                throw new ArgumentException(
+                    string.Format("could not decode byte[] const block at pc=%d", pc)
+                );
+            }
+            size += result.length;
+            if (pc + size + result.length > program.Length) {
+                throw new ArgumentException("pushbytes ran past end of program");
+            }
+            byte[] buff = new byte[result.value];
+            JavaHelper<byte>.SyatemArrayCopy(program, pc + size, buff, 0, result.value);
+            results.Add(buff);
+            size += result.value;
+            return new ByteConstBlock(size, results);
+        }
+
+        public static ByteConstBlock ReadPushIntBlock(byte[] program, int pc) {
+            List<byte[]> results = new List<byte[]>();
+            int size = 1;
+            VarintResult result = GetUVarint(program, pc + size);
+            if (result.length <= 0) {
+                throw new ArgumentException(
+                    string.Format("could not decode push int const at pc=%d", (pc + size))
+                );
+            }
+            size += result.length;
+            int numInts = result.value;
+            results.Add(BitConverter.GetBytes(result.value));
+            return new ByteConstBlock(size, results);
+        }
+
         /// <summary>
         /// Performs basic program validation: instruction count and program cost
         /// </summary>
@@ -345,8 +395,15 @@ namespace Tinyman.V1.Teal4 {
                             bytes.AddRange(bytesBlock.results);
                             break;
                         case PUSHBYTES_OPCODE:
+                            ByteConstBlock pushBytes = ReadPushBytesBlock(program, pc);
+                            size += pushBytes.size;
+                            bytes.AddRange(pushBytes.results);
+                            break;
                         case PUSHINT_OPCODE:
-                            throw new NotImplementedException("TEAL4 opcode reading not yet implemented");
+                            ByteConstBlock pushInt = ReadPushIntBlock(program, pc);
+                            size += pushInt.size;
+                            bytes.AddRange(pushInt.results);
+                            break;
                         default:
                             throw new ArgumentException("invalid instruction: " + op.Opcode);
                     }

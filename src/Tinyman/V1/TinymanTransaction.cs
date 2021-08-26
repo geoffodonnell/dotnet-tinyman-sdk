@@ -333,9 +333,6 @@ namespace Tinyman.V1 {
 				validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
 			var poolAddress = poolLogicSig.Address;
 
-			System.Console.WriteLine(
-				$"TinymanTransaction.PrepareSwapTransactions() poolAddress={poolAddress}");
-
 			var transactions = new List<Transaction>();
 
 			// PaymentTxn
@@ -370,29 +367,27 @@ namespace Tinyman.V1 {
 			// AssetTransferTxn - Send to pool
 			if (amountIn.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, amountIn.Amount, "payment", suggestedParams));
+					sender, poolAddress, amountIn.Amount, null, suggestedParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					sender,
 					poolAddress,
 					amountIn.Asset.Id,
 					amountIn.Amount,
-					suggestedParams,
-					message: "payment"));
+					suggestedParams));
 			}
 
 			// AssetTransferTxn - Receive from pool
 			if (amountOut.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, amountOut.Amount, "payment", suggestedParams));
+					poolAddress, sender, amountOut.Amount, null, suggestedParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
 					amountOut.Asset.Id,
 					amountOut.Amount,
-					suggestedParams,
-					message: "payment"));
+					suggestedParams));
 			}
 
 			foreach (var tx in transactions) {

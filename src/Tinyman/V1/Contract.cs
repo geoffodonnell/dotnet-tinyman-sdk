@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Tinyman.V1.Asc;
-using Tinyman.V1.Teal4;
 
 namespace Tinyman.V1 {
 
@@ -44,11 +43,7 @@ namespace Tinyman.V1 {
 				{ "asset_id_2", assetIdMin }
 			});
 
-			var result = GetLogicSig(bytes);
-
-			result.args = new List<byte[]>();
-
-			return result;
+			return GetLogicSig(bytes);
 		}
 
 		private static LogicsigSignature GetLogicSig(byte[] bytes) {
@@ -92,7 +87,7 @@ namespace Tinyman.V1 {
 					logic = bytes
 				};
 
-				//Teal4.Logic.CheckProgram(bytes, null);
+				Teal4.Logic.CheckProgram(bytes, null);
 
 				exception = null;
 

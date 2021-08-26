@@ -78,18 +78,11 @@ namespace Tinyman.V1.Model {
 				 bytes.AddRange(Algorand.Encoder.EncodeToMsgPack(tx));
 			}
 
-			var tmp1 = mSignedTransactions.Select(Algorand.Encoder.EncodeToMsgPack).ToList();
-			var tmp2 = tmp1.SelectMany(s => s).ToList();
-			var tmp3 = tmp1.Select(s => Strings.FromByteArray(s)).ToList();
-
-			var tmp4 = JsonConvert.SerializeObject(mSignedTransactions, new JsonSerializerSettings() {
-				DefaultValueHandling = DefaultValueHandling.Ignore,
-				ContractResolver = AlgorandContractResolver.Instance,
-				Formatting = Formatting.None
-			});
-
-			//var tmp5 = Encoder.DecodeFromMsgPack<SignedTransaction[]>(bytes.ToArray());
-
+			//var tmp4 = JsonConvert.SerializeObject(mSignedTransactions, new JsonSerializerSettings() {
+			//	DefaultValueHandling = DefaultValueHandling.Ignore,
+			//	ContractResolver = AlgorandContractResolver.Instance,
+			//	Formatting = Formatting.None
+			//});
 
 			ApiResponse<PostTransactionsResponse> response;
 			
@@ -141,7 +134,7 @@ namespace Tinyman.V1.Model {
 			} catch (Exception ex) {
 				if (tx.sender.Equals(logicsig.Address)) {
 					var stx = new SignedTransaction(tx, logicsig, tx.TxID());
-					stx.SetAuthAddr(tx.sender.Bytes);
+					//stx.SetAuthAddr(tx.sender.Bytes);
 					return stx;
 				}
 
