@@ -3,10 +3,14 @@ using Algorand.Client;
 using Algorand.V2;
 using Algorand.V2.Model;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Utilities;
+using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using Account = Algorand.Account;
 using LogicsigSignature = Algorand.LogicsigSignature;
 using SignedTransaction = Algorand.SignedTransaction;
@@ -84,9 +88,47 @@ namespace Tinyman.V1.Model {
 			//	Formatting = Formatting.None
 			//});
 
+			var tmp8 = JsonConvert.SerializeObject(
+				Algorand.Encoder.DecodeFromMsgPack<JToken>(bytes.ToArray()));
+
+			var tmp12 = $"[{tmp8}]";
+			
 			ApiResponse<PostTransactionsResponse> response;
 			
 			try {
+
+				//var request = WebRequest.CreateHttp(@"https://api.testnet.algoexplorer.io/v2/transactions");
+
+				//request.Method = "POST";
+				//request.Headers[HttpRequestHeader.ContentType] = "application/x-binary";
+				//request.Headers[HttpRequestHeader.ContentLength] = bytes.Count.ToString();
+				//request.Headers[HttpRequestHeader.AcceptEncoding] = "identity";
+				//request.Headers[HttpRequestHeader.UserAgent] = "algosdk";
+				//request.Headers[HttpRequestHeader.Connection] = "close";
+				//request.Headers["X-Algo-Api-Token"] = null;
+
+				//request.KeepAlive = false;
+
+				//using (var body = request.GetRequestStream()) {
+				//	body.Write(bytes.ToArray(), 0, bytes.Count);
+				//	//body.Flush();
+				//}
+
+				//using (var res = request.GetResponse())
+				//using (var body = res.GetResponseStream())
+				//using (var reader = new StreamReader(body)) {
+
+				//	var tmp1 = reader.ReadToEnd();
+				//	Console.WriteLine(tmp1);
+
+				//}
+					
+
+
+
+
+
+
 				response = algodApi.RawTransactionWithHttpInfo(bytes.ToArray());
 
 				if (wait) {
@@ -106,17 +148,6 @@ namespace Tinyman.V1.Model {
 			if (mTransactions == null || mTransactions.Length == 0) {
 				return;
 			}
-
-			//if (mTransactions.Length > 1 && mSignedTransactions.All(s => s == null)) {
-			//	//mGroupId = Algorand.TxGroup.ComputeGroupID(mTransactions.ToArray());
-			//	//mTransactions.ForEach(s => s.AssignGroupID(mGroupId));
-			//	TxGroup.AssignGroupID(mTransactions);
-			//}
-
-			//var tmp1 = Algorand.TxGroup.ComputeGroupID(mTransactions);
-			//var tmp2 = Algorand.TxGroup.ComputeGroupID(mTransactions);
-
-			//var tmp3 = mTransactions.Select(s => s.group).ToList();
 			
 			for (var i = 0; i < mTransactions.Length; i++) {
 				if (mTransactions[i].sender.Equals(sender)) {
@@ -135,6 +166,12 @@ namespace Tinyman.V1.Model {
 				if (tx.sender.Equals(logicsig.Address)) {
 					var stx = new SignedTransaction(tx, logicsig, tx.TxID());
 					//stx.SetAuthAddr(tx.sender.Bytes);
+
+					//var tmp1 = Encoder.EncodeToMsgPack(stx);
+					//var tmp2 = Encoder.DecodeFromMsgPack<SignedTransaction>(tmp1);
+
+
+
 					return stx;
 				}
 

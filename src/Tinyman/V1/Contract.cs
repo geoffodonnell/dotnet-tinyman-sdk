@@ -52,7 +52,7 @@ namespace Tinyman.V1 {
 				return result;
 			}
 
-			if (TryCreateLogicSigWithManualCheck(bytes, out result, out exception)) {
+			if (TryCreateLogicSigWithPatch(bytes, out result, out exception)) {
 				return result;
 			}
 
@@ -78,7 +78,7 @@ namespace Tinyman.V1 {
 			}
 		}
 
-		private static bool TryCreateLogicSigWithManualCheck(
+		private static bool TryCreateLogicSigWithPatch(
 			byte[] bytes, out LogicsigSignature result, out Exception exception) {
 
 			try {
@@ -87,7 +87,7 @@ namespace Tinyman.V1 {
 					logic = bytes
 				};
 
-				Teal4.Logic.CheckProgram(bytes, null);
+				Patch.Logic.CheckProgram(bytes, null);
 
 				exception = null;
 

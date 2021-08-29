@@ -7,6 +7,8 @@ namespace Tinyman.V1.Action {
 
 		public Tuple<AssetAmount, AssetAmount> Amounts { get; internal set; }
 
+		public AssetAmount LiquidityAssetAmount { get; internal set; }
+
 		internal Pool Pool { get; set; }
 
 		internal Mint() { }
@@ -15,6 +17,7 @@ namespace Tinyman.V1.Action {
 			return new Mint {
 				Amounts = new Tuple<AssetAmount, AssetAmount>(
 					quote.AmountsIn.Item1, quote.AmountsIn.Item2),
+				LiquidityAssetAmount = quote.LiquidityAssetAmount,
 				Pool = quote.Pool
 			};
 		}

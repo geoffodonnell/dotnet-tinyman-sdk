@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Tinyman.V1.Teal4 {
+namespace Tinyman.Patch {
 
     /// <summary>
     /// Copied from: https://github.com/RileyGe/dotnet-algorand-sdk/blob/master/dotnet-algorand-sdk/Util/JavaHelper.cs

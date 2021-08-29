@@ -1,11 +1,10 @@
 ﻿using Algorand;
 using Algorand.V2.Model;
-using Newtonsoft.Json;
 using Org.BouncyCastle.Utilities;
-using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tinyman.Patch;
 using Tinyman.V1.Model;
 using Asset = Tinyman.V1.Model.Asset;
 using Transaction = Algorand.Transaction;
@@ -94,7 +93,7 @@ namespace Tinyman.V1 {
 			return result;
 		}
 
-		public static TransactionGroup PrepareBurnTransaction(
+		public static TransactionGroup PrepareBurnTransactions(
 			ulong validatorAppId,
 			AssetAmount assetAmount1,
 			AssetAmount assetAmount2,
@@ -131,6 +130,8 @@ namespace Tinyman.V1 {
 			if (assetAmount2.Asset.Id != 0) {
 				callTx.foreignAssets.Add(assetAmount2.Asset.Id);
 			}
+
+			callTx.foreignAssets = callTx.foreignAssets.OrderBy(s => s).ToList();
 
 			transactions.Add(callTx);
 
@@ -208,6 +209,8 @@ namespace Tinyman.V1 {
 				callTx.foreignAssets.Add(assetAmount2.Asset.Id);
 			}
 
+			callTx.foreignAssets = callTx.foreignAssets.OrderBy(s => s).ToList();
+
 			transactions.Add(callTx);
 
 			// AssetTransferTxn
@@ -239,7 +242,7 @@ namespace Tinyman.V1 {
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
 				suggestedParams));
 
-			var result = new TransactionGroup(transactions);
+			var result = new TransactionGroup(transactions.Select(s => PatchTransaction.Create(s)));
 
 			result.SignWithLogicSig(poolLogicSig);
 
@@ -286,6 +289,8 @@ namespace Tinyman.V1 {
 				callTx.foreignAssets.Add(asset2.Id);
 			}
 
+			callTx.foreignAssets = callTx.foreignAssets.OrderBy(s => s).ToList();
+
 			transactions.Add(callTx);
 
 			// AssetTransferTxn
@@ -307,13 +312,8 @@ namespace Tinyman.V1 {
 				}
 			}
 
-			var result = new TransactionGroup(transactions);
-
-			var tmp1 = JsonConvert.SerializeObject(transactions, new JsonSerializerSettings() {
-				DefaultValueHandling = DefaultValueHandling.Ignore,
-				ContractResolver = AlgorandContractResolver.Instance,
-				Formatting = Formatting.None
-			});
+			var result = new TransactionGroup(
+				transactions.Select(PatchTransaction.Create));
 
 			result.SignWithLogicSig(poolLogicSig);
 
@@ -352,7 +352,6 @@ namespace Tinyman.V1 {
 			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("swap"));
 			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray(swapType == SwapType.FixedInput ? "fi" : "fo"));
 			callTx.accounts.Add(sender);
-			callTx.foreignAssets.Add(assetLiquidity.Id);
 
 			if (amountIn.Asset.Id != 0) {
 				callTx.foreignAssets.Add(amountIn.Asset.Id);
@@ -361,6 +360,9 @@ namespace Tinyman.V1 {
 			if (amountOut.Asset.Id != 0) {
 				callTx.foreignAssets.Add(amountOut.Asset.Id);
 			}
+
+			callTx.foreignAssets.Add(assetLiquidity.Id);
+			callTx.foreignAssets = callTx.foreignAssets.OrderBy(s => s).ToList();
 
 			transactions.Add(callTx);
 
@@ -396,13 +398,8 @@ namespace Tinyman.V1 {
 				}
 			}
 
-			var result = new TransactionGroup(transactions);
-
-			var tmp1 = JsonConvert.SerializeObject(transactions, new JsonSerializerSettings () {
-				DefaultValueHandling = DefaultValueHandling.Ignore,
-				ContractResolver = AlgorandContractResolver.Instance,
-				Formatting = Formatting.None
-			});
+			var result = new TransactionGroup(
+				transactions.Select(PatchTransaction.Create));
 
 			result.SignWithLogicSig(poolLogicSig);
 

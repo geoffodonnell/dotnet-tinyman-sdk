@@ -2,12 +2,15 @@
 using Algorand.V2.Algod;
 using Algorand.V2.Model;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using Tinyman.V1.Asc;
 using Account = Algorand.Account;
@@ -84,9 +87,6 @@ namespace Tinyman.V1 {
             List<SignedTransaction> signedTransactions,
             Account account) {
 
-            // TODO: Does signedTransactions contain items? If so, how does the group ID get
-            // applied to the already signed transaction?
-
             var gid = Algorand.TxGroup.ComputeGroupID(transactions);
 
             for (var i = 0; i < transactions.Length; i++) {
@@ -95,11 +95,8 @@ namespace Tinyman.V1 {
 
                 tx.AssignGroupID(gid);
 
-                if (tx.sender.Equals(account.Address)) {
-
-                    var signed = account.SignTransaction(tx);
-
-                    signedTransactions[i] = signed;
+                if (tx.sender.Equals(account.Address)) {                    
+                    signedTransactions[i] = account.SignTransaction(tx);
                 }
             }
 
@@ -188,7 +185,7 @@ namespace Tinyman.V1 {
 
             return result.ToArray();
         }
-        
+
     }
 
 }

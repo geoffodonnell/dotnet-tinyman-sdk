@@ -4,15 +4,15 @@ namespace Tinyman.V1.Model {
 
 	public class SwapQuote {
 
-		public SwapType SwapType { get; internal set; }
+		public SwapType SwapType { get; set; }
 
-		public AssetAmount AmountIn { get; internal set; }
+		public AssetAmount AmountIn { get; set; }
 
-		public AssetAmount AmountOut { get; internal set; }
+		public AssetAmount AmountOut { get; set; }
 
-		public AssetAmount SwapFees { get; internal set; }
+		public AssetAmount SwapFees { get; set; }
 
-		public double Slippage { get; internal set;	}
+		public double Slippage { get; set;	}
 
 		internal Pool Pool { get; set; }
 
@@ -52,7 +52,7 @@ namespace Tinyman.V1.Model {
 			get => AmountOutWithSlippage.Amount / (double)AmountInWithSlippage.Amount;
 		}
 
-		internal SwapQuote(Pool pool) {
+		public SwapQuote(Pool pool) {
 			Pool = pool;
 		}
 

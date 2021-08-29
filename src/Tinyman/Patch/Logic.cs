@@ -3,9 +3,8 @@ using System;
 using Newtonsoft.Json;
 using System.IO;
 using System.Reflection;
-using System.Linq;
 
-namespace Tinyman.V1.Teal4 {
+namespace Tinyman.Patch {
 
     /// <summary>
     /// Copied from: https://github.com/RileyGe/dotnet-algorand-sdk/blob/master/dotnet-algorand-sdk/Logic.cs

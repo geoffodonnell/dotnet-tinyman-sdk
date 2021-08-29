@@ -38,13 +38,23 @@ namespace Tinyman.V1 {
 		public static PostTransactionsResponse Burn(
 			this TinymanClient client, Account account, Burn action) {
 
-			throw new NotImplementedException("'Burn' is not implemented yet.");
+			var txs = PrepareBurnTransactions(
+				client, account.Address, action);
+
+			txs.Sign(account);
+
+			return client.Submit(txs, true);
 		}
 
 		public static PostTransactionsResponse Mint(
 			this TinymanClient client, Account account, Mint action) {
 
-			throw new NotImplementedException("'Mint' is not implemented yet.");
+			var txs = PrepareMintTransactions(
+				client, account.Address, action);
+
+			txs.Sign(account);
+
+			return client.Submit(txs, true);
 		}
 
 		public static PostTransactionsResponse Swap(
@@ -69,6 +79,42 @@ namespace Tinyman.V1 {
 			return client.Submit(txs, true);
 		}
 
+		public static TransactionGroup PrepareBurnTransactions(
+			this TinymanClient client,
+			Address sender,
+			Burn action) {
+
+			var txParams = client.AlgodApi.TransactionParams();
+
+			var result = TinymanTransaction.PrepareBurnTransactions(
+				client.ValidatorAppId,
+				action.Amounts.Item1,
+				action.Amounts.Item2,
+				action.LiquidityAssetAmount,
+				sender,
+				txParams);
+
+			return result;
+		}
+
+		public static TransactionGroup PrepareMintTransactions(
+			this TinymanClient client,
+			Address sender,
+			Mint action) {
+
+			var txParams = client.AlgodApi.TransactionParams();
+
+			var result = TinymanTransaction.PrepareMintTransactions(
+				client.ValidatorAppId,
+				action.Amounts.Item1,
+				action.Amounts.Item2,
+				action.LiquidityAssetAmount,
+				sender,
+				txParams);
+
+			return result;
+		}
+
 		public static TransactionGroup PrepareSwapTransactions(
 			this TinymanClient client,
 			Address sender,
@@ -76,7 +122,7 @@ namespace Tinyman.V1 {
 
 			var liquidityAsset = client.FetchAsset(action.Pool.LiquidityAssetId);
 			var txParams = client.AlgodApi.TransactionParams();
-			
+
 			var result = TinymanTransaction.PrepareSwapTransactions(
 				client.ValidatorAppId,
 				action.AmountIn,
