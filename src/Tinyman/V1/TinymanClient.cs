@@ -87,8 +87,14 @@ namespace Tinyman.V1 {
 			var issuedLiquidity = Util.GetStateInt(validatorAppState, "ilt");
 			var unclaimedProtocolFees = Util.GetStateInt(validatorAppState, "p");
 					   
-			var liquidityAsset = accountInfo.CreatedAssets[0];
-			var liquidityAssetId = liquidityAsset.Index;
+			var liquidityAssetId = accountInfo?.CreatedAssets[0]?.Index.GetValueOrDefault();
+
+			var liquidityAsset = default(Asset);
+			var exists = liquidityAssetId != null;
+
+			if (exists) {
+				liquidityAsset = FetchAsset(liquidityAssetId);
+			}			 
 			
 			var outstandingAsset1Amount = Util.GetStateInt(
 				validatorAppState, Util.IntToStateKey(asset1Id.GetValueOrDefault()));
@@ -100,9 +106,9 @@ namespace Tinyman.V1 {
 				validatorAppState, Util.IntToStateKey(liquidityAssetId.GetValueOrDefault()));
 
 			var result = new Pool(asset1, asset2) {
+				Exists = exists,
 				Address = poolAddress,
-				LiquidityAssetId = liquidityAsset.Index.GetValueOrDefault(),
-				LiquidityAssetName = liquidityAsset.Params.Name,
+				LiquidityAsset = liquidityAsset,
 				Asset1Reserves = asset1Reserves.GetValueOrDefault(),
 				Asset2Reserves = asset2Reserves.GetValueOrDefault(),
 				IssuedLiquidity = issuedLiquidity.GetValueOrDefault(),
@@ -116,11 +122,13 @@ namespace Tinyman.V1 {
 			};
 
 			if (result.Asset1.Id != Convert.ToInt64(asset1Id.GetValueOrDefault())) {
-				throw new Exception("tbd message");
+				throw new Exception(
+					$"Expected Pool Asset1 ID of '{result.Asset1.Id}' got {Convert.ToInt64(asset1Id.GetValueOrDefault())}");
 			}
 
 			if (result.Asset2.Id != Convert.ToInt64(asset2Id.GetValueOrDefault())) {
-				throw new Exception("tbd message");
+				throw new Exception(
+					$"Expected Poo2 Asset1 ID of '{result.Asset2.Id}' got {Convert.ToInt64(asset2Id.GetValueOrDefault())}");
 			}
 
 			return result;

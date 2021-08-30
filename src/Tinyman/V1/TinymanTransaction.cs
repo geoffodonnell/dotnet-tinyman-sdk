@@ -197,9 +197,11 @@ namespace Tinyman.V1 {
 					sender, poolAddress, Constants.MintFee, "fee", suggestedParams));
 
 			// ApplicationNoOpTxn
-			var callTx = Algorand.Utils.GetApplicationOptinTransaction(
+			var callTx = Algorand.Utils.GetApplicationCallTransaction(
 				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
 
+			callTx.onCompletion = OnCompletion.Noop;
+			callTx.applicationArgs = new List<byte[]>();
 			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("mint"));
 			callTx.accounts.Add(sender);
 			callTx.foreignAssets.Add(assetAmount1.Asset.Id);
@@ -279,6 +281,7 @@ namespace Tinyman.V1 {
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
 				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
 
+			callTx.onCompletion = OnCompletion.Noop;
 			callTx.applicationArgs = new List<byte[]>();
 			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("redeem"));
 			callTx.accounts.Add(sender);

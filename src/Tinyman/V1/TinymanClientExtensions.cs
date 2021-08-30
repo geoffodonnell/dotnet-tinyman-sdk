@@ -120,14 +120,13 @@ namespace Tinyman.V1 {
 			Address sender,
 			Swap action) {
 
-			var liquidityAsset = client.FetchAsset(action.Pool.LiquidityAssetId);
 			var txParams = client.AlgodApi.TransactionParams();
 
 			var result = TinymanTransaction.PrepareSwapTransactions(
 				client.ValidatorAppId,
 				action.AmountIn,
 				action.AmountOut,
-				liquidityAsset,
+				action.Pool.LiquidityAsset,
 				action.SwapType,
 				sender,
 				txParams);
@@ -143,14 +142,13 @@ namespace Tinyman.V1 {
 				action.Pool = client.FetchPool(action.PoolAddress);
 			}
 
-			var liquidityAsset = client.FetchAsset(action.Pool.LiquidityAssetId);
 			var txParams = client.AlgodApi.TransactionParams();
 
 			var result = TinymanTransaction.PrepareRedeemTransactions(
 				client.ValidatorAppId,
 				action.Pool.Asset1,
 				action.Pool.Asset2,
-				liquidityAsset,
+				action.Pool.LiquidityAsset,
 				action.Amount,
 				sender,
 				txParams);

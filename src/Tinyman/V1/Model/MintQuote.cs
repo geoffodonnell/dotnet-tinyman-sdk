@@ -4,15 +4,15 @@ namespace Tinyman.V1.Model {
 
 	public class MintQuote {
 
-		public Tuple<AssetAmount, AssetAmount> AmountsIn { get; internal set; }
+		public virtual Tuple<AssetAmount, AssetAmount> AmountsIn { get; internal set; }
 
-		public AssetAmount LiquidityAssetAmount { get; internal set; }
+		public virtual AssetAmount LiquidityAssetAmount { get; internal set; }
 
-		public double Slippage { get; internal set; }
+		public virtual double Slippage { get; internal set; }
 
 		internal Pool Pool { get; set; }
 
-		public AssetAmount LiquidityAssetAmountWithSlippage {
+		public virtual AssetAmount LiquidityAssetAmountWithSlippage {
 			get {
 				return LiquidityAssetAmount - (LiquidityAssetAmount * Slippage);
 			}

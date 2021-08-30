@@ -5,9 +5,9 @@ namespace Tinyman.V1.Model {
 
 	public class RedeemQuote {
 
-		public AssetAmount Amount { get; internal set; }
+		public virtual AssetAmount Amount { get; internal set; }
 
-		public Address PoolAddress { get; internal set; }
+		public virtual Address PoolAddress { get; internal set; }
 
 		internal RedeemQuote() { }
 

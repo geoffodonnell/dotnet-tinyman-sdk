@@ -22,9 +22,8 @@ namespace Tinyman.V1.Model {
 
 		private readonly Transaction[] mTransactions;
 		private SignedTransaction[] mSignedTransactions;
-		//private Digest mGroupId;
 
-		public bool IsSigned => mSignedTransactions.All(s => s != null);
+		public virtual bool IsSigned => mSignedTransactions.All(s => s != null);
 
 		public TransactionGroup(IEnumerable<Transaction> transactions) {
 
@@ -36,20 +35,6 @@ namespace Tinyman.V1.Model {
 			foreach (var tx in mTransactions) {
 				tx.AssignGroupID(gid);
 			}
-		}
-
-		public void Add(Transaction value) {
-
-			//mSignedTransactions = null;
-			//mGroupId = null;
-			//mTransactions.Add(value);
-		}
-
-		public void Remove(Transaction value) {
-
-			//mSignedTransactions = null;
-			//mGroupId = null;
-			//mTransactions.Remove(value);
 		}
 
 		public void Sign(Account account) {
@@ -81,53 +66,10 @@ namespace Tinyman.V1.Model {
 			foreach (var tx in mSignedTransactions) {
 				 bytes.AddRange(Algorand.Encoder.EncodeToMsgPack(tx));
 			}
-
-			//var tmp4 = JsonConvert.SerializeObject(mSignedTransactions, new JsonSerializerSettings() {
-			//	DefaultValueHandling = DefaultValueHandling.Ignore,
-			//	ContractResolver = AlgorandContractResolver.Instance,
-			//	Formatting = Formatting.None
-			//});
-
-			var tmp8 = JsonConvert.SerializeObject(
-				Algorand.Encoder.DecodeFromMsgPack<JToken>(bytes.ToArray()));
-
-			var tmp12 = $"[{tmp8}]";
 			
 			ApiResponse<PostTransactionsResponse> response;
 			
 			try {
-
-				//var request = WebRequest.CreateHttp(@"https://api.testnet.algoexplorer.io/v2/transactions");
-
-				//request.Method = "POST";
-				//request.Headers[HttpRequestHeader.ContentType] = "application/x-binary";
-				//request.Headers[HttpRequestHeader.ContentLength] = bytes.Count.ToString();
-				//request.Headers[HttpRequestHeader.AcceptEncoding] = "identity";
-				//request.Headers[HttpRequestHeader.UserAgent] = "algosdk";
-				//request.Headers[HttpRequestHeader.Connection] = "close";
-				//request.Headers["X-Algo-Api-Token"] = null;
-
-				//request.KeepAlive = false;
-
-				//using (var body = request.GetRequestStream()) {
-				//	body.Write(bytes.ToArray(), 0, bytes.Count);
-				//	//body.Flush();
-				//}
-
-				//using (var res = request.GetResponse())
-				//using (var body = res.GetResponseStream())
-				//using (var reader = new StreamReader(body)) {
-
-				//	var tmp1 = reader.ReadToEnd();
-				//	Console.WriteLine(tmp1);
-
-				//}
-					
-
-
-
-
-
 
 				response = algodApi.RawTransactionWithHttpInfo(bytes.ToArray());
 
@@ -164,20 +106,11 @@ namespace Tinyman.V1.Model {
 				return Account.SignLogicsigTransaction(logicsig, tx);
 			} catch (Exception ex) {
 				if (tx.sender.Equals(logicsig.Address)) {
-					var stx = new SignedTransaction(tx, logicsig, tx.TxID());
-					//stx.SetAuthAddr(tx.sender.Bytes);
-
-					//var tmp1 = Encoder.EncodeToMsgPack(stx);
-					//var tmp2 = Encoder.DecodeFromMsgPack<SignedTransaction>(tmp1);
-
-
-
-					return stx;
+					return new SignedTransaction(tx, logicsig, tx.TxID());
 				}
 
 				throw;
-			}
-			
+			}			
 		}
 
 	}
