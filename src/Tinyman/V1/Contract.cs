@@ -9,35 +9,35 @@ namespace Tinyman.V1 {
 
 	public static class Contract {
 
-		private const string ResourceFileName = "Tinyman.V1.asc.json";
-		private const string PoolLogicSigName = "pool_logicsig";
-		private const string ValidatorAppName = "validator_app";
-		private const string UnsupportedVersionErrorMessageFromSdk = "unsupported version";
-		private const string UnsupportedVersionErrorMessage = "Unsupported version -- use Contract.GetPoolLogicSig4 until the Algorand SDK is updated to support TEAL 4 opcodes.";
+		private const string mResourceFileName = "Tinyman.V1.asc.json";
+		private const string mPoolLogicSigName = "pool_logicsig";
+		private const string mValidatorAppName = "validator_app";
+		private const string mResourceFileLoadErrorFormat =
+			"An error occured while loading the embedded resource file: '{0}'";
 
 		private static ContractCollection mContracts;
-		private static LogicSigContract PoolLogicSigDef;
-		private static AppContract ValidatorAppDef;
+		private static LogicSigContract mPoolLogicSigDef;
+		private static AppContract mValidatorAppDef;
+
+		private static readonly object mLock = new object();
 
 		public static byte[] ValidatorAppApprovalProgramBytes {
-			get => Util.GetProgram(ValidatorAppDef.ApprovalProgram, null);
+			get => Util.GetProgram(mValidatorAppDef.ApprovalProgram, null);
 		}
 
 		public static byte[] ValidatorAppClearProgramBytes {
-			get => Util.GetProgram(ValidatorAppDef.ClearProgram, null);
-		}
-
-		static Contract() {
-			LoadContractsFromResource();
+			get => Util.GetProgram(mValidatorAppDef.ClearProgram, null);
 		}
 
 		public static LogicsigSignature GetPoolLogicSig(
-			ulong validatorAppId, long assetIdA, long assetIdB) {
+			ulong validatorAppId, long assetIdA, long assetIdB, bool usePatch = true) {
+
+			Initialize();
 
 			var assetIdMax = Math.Max(assetIdA, assetIdB);
 			var assetIdMin = Math.Min(assetIdA, assetIdB);
 
-			var bytes = Util.GetProgram(PoolLogicSigDef.Logic, new Dictionary<string, object> {
+			var bytes = Util.GetProgram(mPoolLogicSigDef.Logic, new Dictionary<string, object> {
 				{ "validator_app_id", validatorAppId },
 				{ "asset_id_1", assetIdMax },
 				{ "asset_id_2", assetIdMin }
@@ -46,13 +46,26 @@ namespace Tinyman.V1 {
 			return GetLogicSig(bytes);
 		}
 
-		private static LogicsigSignature GetLogicSig(byte[] bytes) {
+		private static void Initialize() {
+
+			if (mContracts != null) {
+				return;
+			}
+
+			lock (mLock) {
+				if (mContracts == null) {
+					LoadContractsFromResource();
+				}
+			}
+		}
+
+		private static LogicsigSignature GetLogicSig(byte[] bytes, bool usePatch = true) {
 
 			if (TryCreateLogicSig(bytes, out var result, out var exception)) {
 				return result;
 			}
 
-			if (TryCreateLogicSigWithPatch(bytes, out result, out exception)) {
+			if (usePatch && TryCreateLogicSigWithPatch(bytes, out result, out exception)) {
 				return result;
 			}
 
@@ -107,14 +120,27 @@ namespace Tinyman.V1 {
 			var assembly = typeof(Contract).Assembly;
 			var serializer = JsonSerializer.CreateDefault();
 
-			using (var stream = assembly.GetManifestResourceStream(ResourceFileName))
-			using (var reader = new StreamReader(stream))
-			using (var json = new JsonTextReader(reader)) {
-				mContracts = serializer.Deserialize<ContractCollection>(json);
+			var stream = assembly.GetManifestResourceStream(mResourceFileName);
+
+			if (stream == null) {
+				throw new Exception(
+					String.Format(mResourceFileLoadErrorFormat, mResourceFileName));
+			}			
+			
+			try {
+				using (var reader = new StreamReader(stream))
+				using (var json = new JsonTextReader(reader)) {
+					mContracts = serializer.Deserialize<ContractCollection>(json);
+				}
+			} catch (Exception ex) {
+				throw new Exception(
+					String.Format(mResourceFileLoadErrorFormat, mResourceFileName), ex);
 			}
 
-			PoolLogicSigDef = mContracts.Contracts[PoolLogicSigName] as LogicSigContract;
-			ValidatorAppDef = mContracts.Contracts[ValidatorAppName] as AppContract;
+			stream.Dispose();
+
+			mPoolLogicSigDef = mContracts.Contracts[mPoolLogicSigName] as LogicSigContract;
+			mValidatorAppDef = mContracts.Contracts[mValidatorAppName] as AppContract;
 		}
 
 	}

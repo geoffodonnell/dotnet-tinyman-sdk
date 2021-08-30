@@ -21,9 +21,9 @@ namespace Tinyman.V1 {
 		protected readonly ulong mValidatorAppId;
 		protected readonly ConcurrentDictionary<long?, Asset> mAssetCache;
 
-		public AlgodApi AlgodApi { get => mAlgodApi; }
+		internal AlgodApi AlgodApi { get => mAlgodApi; }
 
-		public ulong ValidatorAppId { get => mValidatorAppId; }
+		internal ulong ValidatorAppId { get => mValidatorAppId; }
 
 		public TinymanClient(AlgodApi algodApi, ulong validatorAppId) {
 
@@ -32,6 +32,12 @@ namespace Tinyman.V1 {
 			mAssetCache = new ConcurrentDictionary<long?, Asset>();
 		}
 
+		/// <summary>
+		/// Retrieve a pool given an asset pair.
+		/// </summary>
+		/// <param name="asset1">First asset</param>
+		/// <param name="asset2">Second asset</param>
+		/// <returns>The pool</returns>
 		public virtual Pool FetchPool(Asset asset1, Asset asset2) {
 
 			var poolLogicSig = Contract.GetPoolLogicSig(mValidatorAppId, asset1.Id, asset2.Id);
@@ -41,12 +47,104 @@ namespace Tinyman.V1 {
 			return FetchPoolInfoFromAccountInfo(accountInfo, asset1, asset2);
 		}
 
+		/// <summary>
+		/// Retrieve a pool given the pool address.
+		/// </summary>
+		/// <param name="poolAddress">The pool address</param>
+		/// <returns>The pool</returns>
 		public virtual Pool FetchPool(Address poolAddress) {
 
 			var accountInfo = mAlgodApi
 				.AccountInformation(poolAddress.EncodeAsString());
 
 			return FetchPoolFromAccountInfo(accountInfo);
+		}
+
+		/// <summary>
+		/// Fetch an asset given the asset ID.
+		/// </summary>
+		/// <param name="id">The asset ID</param>
+		/// <returns>The asset</returns>
+		public virtual Asset FetchAsset(long? id) {
+
+			return mAssetCache.GetOrAdd(id, FetchAssetFromApi);
+		}
+
+		/// <summary>
+		/// Submit a signed transaction group.
+		/// </summary>
+		/// <param name="transactionGroup">Signed transaction group</param>
+		/// <param name="wait">Wait for confirmation</param>
+		/// <returns>Transaction reponse</returns>
+		public virtual PostTransactionsResponse Submit(
+			TransactionGroup transactionGroup, bool wait = true) {
+
+			return transactionGroup.Submit(mAlgodApi, wait);
+		}
+
+		/// <summary>
+		/// Fetch excess amounts.
+		/// </summary>
+		/// <param name="address">Address of account</param>
+		/// <returns>List of redemption quotes</returns>
+		public virtual List<RedeemQuote> FetchExcessAmounts(Address address) {
+
+			var result = new List<RedeemQuote>();
+			var appId = Convert.ToInt64(mValidatorAppId);
+			var accountInfo = mAlgodApi.AccountInformation(address.EncodeAsString());
+
+			var validatorApp = accountInfo?
+				.AppsLocalState?
+				.FirstOrDefault(s => s.Id == appId);
+
+			var validatorAppState = validatorApp?
+				.KeyValue?
+				.ToDictionary(s => s.Key, s => s.Value);
+
+			if (validatorApp == null || validatorAppState == null) {
+				return result;
+			}
+
+			foreach (var entry in validatorAppState) {
+				var utf8Bytes = Encoding.UTF8.GetBytes(entry.Key);
+				var base64Bytes = Base64.Decode(utf8Bytes).ToList();
+				var splitOn = Strings.ToUtf8ByteArray("e")[0];
+
+				if (base64Bytes[base64Bytes.Count - 9] == splitOn) {
+
+					var value = (validatorAppState[entry.Key]?.Uint).GetValueOrDefault();
+					var poolAddress = new Address(base64Bytes.GetRange(0, base64Bytes.Count - 9).ToArray());
+					var assetId = BinaryPrimitives.ReadInt64BigEndian(base64Bytes.GetRange(base64Bytes.Count - 8, 8).ToArray());
+					var asset = FetchAsset(assetId);
+
+					result.Add(new RedeemQuote {
+						Amount = new AssetAmount(asset, value),
+						PoolAddress = poolAddress
+					});
+				}
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Check whether or not the address is opted in to Tinyman.
+		/// </summary>
+		/// <param name="address">Address of account</param>
+		/// <returns>Whether or not the address is opted in</returns>
+		public virtual bool IsOptedIn(Address address) {
+
+			var info = mAlgodApi.AccountInformation(address.EncodeAsString());
+			var appId = Convert.ToInt64(mValidatorAppId);
+
+			foreach (var entry in info.AppsLocalState) {
+
+				if (entry.Id == appId) {
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		protected virtual Pool FetchPoolFromAccountInfo(Account accountInfo) {
@@ -70,7 +168,7 @@ namespace Tinyman.V1 {
 			var validatorAppId = accountInfo.AppsLocalState[0].Id;
 			var validatorAppState = accountInfo.AppsLocalState[0]
 				.KeyValue.ToDictionary(s => s.Key, s => s.Value);
-			
+
 			var asset1Id = Util.GetStateInt(validatorAppState, "a1");
 			var asset2Id = Util.GetStateInt(validatorAppState, "a2");
 
@@ -86,7 +184,7 @@ namespace Tinyman.V1 {
 			var asset2Reserves = Util.GetStateInt(validatorAppState, "s2");
 			var issuedLiquidity = Util.GetStateInt(validatorAppState, "ilt");
 			var unclaimedProtocolFees = Util.GetStateInt(validatorAppState, "p");
-					   
+
 			var liquidityAssetId = accountInfo?.CreatedAssets[0]?.Index.GetValueOrDefault();
 
 			var liquidityAsset = default(Asset);
@@ -94,8 +192,8 @@ namespace Tinyman.V1 {
 
 			if (exists) {
 				liquidityAsset = FetchAsset(liquidityAssetId);
-			}			 
-			
+			}
+
 			var outstandingAsset1Amount = Util.GetStateInt(
 				validatorAppState, Util.IntToStateKey(asset1Id.GetValueOrDefault()));
 
@@ -132,81 +230,6 @@ namespace Tinyman.V1 {
 			}
 
 			return result;
-		}
-
-		public virtual Asset FetchAsset(long? id) {
-
-			return mAssetCache.GetOrAdd(id, FetchAssetFromApi);
-		}
-
-		public virtual PostTransactionsResponse Submit(
-			TransactionGroup transactionGroup, bool wait = true) {
-
-			return transactionGroup.Submit(mAlgodApi, wait);
-		}
-
-		public virtual object PrepareAppOptinTransactions(Address userAddress) {
-
-			var suggestedParams = mAlgodApi.TransactionParams();
-			var transactionGroup = TinymanTransaction.PrepareAppOptinTransactions(
-				mValidatorAppId, userAddress, suggestedParams);
-
-			return transactionGroup;
-		}
-
-		public virtual List<RedeemQuote> FetchExcessAmounts(Address userAddress) {
-
-			var result = new List<RedeemQuote>();
-			var appId = Convert.ToInt64(mValidatorAppId);
-			var accountInfo = mAlgodApi.AccountInformation(userAddress.EncodeAsString());
-
-			var validatorApp = accountInfo?
-				.AppsLocalState?
-				.FirstOrDefault(s => s.Id == appId);
-
-			var validatorAppState = validatorApp?
-				.KeyValue?
-				.ToDictionary(s => s.Key, s => s.Value);
-
-			if (validatorApp == null || validatorAppState == null) {
-				return result;
-			}
-
-			foreach (var entry in validatorAppState) {
-				var utf8Bytes = Encoding.UTF8.GetBytes(entry.Key);
-				var base64Bytes = Base64.Decode(utf8Bytes).ToList();
-				var splitOn = Strings.ToUtf8ByteArray("e")[0];
-
-				if (base64Bytes[base64Bytes.Count - 9] == splitOn) {
-
-					var value = (validatorAppState[entry.Key]?.Uint).GetValueOrDefault();
-					var poolAddress = new Address(base64Bytes.GetRange(0, base64Bytes.Count - 9).ToArray());
-					var assetId = BinaryPrimitives.ReadInt64BigEndian(base64Bytes.GetRange(base64Bytes.Count - 8, 8).ToArray());
-					var asset = FetchAsset(assetId);
-
-					result.Add(new RedeemQuote {
-						Amount = new AssetAmount(asset, value),
-						PoolAddress = poolAddress
-					});
-				}
-			}
-
-			return result;
-		}
-
-		public virtual bool IsOptedIn(string address) {
-
-			var info = mAlgodApi.AccountInformation(address);
-			var appId = Convert.ToInt64(mValidatorAppId);
-
-			foreach (var entry in info.AppsLocalState) {
-
-				if (entry.Id == appId) {
-					return true;
-				}
-			}
-
-			return false;
 		}
 
 		protected virtual Asset FetchAssetFromApi(long? id) {

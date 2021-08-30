@@ -93,6 +93,16 @@ namespace Tinyman.V1 {
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare transaction group to burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="assetAmount1">Asset 1 amount</param>
+		/// <param name="assetAmount2">Asset 2 amount</param>
+		/// <param name="assetAmountLiquidity">Liquidity asset amount</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="suggestedParams">Network parameters</param>
+		/// <returns></returns>
 		public static TransactionGroup PrepareBurnTransactions(
 			ulong validatorAppId,
 			AssetAmount assetAmount1,
@@ -116,12 +126,14 @@ namespace Tinyman.V1 {
 
 			// PaymentTxn
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constants.BurnFee, "fee", suggestedParams));
+					sender, poolAddress, Constant.BurnFee, "fee", suggestedParams));
 
 			// ApplicationNoOpTxn
-			var callTx = Algorand.Utils.GetApplicationOptinTransaction(
+			var callTx = Algorand.Utils.GetApplicationCallTransaction(
 				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
 
+			callTx.onCompletion = OnCompletion.Noop;
+			callTx.applicationArgs = new List<byte[]>();
 			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("burn"));
 			callTx.accounts.Add(sender);
 			callTx.foreignAssets.Add(assetAmount1.Asset.Id);
@@ -164,7 +176,7 @@ namespace Tinyman.V1 {
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
 				suggestedParams));
 
-			var result = new TransactionGroup(transactions);
+			var result = new TransactionGroup(transactions.Select(s => PatchTransaction.Create(s)));
 
 			result.SignWithLogicSig(poolLogicSig);
 
@@ -194,7 +206,7 @@ namespace Tinyman.V1 {
 
 			// PaymentTxn
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constants.MintFee, "fee", suggestedParams));
+					sender, poolAddress, Constant.MintFee, "fee", suggestedParams));
 
 			// ApplicationNoOpTxn
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
@@ -275,7 +287,7 @@ namespace Tinyman.V1 {
 					   			 		  		  		 	   			
 			// PaymentTxn
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constants.RedeemFee, null, suggestedParams));
+					sender, poolAddress, Constant.RedeemFee, null, suggestedParams));
 
 			// ApplicationNoOpTxn
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
@@ -342,7 +354,7 @@ namespace Tinyman.V1 {
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
 					sender,
 					poolAddress,
-					Constants.SwapFee,
+					Constant.SwapFee,
 					"fee",
 					suggestedParams));
 

@@ -6,11 +6,11 @@ namespace Tinyman.V1 {
 	public class TinymanTestnetClient: TinymanClient {
 
 		public TinymanTestnetClient()
-			: this (new AlgodApi(Constants.AlgodTestnetHost, String.Empty)) {
+			: this (new AlgodApi(Constant.AlgodTestnetHost, String.Empty)) {
 		}
 
 		public TinymanTestnetClient(AlgodApi algodApi)
-			: base(algodApi, Constants.TestnetValidatorAppId) {
+			: base(algodApi, Constant.TestnetValidatorAppId) {
 		}
 	}
 
