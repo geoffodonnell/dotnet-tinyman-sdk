@@ -1,16 +1,11 @@
 ﻿using Algorand.V2;
-using Algorand.V2.Algod;
 using Algorand.V2.Model;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Serialization;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Text;
 using Tinyman.V1.Asc;
 using Account = Algorand.Account;
@@ -19,7 +14,7 @@ using Transaction = Algorand.Transaction;
 
 namespace Tinyman.V1 {
 
-	public static class Util {
+    public static class Util {
                
         internal static byte[] GetProgram(
             ProgramLogic logic, Dictionary<string, object> variables) {

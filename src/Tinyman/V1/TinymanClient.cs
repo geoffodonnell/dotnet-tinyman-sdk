@@ -15,6 +15,9 @@ using Asset = Tinyman.V1.Model.Asset;
 
 namespace Tinyman.V1 {
 
+	/// <summary>
+	/// Provides methods for interacting with Tinyman AMM via Algorand REST API.
+	/// </summary>
 	public class TinymanClient {
 
 		protected readonly AlgodApi mAlgodApi;

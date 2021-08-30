@@ -67,21 +67,13 @@ namespace Tinyman.V1.Model {
 				 bytes.AddRange(Algorand.Encoder.EncodeToMsgPack(tx));
 			}
 			
-			ApiResponse<PostTransactionsResponse> response;
-			
-			try {
+			var response = algodApi.RawTransactionWithHttpInfo(bytes.ToArray());
 
-				response = algodApi.RawTransactionWithHttpInfo(bytes.ToArray());
-
-				if (wait) {
-					Algorand.Utils.WaitTransactionToComplete(algodApi, response.Data.TxId);
-				}
-
-				return response.Data;
-
-			} catch(Exception ex) {
-				return null;
+			if (wait) {
+				Algorand.Utils.WaitTransactionToComplete(algodApi, response.Data.TxId);
 			}
+
+			return response.Data;
 		}
 
 		protected virtual void PerformSign(
