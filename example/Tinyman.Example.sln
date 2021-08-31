@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.SwapExample", "Tinyman.SwapExample\Tinyman.SwapExample.csproj", "{56512572-4AC9-42F2-A7F3-0BB731E1355D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman", "..\..\src\Tinyman\Tinyman.csproj", "{81C8EE93-975A-4A18-BF33-6366B2BDD596}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman", "..\src\Tinyman\Tinyman.csproj", "{81C8EE93-975A-4A18-BF33-6366B2BDD596}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.VerboseSwapExample", "Tinyman.VerboseSwapExample\Tinyman.VerboseSwapExample.csproj", "{006C80E4-D1B1-4D45-ACF4-E175B3EE2C5E}"
 EndProject
