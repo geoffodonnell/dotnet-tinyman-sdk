@@ -153,7 +153,10 @@ namespace Tinyman.Patch {
 
 				// If the value is null here something has gone sideways
 				if (asSdkType != null) {
-					value = asSdkType.Select(s => Convert.ToUInt64(s)).ToList();
+					value = asSdkType
+						.Where(s => s > 0)
+						.Select(s => Convert.ToUInt64(s))
+						.ToList();
 				}
 			}
 			// --- /PATCH

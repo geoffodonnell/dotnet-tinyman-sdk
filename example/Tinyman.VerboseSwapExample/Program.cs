@@ -36,10 +36,14 @@ namespace Tinyman.VerboseSwapExample {
 				var optInTxGroup = TinymanTransaction
 					.PrepareAppOptinTransactions(appId, account.Address, txParams);
 
-				// Presumably after inspection, sign the transactions from the account
+				// Sign the transactions sent from the account,
+				// the LogicSig transactions will already be signed
 				for (var i = 0; i < optInTxGroup.Transactions.Length; i++) {
 					var tx = optInTxGroup.Transactions[i];
 
+					// Inspect transaction
+
+					// Sign transaction
 					if (tx.sender.Equals(account.Address)) {
 						optInTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
 					}
@@ -78,11 +82,14 @@ namespace Tinyman.VerboseSwapExample {
 						account.Address,
 						txParams);
 
-				// Presumably after inspection, sign the transactions from the account,
+				// Sign the transactions sent from the account,
 				// the LogicSig transactions will already be signed
 				for (var i = 0; i < swapTxGroup.Transactions.Length; i++) {
 					var tx = swapTxGroup.Transactions[i];
 
+					// Inspect transaction
+
+					// Sign transaction
 					if (tx.sender.Equals(account.Address)) {
 						swapTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
 					}

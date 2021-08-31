@@ -5,7 +5,7 @@ using Tinyman.V1;
 using Tinyman.V1.Action;
 using Tinyman.V1.Model;
 
-namespace Tinyman.SwapExample {
+namespace Tinyman.MintExample {
 
 	class Program {
 
@@ -39,7 +39,7 @@ namespace Tinyman.SwapExample {
 
 			// Get a quote to add 1 Algo and the corresponding tinyUsdc amount to the pool
 			var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
-			var quote = pool.CalculatehMintQuote(new AssetAmount(algo, amountIn), 0.05);
+			var quote = pool.CalculateMintQuote(new AssetAmount(algo, amountIn), 0.05);
 
 			// Check the quote, ensure it's something that you want to execute
 

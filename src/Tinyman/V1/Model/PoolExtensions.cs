@@ -131,16 +131,16 @@ namespace Tinyman.V1.Model {
 			return result;
 		}
 
-		public static MintQuote CalculatehMintQuote(
+		public static MintQuote CalculateMintQuote(
 			this Pool pool,
 			AssetAmount amount,
 			double slippage = 0.05) {
 
-			return CalculatehMintQuote(
+			return CalculateMintQuote(
 				pool, new Tuple<AssetAmount, AssetAmount>(amount, null), slippage);
 		}
 
-		public static MintQuote CalculatehMintQuote(
+		public static MintQuote CalculateMintQuote(
 			this Pool pool,
 			Tuple<AssetAmount, AssetAmount> amounts,
 			double slippage = 0.05) {

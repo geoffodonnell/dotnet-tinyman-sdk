@@ -1,8 +1,11 @@
 ﻿using Algorand;
 using Algorand.V2.Model;
+using System;
+using System.Linq;
 using Tinyman.V1.Action;
 using Tinyman.V1.Model;
 using Account = Algorand.Account;
+using Asset = Tinyman.V1.Model.Asset;
 
 namespace Tinyman.V1 {
 
@@ -10,12 +13,9 @@ namespace Tinyman.V1 {
 
 		public static PostTransactionsResponse OptIn(this TinymanClient client, Account account) {
 
-			var appId = client.ValidatorAppId;
-			var algodApi = client.AlgodApi;
-			var txParams = algodApi.TransactionParams();
-			var txs = TinymanTransaction.PrepareAppOptinTransactions(
-				appId, account.Address, txParams);
-
+			var txs = PrepareOptInTransactions(
+				client, account.Address);
+			
 			txs.Sign(account);
 
 			return client.Submit(txs, true);
@@ -23,11 +23,8 @@ namespace Tinyman.V1 {
 
 		public static PostTransactionsResponse OptOut(this TinymanClient client, Account account) {
 
-			var appId = client.ValidatorAppId;
-			var algodApi = client.AlgodApi;
-			var txParams = algodApi.TransactionParams();
-			var txs = TinymanTransaction.PrepareAppOptoutTransactions(
-				appId, account.Address, txParams);
+			var txs = PrepareOptOutTransactions(
+				client, account.Address);
 
 			txs.Sign(account);
 
@@ -76,6 +73,58 @@ namespace Tinyman.V1 {
 			txs.Sign(account);
 
 			return client.Submit(txs, true);
+		}
+
+		/// <summary>
+		/// Convenience method for retreiving an asset balance for an account 
+		/// </summary>
+		/// <param name="client">Tinyman V1 client</param>
+		/// <param name="address">Account address</param>
+		/// <param name="asset">Asset</param>
+		/// <returns>Asset amount</returns>
+		public static AssetAmount GetBalance(
+			this TinymanClient client, Address address, Asset asset) {
+
+			var info = client.AlgodApi.AccountInformation(address.EncodeAsString());
+
+			if (asset.Id == 0) {
+				return new AssetAmount(asset, Convert.ToUInt64(info.AmountWithoutPendingRewards));
+			}
+
+			var amt = info?.Assets?
+				.Where(s => s.AssetId == asset.Id)
+				.Select(s => s.Amount)
+				.FirstOrDefault() ?? 0;
+
+			return new AssetAmount(asset, amt);
+		}
+
+		public static TransactionGroup PrepareOptInTransactions(
+			this TinymanClient client,
+			Address sender) {
+
+			var txParams = client.AlgodApi.TransactionParams();
+
+			var result = TinymanTransaction.PrepareAppOptinTransactions(
+				client.ValidatorAppId,
+				sender,
+				txParams);
+
+			return result;
+		}
+
+		public static TransactionGroup PrepareOptOutTransactions(
+			this TinymanClient client,
+			Address sender) {
+
+			var txParams = client.AlgodApi.TransactionParams();
+
+			var result = TinymanTransaction.PrepareAppOptoutTransactions(
+				client.ValidatorAppId,
+				sender,
+				txParams);
+
+			return result;
 		}
 
 		public static TransactionGroup PrepareBurnTransactions(
