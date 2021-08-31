@@ -82,7 +82,7 @@ namespace Tinyman.V1 {
 			var poolLogicSig = Contract.GetPoolLogicSig(validatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicSig.Address;
 
-			// Swap - Id of Asset1 needs to be less than Asset2
+			// Id of Asset1 needs to be less than Asset2
 			if (asset1.Id < asset2.Id) {
 				var placeholder = asset1;
 
@@ -98,9 +98,18 @@ namespace Tinyman.V1 {
 			var appOptinTx = Algorand.Utils.GetApplicationOptinTransaction(
 				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
 
-			if (appOptinTx != null) {
-				throw new Exception(" Not done yet, I think this should be an app call tx.");
+			appOptinTx.applicationArgs = new List<byte[]>();
+			appOptinTx.applicationArgs.Add(Strings.ToUtf8ByteArray("bootstrap"));
+			appOptinTx.applicationArgs.Add(Util.IntToBytes(asset1.Id));
+			appOptinTx.applicationArgs.Add(Util.IntToBytes(asset2.Id));
+
+			appOptinTx.foreignAssets.Add(asset1.Id);
+
+			if (asset2.Id != 0) {
+				appOptinTx.foreignAssets.Add(asset2.Id);
 			}
+
+			transactions.Add(appOptinTx);
 
 			transactions.Add(Algorand.Utils.GetCreateAssetTransaction(new AssetParams() {
 				Creator = poolAddress.EncodeAsString(),
@@ -112,10 +121,12 @@ namespace Tinyman.V1 {
 				DefaultFrozen = false
 			}, txParams));
 
-			transactions.Add(Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset1.Id, txParams));
+			transactions.Add(
+				Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset1.Id, txParams));
 
 			if (asset2.Id > 0) {
-				transactions.Add(Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset2.Id, txParams));
+				transactions.Add(
+					Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset2.Id, txParams));
 			}
 
 			var result = new TransactionGroup(transactions);
