@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.SwapExample", "Tiny
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman", "..\..\src\Tinyman\Tinyman.csproj", "{81C8EE93-975A-4A18-BF33-6366B2BDD596}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.VerboseSwapExample", "Tinyman.VerboseSwapExample\Tinyman.VerboseSwapExample.csproj", "{006C80E4-D1B1-4D45-ACF4-E175B3EE2C5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{81C8EE93-975A-4A18-BF33-6366B2BDD596}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81C8EE93-975A-4A18-BF33-6366B2BDD596}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81C8EE93-975A-4A18-BF33-6366B2BDD596}.Release|Any CPU.Build.0 = Release|Any CPU
+		{006C80E4-D1B1-4D45-ACF4-E175B3EE2C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{006C80E4-D1B1-4D45-ACF4-E175B3EE2C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{006C80E4-D1B1-4D45-ACF4-E175B3EE2C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{006C80E4-D1B1-4D45-ACF4-E175B3EE2C5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

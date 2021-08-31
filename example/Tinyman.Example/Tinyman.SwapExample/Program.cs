@@ -36,6 +36,8 @@ namespace Tinyman.SwapExample {
 
 			// Get the pool
 			var pool = client.FetchPool(algo, tinyUsdc);
+
+			// Get a quote to swap 1 Algo for tinyUsdc
 			var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
 			var quote = pool.CalculateFixedInputSwapQuote(new AssetAmount(algo, amountIn), 0.05);
 
