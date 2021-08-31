@@ -4,6 +4,7 @@ using Algorand.V2.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tinyman.Patch;
 using Account = Algorand.Account;
 using LogicsigSignature = Algorand.LogicsigSignature;
 using SignedTransaction = Algorand.SignedTransaction;
@@ -13,34 +14,38 @@ namespace Tinyman.V1.Model {
 
 	public class TransactionGroup {
 
-		private readonly Transaction[] mTransactions;
-		private SignedTransaction[] mSignedTransactions;
+		public virtual Transaction[] Transactions { get; }
 
-		public virtual bool IsSigned => mSignedTransactions.All(s => s != null);
+		public virtual SignedTransaction[] SignedTransactions { get; }
 
-		public TransactionGroup(IEnumerable<Transaction> transactions) {
+		public virtual bool IsSigned => SignedTransactions.All(s => s != null);
 
-			mTransactions = transactions.ToArray();
-			mSignedTransactions = new SignedTransaction[mTransactions.Length];
+		public TransactionGroup(IEnumerable<Transaction> transactions)
+			: this(transactions, true) { }
 
-			var gid = Algorand.TxGroup.ComputeGroupID(mTransactions);
+		public TransactionGroup(IEnumerable<Transaction> transactions, bool usePatch) {
 
-			foreach (var tx in mTransactions) {
+			Transactions = transactions.Select(s => usePatch ? PatchTransaction.Create(s) : s).ToArray();
+			SignedTransactions = new SignedTransaction[Transactions.Length];
+
+			var gid = TxGroup.ComputeGroupID(Transactions);
+
+			foreach (var tx in Transactions) {
 				tx.AssignGroupID(gid);
 			}
 		}
 
-		public void Sign(Account account) {
+		public virtual void Sign(Account account) {
 
 			PerformSign(account.Address, s => account.SignTransaction(s));
 		}
 
-		public void SignWithLogicSig(LogicsigSignature logicsig) {
+		public virtual void SignWithLogicSig(LogicsigSignature logicsig) {
 
 			PerformSign(logicsig.Address, s => SignLogicsigTransaction(logicsig, s));
 		}
 
-		public void SignWithPrivateKey(byte[] privateKey) {
+		public virtual void SignWithPrivateKey(byte[] privateKey) {
 
 			var account = Account.AccountFromPrivateKey(privateKey);
 
@@ -51,12 +56,12 @@ namespace Tinyman.V1.Model {
 			
 			if (!IsSigned) {
 				throw new Exception(
-					"Transaction group has not been signed. Note that adding or removing transactions will remove all signed transactions in the group.");
+					"Transaction group has not been signed.");
 			}
 
 			var bytes = new List<byte>();
 
-			foreach (var tx in mSignedTransactions) {
+			foreach (var tx in SignedTransactions) {
 				 bytes.AddRange(Algorand.Encoder.EncodeToMsgPack(tx));
 			}
 			
@@ -72,14 +77,14 @@ namespace Tinyman.V1.Model {
 		protected virtual void PerformSign(
 			Address sender, Func<Transaction, SignedTransaction> action) {
 
-			if (mTransactions == null || mTransactions.Length == 0) {
+			if (Transactions == null || Transactions.Length == 0) {
 				return;
 			}
 			
-			for (var i = 0; i < mTransactions.Length; i++) {
-				if (mTransactions[i].sender.Equals(sender)) {
-					var signed = action(mTransactions[i]);
-					mSignedTransactions[i] = signed;
+			for (var i = 0; i < Transactions.Length; i++) {
+				if (Transactions[i].sender.Equals(sender)) {
+					var signed = action(Transactions[i]);
+					SignedTransactions[i] = signed;
 				}
 			}
 		}

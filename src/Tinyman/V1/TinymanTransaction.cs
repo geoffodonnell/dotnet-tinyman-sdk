@@ -4,48 +4,80 @@ using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tinyman.Patch;
 using Tinyman.V1.Model;
 using Asset = Tinyman.V1.Model.Asset;
 using Transaction = Algorand.Transaction;
 
 namespace Tinyman.V1 {
 
+	/// <summary>
+	/// Create transaction groups for common actions
+	/// </summary>
 	public static class TinymanTransaction {
 
+		/// <summary>
+		/// Prepare a transaction group to opt-in to Tinyman
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns></returns>
 		public static TransactionGroup PrepareAppOptinTransactions(
-			ulong validatorAppId, Address sender, TransactionParametersResponse suggestedParams) {
+			ulong validatorAppId, Address sender, TransactionParametersResponse txParams) {
 
 			var transaction = Algorand.Utils.GetApplicationOptinTransaction(
-				sender, Convert.ToUInt64(validatorAppId), suggestedParams);
+				sender, Convert.ToUInt64(validatorAppId), txParams);
 
 			return new TransactionGroup(new[] { transaction });
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to opt-out of Tinyman
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns></returns>
 		public static TransactionGroup PrepareAppOptoutTransactions(
-			ulong validatorAppId, Address sender, TransactionParametersResponse suggestedParams) {
+			ulong validatorAppId, Address sender, TransactionParametersResponse txParams) {
 
 			var transaction = Algorand.Utils.GetApplicationClearTransaction(
-				sender, Convert.ToUInt64(validatorAppId), suggestedParams);
+				sender, Convert.ToUInt64(validatorAppId), txParams);
 
 			return new TransactionGroup(new[] { transaction });
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to opt-in to an asset
+		/// </summary>
+		/// <param name="assetId">Asset ID</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns></returns>
 		public static TransactionGroup PrepareAssetOptinTransactions(
-			long assetId, Address sender, TransactionParametersResponse suggestedParams) {
+			long assetId, Address sender, TransactionParametersResponse txParams) {
 
 			var transaction = Algorand.Utils.GetAssetOptingInTransaction(
-				sender, assetId, suggestedParams);
+				sender, assetId, txParams);
 
 			return new TransactionGroup(new[] { transaction });
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to bootstrap a new pool
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="asset1">Asset 1</param>
+		/// <param name="asset2">Asset 2</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareBootstrapTransactions(
 			ulong validatorAppId,
 			Asset asset1,
 			Asset asset2,
 			Address sender,
-			TransactionParametersResponse suggestedParams) {
+			TransactionParametersResponse txParams) {
 
 			var poolLogicSig = Contract.GetPoolLogicSig(validatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicSig.Address;
@@ -61,10 +93,10 @@ namespace Tinyman.V1 {
 			var transactions = new List<Transaction>();
 
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Convert.ToUInt64(asset2.Id > 0 ? 961000 : 860000), "fee", suggestedParams));
+					sender, poolAddress, Convert.ToUInt64(asset2.Id > 0 ? 961000 : 860000), "fee", txParams));
 
 			var appOptinTx = Algorand.Utils.GetApplicationOptinTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
+				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
 
 			if (appOptinTx != null) {
 				throw new Exception(" Not done yet, I think this should be an app call tx.");
@@ -78,15 +110,15 @@ namespace Tinyman.V1 {
 				Name = $"Tinyman Pool {asset1.UnitName}{asset2.UnitName}",
 				Url = "https://tinyman.org",
 				DefaultFrozen = false
-			}, suggestedParams));
+			}, txParams));
 
-			transactions.Add(Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset1.Id, suggestedParams));
+			transactions.Add(Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset1.Id, txParams));
 
 			if (asset2.Id > 0) {
-				transactions.Add(Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset2.Id, suggestedParams));
+				transactions.Add(Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset2.Id, txParams));
 			}
 
-			var result = new TransactionGroup(transactions.ToArray());
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 
@@ -94,22 +126,22 @@ namespace Tinyman.V1 {
 		}
 
 		/// <summary>
-		/// Prepare transaction group to burn the liquidity pool asset amount in exchange for pool assets.
+		/// Prepare a transaction group to burn the liquidity pool asset amount in exchange for pool assets.
 		/// </summary>
 		/// <param name="validatorAppId">Tinyman application ID</param>
 		/// <param name="assetAmount1">Asset 1 amount</param>
 		/// <param name="assetAmount2">Asset 2 amount</param>
 		/// <param name="assetAmountLiquidity">Liquidity asset amount</param>
 		/// <param name="sender">Account address</param>
-		/// <param name="suggestedParams">Network parameters</param>
-		/// <returns></returns>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareBurnTransactions(
 			ulong validatorAppId,
 			AssetAmount assetAmount1,
 			AssetAmount assetAmount2,
 			AssetAmount assetAmountLiquidity,
 			Address sender,
-			TransactionParametersResponse suggestedParams) {
+			TransactionParametersResponse txParams) {
 
 			var poolLogicSig = Contract.GetPoolLogicSig(
 				validatorAppId, assetAmount1.Asset.Id, assetAmount2.Asset.Id);
@@ -126,11 +158,11 @@ namespace Tinyman.V1 {
 
 			// PaymentTxn
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constant.BurnFee, "fee", suggestedParams));
+					sender, poolAddress, Constant.BurnFee, "fee", txParams));
 
 			// ApplicationNoOpTxn
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
+				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
 
 			callTx.onCompletion = OnCompletion.Noop;
 			callTx.applicationArgs = new List<byte[]>();
@@ -153,19 +185,19 @@ namespace Tinyman.V1 {
 				sender,
 				Convert.ToInt64(assetAmount1.Asset.Id),
 				Convert.ToUInt64(assetAmount1.Amount),
-				suggestedParams));
+				txParams));
 
 			// AssetTransferTxn
 			if (assetAmount2.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, Convert.ToUInt64(assetAmount2.Amount), "", suggestedParams));
+					poolAddress, sender, Convert.ToUInt64(assetAmount2.Amount), "", txParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
 					Convert.ToInt64(assetAmount2.Asset.Id),
 					Convert.ToUInt64(assetAmount2.Amount),
-					suggestedParams));
+					txParams));
 			}
 
 			// AssetTransferTxn
@@ -174,22 +206,32 @@ namespace Tinyman.V1 {
 				poolAddress,
 				Convert.ToInt64(assetAmountLiquidity.Asset.Id),
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
-				suggestedParams));
+				txParams));
 
-			var result = new TransactionGroup(transactions.Select(s => PatchTransaction.Create(s)));
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="assetAmount1">Asset 1 amount</param>
+		/// <param name="assetAmount2">Asset 2 amount</param>
+		/// <param name="assetAmountLiquidity">Liquidity asset amount</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareMintTransactions(
 			ulong validatorAppId,
 			AssetAmount assetAmount1,
 			AssetAmount assetAmount2,
 			AssetAmount assetAmountLiquidity,
 			Address sender,
-			TransactionParametersResponse suggestedParams) {
+			TransactionParametersResponse txParams) {
 
 			var poolLogicSig = Contract.GetPoolLogicSig(
 				validatorAppId, assetAmount1.Asset.Id, assetAmount2.Asset.Id);
@@ -206,11 +248,11 @@ namespace Tinyman.V1 {
 
 			// PaymentTxn
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constant.MintFee, "fee", suggestedParams));
+					sender, poolAddress, Constant.MintFee, "fee", txParams));
 
 			// ApplicationNoOpTxn
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
+				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
 
 			callTx.onCompletion = OnCompletion.Noop;
 			callTx.applicationArgs = new List<byte[]>();
@@ -233,19 +275,19 @@ namespace Tinyman.V1 {
 				poolAddress,
 				Convert.ToInt64(assetAmount1.Asset.Id),
 				Convert.ToUInt64(assetAmount1.Amount),
-				suggestedParams));
+				txParams));
 
 			// AssetTransferTxn
 			if (assetAmount2.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Convert.ToUInt64(assetAmount2.Amount), "", suggestedParams));
+					sender, poolAddress, Convert.ToUInt64(assetAmount2.Amount), "", txParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					sender,
 					poolAddress,
 					Convert.ToInt64(assetAmount2.Asset.Id),
 					Convert.ToUInt64(assetAmount2.Amount),
-					suggestedParams));
+					txParams));
 			}
 
 			// AssetTransferTxn
@@ -254,15 +296,26 @@ namespace Tinyman.V1 {
 				sender,
 				Convert.ToInt64(assetAmountLiquidity.Asset.Id),
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
-				suggestedParams));
+				txParams));
 
-			var result = new TransactionGroup(transactions.Select(s => PatchTransaction.Create(s)));
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to redeem a specified excess asset amount from a pool.
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="asset1">Asset 1</param>
+		/// <param name="asset2">Asset 2</param>
+		/// <param name="assetLiquidity">Pool liquidity asset</param>
+		/// <param name="assetAmount">Asset amount to redeem</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareRedeemTransactions(
 			ulong validatorAppId,
 			Asset asset1,
@@ -270,7 +323,7 @@ namespace Tinyman.V1 {
 			Asset assetLiquidity,
 			AssetAmount assetAmount,
 			Address sender,
-			TransactionParametersResponse suggestedParams) {
+			TransactionParametersResponse txParams) {
 
 			var poolLogicSig = Contract.GetPoolLogicSig(
 				validatorAppId, asset1.Id, asset2.Id);
@@ -287,11 +340,11 @@ namespace Tinyman.V1 {
 					   			 		  		  		 	   			
 			// PaymentTxn
 			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constant.RedeemFee, null, suggestedParams));
+					sender, poolAddress, Constant.RedeemFee, null, txParams));
 
 			// ApplicationNoOpTxn
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
+				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
 
 			callTx.onCompletion = OnCompletion.Noop;
 			callTx.applicationArgs = new List<byte[]>();
@@ -311,30 +364,40 @@ namespace Tinyman.V1 {
 			// AssetTransferTxn
 			if (assetAmount.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, Convert.ToUInt64(assetAmount.Amount), null, suggestedParams));
+					poolAddress, sender, Convert.ToUInt64(assetAmount.Amount), null, txParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
 					assetAmount.Asset.Id,
 					assetAmount.Amount,
-					suggestedParams));
+					txParams));
 			}
 			
 			foreach (var tx in transactions) {
 				if (String.IsNullOrWhiteSpace(tx.genesisID)) {
-					tx.genesisID = suggestedParams.GenesisId;
+					tx.genesisID = txParams.GenesisId;
 				}
 			}
 
-			var result = new TransactionGroup(
-				transactions.Select(PatchTransaction.Create));
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to swap assets.
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="amountIn">Amount to send to pool</param>
+		/// <param name="amountOut">Amount to receive from pool</param>
+		/// <param name="assetLiquidity">Pool liquidity asset</param>
+		/// <param name="swapType">Swap type</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareSwapTransactions(
 			ulong validatorAppId,
 			AssetAmount amountIn,
@@ -342,7 +405,7 @@ namespace Tinyman.V1 {
 			Asset assetLiquidity,
 			SwapType swapType,
 			Address sender,
-			TransactionParametersResponse suggestedParams) {
+			TransactionParametersResponse txParams) {
 
 			var poolLogicSig = Contract.GetPoolLogicSig(
 				validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
@@ -356,11 +419,11 @@ namespace Tinyman.V1 {
 					poolAddress,
 					Constant.SwapFee,
 					"fee",
-					suggestedParams));
+					txParams));
 
 			// ApplicationNoOpTxn
 			var callTx = Algorand.Utils.GetApplicationCallTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), suggestedParams);
+				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
 
 			callTx.onCompletion = OnCompletion.Noop;
 			callTx.applicationArgs = new List<byte[]>();
@@ -384,37 +447,36 @@ namespace Tinyman.V1 {
 			// AssetTransferTxn - Send to pool
 			if (amountIn.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, amountIn.Amount, null, suggestedParams));
+					sender, poolAddress, amountIn.Amount, null, txParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					sender,
 					poolAddress,
 					amountIn.Asset.Id,
 					amountIn.Amount,
-					suggestedParams));
+					txParams));
 			}
 
 			// AssetTransferTxn - Receive from pool
 			if (amountOut.Asset.Id == 0) {
 				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, amountOut.Amount, null, suggestedParams));
+					poolAddress, sender, amountOut.Amount, null, txParams));
 			} else {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
 					amountOut.Asset.Id,
 					amountOut.Amount,
-					suggestedParams));
+					txParams));
 			}
 
 			foreach (var tx in transactions) {
 				if (String.IsNullOrWhiteSpace(tx.genesisID)) {
-					tx.genesisID = suggestedParams.GenesisId;
+					tx.genesisID = txParams.GenesisId;
 				}
 			}
 
-			var result = new TransactionGroup(
-				transactions.Select(PatchTransaction.Create));
+			var result = new TransactionGroup(transactions);
 
 			result.SignWithLogicSig(poolLogicSig);
 
