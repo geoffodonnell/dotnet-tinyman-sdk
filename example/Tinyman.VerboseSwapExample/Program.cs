@@ -2,7 +2,6 @@
 using System;
 using System.Configuration;
 using Tinyman.V1;
-using Tinyman.V1.Action;
 using Tinyman.V1.Model;
 
 namespace Tinyman.VerboseSwapExample {
