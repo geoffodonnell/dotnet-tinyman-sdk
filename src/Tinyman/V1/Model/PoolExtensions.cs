@@ -105,7 +105,7 @@ namespace Tinyman.V1.Model {
 			return result;
 		}
 
-		public static BurnQuote FetchBurnQuote(
+		public static BurnQuote CalculateBurnQuote(
 			this Pool pool,
 			AssetAmount amountIn,
 			double slippage = 0.05) {
@@ -131,14 +131,19 @@ namespace Tinyman.V1.Model {
 			return result;
 		}
 
-		public static MintQuote FetchMintQuote(
-			this Pool pool, AssetAmount amount, double slippage = 0.05) {
+		public static MintQuote CalculatehMintQuote(
+			this Pool pool,
+			AssetAmount amount,
+			double slippage = 0.05) {
 
-			return FetchMintQuote(pool, new Tuple<AssetAmount, AssetAmount>(amount, null), slippage);
+			return CalculatehMintQuote(
+				pool, new Tuple<AssetAmount, AssetAmount>(amount, null), slippage);
 		}
 
-		public static MintQuote FetchMintQuote(
-			this Pool pool, Tuple<AssetAmount, AssetAmount> amounts, double slippage = 0.05) {
+		public static MintQuote CalculatehMintQuote(
+			this Pool pool,
+			Tuple<AssetAmount, AssetAmount> amounts,
+			double slippage = 0.05) {
 
 			var amount1 = default(AssetAmount);
 			var amount2 = default(AssetAmount);
@@ -150,8 +155,6 @@ namespace Tinyman.V1.Model {
 				amount1 = amounts.Item2;
 				amount2 = amounts.Item1;
 			}
-
-
 
 			var liquidityAssetAmount = 0ul;
 
