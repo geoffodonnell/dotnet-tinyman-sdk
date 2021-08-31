@@ -1,16 +1,9 @@
 ﻿using Algorand;
-using Algorand.Client;
 using Algorand.V2;
 using Algorand.V2.Model;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Org.BouncyCastle.Utilities;
-using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using Account = Algorand.Account;
 using LogicsigSignature = Algorand.LogicsigSignature;
 using SignedTransaction = Algorand.SignedTransaction;
