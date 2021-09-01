@@ -49,7 +49,7 @@
 			Exists = false;
 		}
 
-		public virtual AssetAmount Convert (AssetAmount amount) {
+		public virtual AssetAmount Convert(AssetAmount amount) {
 
 			if (amount.Asset == Asset1) {
 				return new AssetAmount(Asset2, amount.Amount * Asset1Price);

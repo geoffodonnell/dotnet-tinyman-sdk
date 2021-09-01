@@ -4,15 +4,15 @@ namespace Tinyman.V1.Model {
 
 	public class SwapQuote {
 
-		public virtual SwapType SwapType { get; set; }
+		public virtual SwapType SwapType { get; internal set; }
 
-		public virtual AssetAmount AmountIn { get; set; }
+		public virtual AssetAmount AmountIn { get; internal set; }
 
-		public virtual AssetAmount AmountOut { get; set; }
+		public virtual AssetAmount AmountOut { get; internal set; }
 
-		public virtual AssetAmount SwapFees { get; set; }
+		public virtual AssetAmount SwapFees { get; internal set; }
 
-		public virtual double Slippage { get; set;	}
+		public virtual double Slippage { get; internal set;	}
 
 		internal Pool Pool { get; set; }
 

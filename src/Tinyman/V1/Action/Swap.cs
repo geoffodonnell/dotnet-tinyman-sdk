@@ -4,11 +4,11 @@ namespace Tinyman.V1.Action {
 
 	public class Swap {
 
-		public AssetAmount AmountIn { get; set; }
+		public AssetAmount AmountIn { get; internal set; }
 
-		public AssetAmount AmountOut { get; set; }
+		public AssetAmount AmountOut { get; internal set; }
 
-		public SwapType SwapType { get; set; }
+		public SwapType SwapType { get; internal set; }
 
 		internal Pool Pool { get; set; }
 

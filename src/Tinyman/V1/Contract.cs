@@ -43,7 +43,7 @@ namespace Tinyman.V1 {
 				{ "asset_id_2", assetIdMin }
 			});
 
-			return GetLogicSig(bytes);
+			return GetLogicSig(bytes, usePatch);
 		}
 
 		private static void Initialize() {
@@ -59,7 +59,7 @@ namespace Tinyman.V1 {
 			}
 		}
 
-		private static LogicsigSignature GetLogicSig(byte[] bytes, bool usePatch = true) {
+		private static LogicsigSignature GetLogicSig(byte[] bytes, bool usePatch) {
 
 			if (TryCreateLogicSig(bytes, out var result, out var exception)) {
 				return result;
