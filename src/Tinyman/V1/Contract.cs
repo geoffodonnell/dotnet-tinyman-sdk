@@ -22,11 +22,20 @@ namespace Tinyman.V1 {
 		private static readonly object mLock = new object();
 
 		public static byte[] ValidatorAppApprovalProgramBytes {
-			get => Util.GetProgram(mValidatorAppDef.ApprovalProgram, null);
+			get {
+
+				Initialize();
+
+				return Util.GetProgram(mValidatorAppDef.ApprovalProgram, null);
+			}
 		}
 
 		public static byte[] ValidatorAppClearProgramBytes {
-			get => Util.GetProgram(mValidatorAppDef.ClearProgram, null);
+			get {
+				Initialize();
+				
+				return Util.GetProgram(mValidatorAppDef.ClearProgram, null);
+			}
 		}
 
 		public static LogicsigSignature GetPoolLogicSig(

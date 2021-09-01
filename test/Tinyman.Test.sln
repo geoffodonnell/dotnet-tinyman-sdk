@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.UnitTest", "Tinyman.UnitTest\Tinyman.UnitTest.csproj", "{35665AF4-5E9F-4C22-9614-275419960855}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman.UnitTest", "Tinyman.UnitTest\Tinyman.UnitTest.csproj", "{35665AF4-5E9F-4C22-9614-275419960855}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman", "..\src\Tinyman\Tinyman.csproj", "{58360500-989D-4228-AB0C-022B2BC02582}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{35665AF4-5E9F-4C22-9614-275419960855}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35665AF4-5E9F-4C22-9614-275419960855}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35665AF4-5E9F-4C22-9614-275419960855}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58360500-989D-4228-AB0C-022B2BC02582}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58360500-989D-4228-AB0C-022B2BC02582}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58360500-989D-4228-AB0C-022B2BC02582}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58360500-989D-4228-AB0C-022B2BC02582}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
