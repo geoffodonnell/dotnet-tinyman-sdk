@@ -21,16 +21,18 @@ steps:
     projects: 'src/Tinyman/Tinyman.csproj'
 
 - task: DotNetCoreCLI@2
-  displayName: "Test Tinyman .NET SDK"
+  displayName: 'Test Tinyman .NET SDK'
   inputs:
     command: test
     configuration: 'Release'
     projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Package Tinyman .NET SDK'
   inputs:
     command: 'pack'
-    packagesToPack: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
+    configuration: 'Release'
+    packagesToPack: 'src/Tinyman/Tinyman.csproj'
     nobuild: true
     versioningScheme: 'byPrereleaseNumber'
     majorVersion: '0'
@@ -38,6 +40,7 @@ steps:
     patchVersion: '0'
 
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish Tinyman .NET SDK'
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'drop'
