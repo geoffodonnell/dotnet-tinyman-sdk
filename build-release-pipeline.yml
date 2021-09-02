@@ -19,5 +19,11 @@ steps:
 - task: DotNetCoreCLI@2
   displayName: 'Build Tinyman .NET SDK'
   inputs:
-    command: build
+    command: 'build'
+    configuration: 'Release'
     projects: 'src/Tinyman/Tinyman.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: "Test Tinyman .NET SDK"
+  inputs:
+    command: test
