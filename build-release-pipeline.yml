@@ -27,3 +27,5 @@ steps:
   displayName: "Test Tinyman .NET SDK"
   inputs:
     command: test
+    configuration: 'Release'
+    projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
