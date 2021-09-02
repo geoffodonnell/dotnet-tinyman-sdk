@@ -1,4 +1,4 @@
-# Build, Test, Publish
+# Build CI Pipeline
 
 trigger:
 - main
@@ -26,3 +26,13 @@ steps:
     command: test
     configuration: 'Release'
     projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
+    nobuild: true
+    versioningScheme: 'byPrereleaseNumber'
+    majorVersion: '0'
+    minorVersion: '1'
+    patchVersion: '0'    
