@@ -6,6 +6,9 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  buildConfiguration: 'Release'
+
 steps:
 - task: UseDotNet@2
   displayName: 'Install .Net Core SDK'
@@ -14,24 +17,24 @@ steps:
     version: '3.1.x'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Build Tinyman .NET SDK'
+  displayName: 'Build Tinyman .NET SDK ($(buildConfiguration))'
   inputs:
     command: 'build'
-    configuration: 'Release'
+    arguments: '--configuration $(buildConfiguration)'
     projects: 'src/Tinyman/Tinyman.csproj'
 
 - task: DotNetCoreCLI@2
   displayName: 'Test Tinyman .NET SDK'
   inputs:
     command: test
-    configuration: 'Release'
+    arguments: '--configuration $(buildConfiguration)'
     projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
 
 - task: DotNetCoreCLI@2
   displayName: 'Package Tinyman .NET SDK'
   inputs:
     command: 'pack'
-    configuration: 'Release'
+    configuration: '$(buildConfiguration)'
     packagesToPack: 'src/Tinyman/Tinyman.csproj'
     nobuild: true
     versioningScheme: 'byPrereleaseNumber'
