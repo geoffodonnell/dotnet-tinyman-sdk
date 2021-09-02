@@ -1,7 +1,4 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+# Build, Test, Publish
 
 trigger:
 - main
@@ -14,7 +11,7 @@ steps:
   displayName: 'Install .Net Core SDK'
   inputs:
     packageType: 'sdk'
-    version: '2.x'
+    version: '3.1.x'
 
 - task: DotNetCoreCLI@2
   displayName: 'Build Tinyman .NET SDK'
