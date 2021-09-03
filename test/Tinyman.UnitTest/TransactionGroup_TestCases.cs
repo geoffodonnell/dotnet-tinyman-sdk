@@ -4,9 +4,7 @@ using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System.Linq;
 using Tinyman.V1;
-using Tinyman.V1.Model;
 using Account = Algorand.Account;
-using Asset = Tinyman.V1.Model.Asset;
 
 namespace Tinyman.UnitTest {
 
