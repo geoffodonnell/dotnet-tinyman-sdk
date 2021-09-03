@@ -1,0 +1,38 @@
+# Build CI Pipeline
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: UseDotNet@2
+  displayName: 'Install .Net Core SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '3.1.x'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build Tinyman .NET SDK'
+  inputs:
+    command: 'build'
+    configuration: 'Release'
+    projects: 'src/Tinyman/Tinyman.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: "Test Tinyman .NET SDK"
+  inputs:
+    command: test
+    configuration: 'Release'
+    projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
+    nobuild: true
+    versioningScheme: 'byPrereleaseNumber'
+    majorVersion: '0'
+    minorVersion: '1'
+    patchVersion: '0'    
