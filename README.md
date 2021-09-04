@@ -1,6 +1,8 @@
 # dotnet-tinyman-sdk
 Tinyman .NET SDK
 
+[![Dev CI Status](https://dev.azure.com/gbo-devops/github-pipelines/_apis/build/status/Tinyman%20Dev%20CI?branchName=develop)](https://dev.azure.com/gbo-devops/github-pipelines/_build/latest?definitionId=1&branchName=develop)
+
 # Overview
 This library provides access to the [Tinyman AMM](https://docs.tinyman.org/) on the Algorand blockchain.
 
