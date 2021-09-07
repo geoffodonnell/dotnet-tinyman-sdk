@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>This library provides access to the Tinyman AMM on the Algorand blockchain.</Description>
+    <Company></Company>
+    <PackageProjectUrl>https://github.com/geoffodonnell/dotnet-tinyman-sdk</PackageProjectUrl>
+    <Authors>Geoff O'Donnell</Authors>
+    <RepositoryUrl>https://github.com/geoffodonnell/dotnet-tinyman-sdk</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
