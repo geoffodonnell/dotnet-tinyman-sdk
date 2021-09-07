@@ -1,4 +1,4 @@
-# Build CI Pipeline
+# Develop branch CI Pipeline
 
 name: DevelopCI_$(Year:yyyy).$(Month).$(DayOfMonth).$(Rev:r)    
 
