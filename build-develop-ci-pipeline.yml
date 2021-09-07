@@ -49,4 +49,4 @@ steps:
     command: 'pack'
     packagesToPack: 'src/Tinyman/Tinyman.csproj'
     nobuild: true
-    versioningScheme: 'byBuildNumber' 
+    versioningScheme: 'off' 
