@@ -52,7 +52,7 @@ steps:
   inputs:
     command: 'custom'
     custom: 'pack'
-    arguments: '$(Build.SourcesDirectory)/src/Tinyman/Tinyman.csproj --output $(Build.ArtifactStagingDirectory) --no-build /p:Configuration=$(buildConfiguration) /p:PackageID=$(nugetPackageId) /p:PackageVersion=$(AssemblyInfo.PackageVersion) --verbosity Detailed'
+    arguments: '$(Build.SourcesDirectory)/src/Tinyman/Tinyman.csproj --output $(Build.ArtifactStagingDirectory) --no-build /p:Configuration=$(buildConfiguration) /p:PackageID=$(nugetPackageId) /p:PackageVersion=$(AssemblyInfo.FileVersion) --verbosity Detailed'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Tinyman .NET SDK artifact'
