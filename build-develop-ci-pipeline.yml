@@ -22,8 +22,8 @@ steps:
 - task: Assembly-Info-NetCore@2
   displayName: 'Update assembly info'
   inputs:
-    Path: '$(Build.SourcesDirectory)'
-    FileNames: 'src/Tinyman/Tinyman.csproj'
+    Path: '$(Build.SourcesDirectory)/src/'
+    FileNames: 'Tinyman/Tinyman.csproj'
     InsertAttributes: false
     FileEncoding: 'auto'
     WriteBOM: false
