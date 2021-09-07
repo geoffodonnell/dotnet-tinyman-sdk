@@ -103,6 +103,10 @@ foreach (var quote in excessAmounts) {
 }
 ```
 
+# Build
+dotnet-tinyman-sdk build pipelines use the (Assembly Info Task)[https://github.com/BMuuN/vsts-assemblyinfo-task] extension.
+
+
 # License
 dotnet-tinyman-sdk is licensed under a MIT license except for the exceptions listed below. See the LICENSE file for details.
 
