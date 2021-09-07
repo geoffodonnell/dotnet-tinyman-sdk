@@ -27,7 +27,7 @@ steps:
     InsertAttributes: false
     FileEncoding: 'auto'
     WriteBOM: false
-    PackageId: '$(packageId)'
+    #PackageId: '$(packageId)'
     FileVersionNumber: '$(Build.BuildNumber)'
     PackageVersion: '$(Build.BuildNumber)'
     LogLevel: 'verbose'
@@ -40,7 +40,6 @@ steps:
     command: 'build'
     projects: 'src/Tinyman/Tinyman.csproj'
     arguments: '--configuration $(buildConfiguration)'
-
 
 - task: DotNetCoreCLI@2
   displayName: 'Test Tinyman .NET SDK'
