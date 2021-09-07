@@ -104,7 +104,7 @@ foreach (var quote in excessAmounts) {
 ```
 
 # Build
-dotnet-tinyman-sdk build pipelines use the (Assembly Info Task)[https://github.com/BMuuN/vsts-assemblyinfo-task] extension.
+dotnet-tinyman-sdk build pipelines use the [Assembly Info Task](https://github.com/BMuuN/vsts-assemblyinfo-task) extension.
 
 
 # License
