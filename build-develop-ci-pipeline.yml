@@ -23,6 +23,7 @@ steps:
     InsertAttributes: false
     FileEncoding: 'auto'
     WriteBOM: false
+    PackageId: "Tinyman-Dev-CI"
     FileVersionNumber: '$(Build.BuildNumber)'
     PackageVersion: '$(Build.BuildNumber)'
     LogLevel: 'verbose'
@@ -48,5 +49,6 @@ steps:
   inputs:
     command: 'pack'
     packagesToPack: 'src/Tinyman/Tinyman.csproj'
+    configurationToPack: 'Release'
     nobuild: true
-    versioningScheme: 'off' 
+    versioningScheme: 'byBuildNumber' 
