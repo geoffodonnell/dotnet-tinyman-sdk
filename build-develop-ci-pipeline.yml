@@ -47,15 +47,6 @@ steps:
     projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
     arguments: '--configuration $(buildConfiguration)'
 
-#- task: DotNetCoreCLI@2
-#  displayName: 'Pack Tinyman .NET SDK Nuget package'
-#  inputs:
-#    command: 'pack'
-#    packagesToPack: 'src/Tinyman/Tinyman.csproj'
-#    configurationToPack: 'Release'
-#    nobuild: true
-#    versioningScheme: 'byBuildNumber'
-
 - task: DotNetCoreCLI@2
   displayName: 'Pack Tinyman .NET SDK Nuget package'
   inputs:
