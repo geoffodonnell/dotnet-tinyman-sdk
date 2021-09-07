@@ -26,7 +26,7 @@ steps:
     InsertAttributes: false
     FileEncoding: 'auto'
     WriteBOM: false
-    PackageId: "Tinyman-Dev-CI"
+    PackageId: "Tinyman.Develop.CI"
     FileVersionNumber: '$(Build.BuildNumber)'
     PackageVersion: '$(Build.BuildNumber)'
     LogLevel: 'verbose'
