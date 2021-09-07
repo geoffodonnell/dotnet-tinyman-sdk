@@ -27,6 +27,7 @@ steps:
     InsertAttributes: false
     FileEncoding: 'auto'
     WriteBOM: false
+    PackageId: '$(nugetPackageId)'
     FileVersionNumber: '$(Build.BuildNumber)'
     PackageVersion: '$(Build.BuildNumber)'
     LogLevel: 'verbose'
@@ -55,7 +56,6 @@ steps:
     configurationToPack: 'Release'
     nobuild: true
     versioningScheme: 'byBuildNumber'
-    arguments: '/p:PackageID=$(nugetPackageId)'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Tinyman .NET SDK artifact'
