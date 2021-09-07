@@ -16,6 +16,7 @@ steps:
     version: '3.1.x'
 
 - task: Assembly-Info-NetCore@2
+  displayName: 'Update assembly info'
   inputs:
     Path: '$(Build.SourcesDirectory)'
     FileNames: 'src/Tinyman/Tinyman.csproj'
@@ -43,9 +44,10 @@ steps:
     projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
 
 - task: DotNetCoreCLI@2
+  displayName: "Pack Tinyman .NET SDK Nuget package"
   inputs:
     command: 'pack'
-    packagesToPack: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
+    packagesToPack: 'src/Tinyman/Tinyman.csproj'
     nobuild: true
     versioningScheme: 'byPrereleaseNumber'
     majorVersion: '0'
