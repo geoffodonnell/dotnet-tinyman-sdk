@@ -1,5 +1,7 @@
 # Build CI Pipeline
 
+name: DevelopCI_$(date:YYYY).$(date:MM).$(date:DD).$(Rev:r)    
+
 trigger:
 - develop
 
