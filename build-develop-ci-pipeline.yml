@@ -56,3 +56,10 @@ steps:
     configurationToPack: 'Release'
     nobuild: true
     versioningScheme: 'byBuildNumber' 
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Tinyman .NET SDK artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
