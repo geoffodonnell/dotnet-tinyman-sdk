@@ -5,6 +5,9 @@ name: DevelopCI_$(Year:yyyy).$(Month).$(DayOfMonth).$(Rev:r)
 trigger:
 - develop
 
+variables:
+  buildConfiguration: 'Release'
+
 pool:
   vmImage: ubuntu-latest
 
@@ -34,15 +37,16 @@ steps:
   displayName: 'Build Tinyman .NET SDK'
   inputs:
     command: 'build'
-    configuration: 'Release'
     projects: 'src/Tinyman/Tinyman.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
 
 - task: DotNetCoreCLI@2
   displayName: "Test Tinyman .NET SDK"
   inputs:
     command: test
-    configuration: 'Release'
     projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
+    arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
   displayName: "Pack Tinyman .NET SDK Nuget package"
