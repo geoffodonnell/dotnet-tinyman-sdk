@@ -8,6 +8,20 @@ This library provides access to the [Tinyman AMM](https://docs.tinyman.org/) on 
 ## Status
 [![Dev CI Status](https://dev.azure.com/gbo-devops/github-pipelines/_apis/build/status/Tinyman%20Dev%20CI?branchName=develop)](https://dev.azure.com/gbo-devops/github-pipelines/_build/latest?definitionId=1&branchName=develop)
 
+# Installation
+
+## Package Manager
+
+```
+PM> Install-Package -Id Tinyman
+```
+
+## .NET CLI
+
+```
+dotnet add package Tinyman
+```
+
 # Usage
 
 ## Swapping
