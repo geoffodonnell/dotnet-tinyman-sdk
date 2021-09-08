@@ -8,7 +8,7 @@ This library provides access to the [Tinyman AMM](https://docs.tinyman.org/) on 
 ## Status
 Tinyman is currently live on testnet, this SDK is under active development.
 
-CI Status: [![Dev CI Status](https://dev.azure.com/gbo-devops/github-pipelines/_apis/build/status/Tinyman%20Dev%20CI?branchName=develop)](https://dev.azure.com/gbo-devops/github-pipelines/_build/latest?definitionId=1&branchName=develop)
+[![Dev CI Status](https://dev.azure.com/gbo-devops/github-pipelines/_apis/build/status/Tinyman%20Dev%20CI?branchName=develop)](https://dev.azure.com/gbo-devops/github-pipelines/_build/latest?definitionId=1&branchName=develop)
 
 # Installation
 Releases are available at [nuget.org](https://www.nuget.org/packages/Tinyman/).
