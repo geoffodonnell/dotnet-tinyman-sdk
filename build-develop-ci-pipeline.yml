@@ -27,7 +27,7 @@ steps:
     InsertAttributes: false
     FileEncoding: 'auto'
     WriteBOM: false
-    FileVersionNumber: '$(Build.BuildNumber)'
+    FileVersion: '$(Build.BuildNumber)'
     PackageVersion: '$(Build.BuildNumber)'
     LogLevel: 'verbose'
     FailOnWarning: false
