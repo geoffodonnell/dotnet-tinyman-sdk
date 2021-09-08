@@ -1,13 +1,13 @@
 # Tinyman Release Pipeline
 
+name: '$(nugetPackageId) v$(majorVersion).$(minorVersion).$(patchVersion).$(Rev:r)    
+
 variables:
   buildConfiguration: 'Release'
   nugetPackageId: 'Tinyman'
   majorVersion: '0'
   minorVersion: '0'
   patchVersion: '1'
-
-name: '$(nugetPackageId) v$(majorVersion).$(minorVersion).$(patchVersion).$(Rev:r)    
 
 pool:
   vmImage: ubuntu-latest
