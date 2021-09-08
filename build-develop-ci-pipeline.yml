@@ -27,7 +27,7 @@ steps:
     InsertAttributes: true
     WriteBOM: true
     FileVersionNumber: '$(Build.BuildNumber)'
-    PackageVersion: '$(Build.BuildNumber)'
+    InformationalVersion: '$(Build.BuildNumber)'
     LogLevel: 'verbose'
     FailOnWarning: false
     DisableTelemetry: true
