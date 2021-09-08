@@ -1,7 +1,13 @@
-#  Main branch Release Pipeline
+# Tinyman Release Pipeline
 
-trigger:
-- main
+variables:
+  buildConfiguration: 'Release'
+  nugetPackageId: 'Tinyman'
+  majorVersion: '0'
+  minorVersion: '0'
+  patchVersion: '1'
+
+name: '$(nugetPackageId) v$(majorVersion).$(minorVersion).$(patchVersion).$(Rev:r)    
 
 pool:
   vmImage: ubuntu-latest
@@ -13,26 +19,44 @@ steps:
     packageType: 'sdk'
     version: '3.1.x'
 
+- task: Assembly-Info-NetCore@2
+  displayName: 'Update assembly info'
+  inputs:
+    Path: '$(Build.SourcesDirectory)/src/'
+    FileNames: 'Tinyman/Tinyman.csproj'
+    InsertAttributes: false
+    FileEncoding: 'auto'
+    WriteBOM: false
+    FileVersionNumber: '$(Build.BuildNumber)'
+    PackageVersion: '$(Build.BuildNumber)'
+    LogLevel: 'verbose'
+    FailOnWarning: false
+    DisableTelemetry: true
+
 - task: DotNetCoreCLI@2
   displayName: 'Build Tinyman .NET SDK'
   inputs:
     command: 'build'
-    configuration: 'Release'
     projects: 'src/Tinyman/Tinyman.csproj'
+    arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
-  displayName: "Test Tinyman .NET SDK"
+  displayName: 'Test Tinyman .NET SDK'
   inputs:
-    command: test
-    configuration: 'Release'
+    command: 'test'
     projects: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
+    arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  displayName: 'Pack Tinyman .NET SDK Nuget package'
   inputs:
-    command: 'pack'
-    packagesToPack: 'test/Tinyman.UnitTest/Tinyman.UnitTest.csproj'
-    nobuild: true
-    versioningScheme: 'byPrereleaseNumber'
-    majorVersion: '0'
-    minorVersion: '1'
-    patchVersion: '0'    
+    command: 'custom'
+    custom: 'pack'
+    arguments: '$(Build.SourcesDirectory)/src/Tinyman/Tinyman.csproj --output $(Build.ArtifactStagingDirectory) --no-build /p:Configuration=$(buildConfiguration) /p:PackageID=$(nugetPackageId) /p:PackageVersion=$(AssemblyInfo.FileVersion) --verbosity Detailed'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Tinyman .NET SDK artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
