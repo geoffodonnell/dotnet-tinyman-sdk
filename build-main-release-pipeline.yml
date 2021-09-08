@@ -1,6 +1,6 @@
 # Tinyman Release Pipeline
 
-name: '$(nugetPackageId) v$(majorVersion).$(minorVersion).$(patchVersion).$(Rev:r)    
+name: '$(nugetPackageId) v$(majorVersion).$(minorVersion).$(patchVersion).$(Rev:r)' 
 
 variables:
   buildConfiguration: 'Release'
