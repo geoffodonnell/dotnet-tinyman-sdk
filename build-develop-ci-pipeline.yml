@@ -19,15 +19,14 @@ steps:
     packageType: 'sdk'
     version: '3.1.x'
 
-- task: Assembly-Info-NetCore@2
+- task: bleddynrichards.Assembly-Info-Task.Assembly-Info-NetCore.Assembly-Info-NetCore@2
   displayName: 'Update assembly info'
   inputs:
     Path: '$(Build.SourcesDirectory)/src/'
     FileNames: 'Tinyman/Tinyman.csproj'
-    InsertAttributes: false
-    FileEncoding: 'auto'
-    WriteBOM: false
-    FileVersion: '$(Build.BuildNumber)'
+    InsertAttributes: true
+    WriteBOM: true
+    FileVersionNumber: '$(Build.BuildNumber)'
     PackageVersion: '$(Build.BuildNumber)'
     LogLevel: 'verbose'
     FailOnWarning: false
