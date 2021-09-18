@@ -1,4 +1,7 @@
 # dotnet-tinyman-sdk
+[![Dev CI Status](https://dev.azure.com/gbo-devops/github-pipelines/_apis/build/status/Tinyman%20Dev%20CI?branchName=develop)](https://dev.azure.com/gbo-devops/github-pipelines/_build/latest?definitionId=1&branchName=develop)
+[![NuGet version](https://badge.fury.io/nu/tinyman.svg)](https://badge.fury.io/nu/tinyman)
+
 Tinyman .NET SDK
 
 # Overview
@@ -6,8 +9,6 @@ This library provides access to the [Tinyman AMM](https://docs.tinyman.org/) on 
 
 ## Status
 Tinyman is currently live on testnet, this SDK is under active development.
-
-[![Dev CI Status](https://dev.azure.com/gbo-devops/github-pipelines/_apis/build/status/Tinyman%20Dev%20CI?branchName=develop)](https://dev.azure.com/gbo-devops/github-pipelines/_build/latest?definitionId=1&branchName=develop)
 
 # Installation
 Releases are available at [nuget.org](https://www.nuget.org/packages/Tinyman/).
@@ -117,9 +118,11 @@ foreach (var quote in excessAmounts) {
 }
 ```
 
+# Examples
+Full examples, simple and verbose, can be found in [/example](/example).
+
 # Build
 dotnet-tinyman-sdk build pipelines use the [Assembly Info Task](https://github.com/BMuuN/vsts-assemblyinfo-task) extension.
-
 
 # License
 dotnet-tinyman-sdk is licensed under a MIT license except for the exceptions listed below. See the LICENSE file for details.
