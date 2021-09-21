@@ -79,7 +79,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicSig(validatorAppId, asset1.Id, asset2.Id);
+			var poolLogicSig = Contract.GetPoolLogicsigSignature(validatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicSig.Address;
 
 			// Id of Asset1 needs to be less than Asset2
@@ -116,7 +116,7 @@ namespace Tinyman.V1 {
 				Total = 0xFFFFFFFFFFFFFFFF,
 				Decimals = 6,
 				UnitName = "TM1POOL",
-				Name = $"Tinyman Pool {asset1.UnitName}{asset2.UnitName}",
+				Name = $"Tinyman Pool {asset1.UnitName}-{asset2.UnitName}",
 				Url = "https://tinyman.org",
 				DefaultFrozen = false
 			}, txParams));
@@ -154,7 +154,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicSig(
+			var poolLogicSig = Contract.GetPoolLogicsigSignature(
 				validatorAppId, assetAmount1.Asset.Id, assetAmount2.Asset.Id);
 			var poolAddress = poolLogicSig.Address;
 			
@@ -244,7 +244,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicSig(
+			var poolLogicSig = Contract.GetPoolLogicsigSignature(
 				validatorAppId, assetAmount1.Asset.Id, assetAmount2.Asset.Id);
 			var poolAddress = poolLogicSig.Address;
 
@@ -336,7 +336,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicSig(
+			var poolLogicSig = Contract.GetPoolLogicsigSignature(
 				validatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicSig.Address;
 
@@ -418,7 +418,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicSig(
+			var poolLogicSig = Contract.GetPoolLogicsigSignature(
 				validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
 			var poolAddress = poolLogicSig.Address;
 

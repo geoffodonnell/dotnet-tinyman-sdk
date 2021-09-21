@@ -43,7 +43,7 @@ namespace Tinyman.V1 {
 		/// <returns>The pool</returns>
 		public virtual Pool FetchPool(Asset asset1, Asset asset2) {
 
-			var poolLogicSig = Contract.GetPoolLogicSig(mValidatorAppId, asset1.Id, asset2.Id);
+			var poolLogicSig = Contract.GetPoolLogicsigSignature(mValidatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicSig.Address.EncodeAsString();
 			var accountInfo = mAlgodApi.AccountInformation(poolAddress);
 
@@ -175,7 +175,7 @@ namespace Tinyman.V1 {
 			var asset1Id = Util.GetStateInt(validatorAppState, "a1");
 			var asset2Id = Util.GetStateInt(validatorAppState, "a2");
 
-			var poolLogicSig = Contract.GetPoolLogicSig(
+			var poolLogicSig = Contract.GetPoolLogicsigSignature(
 				Convert.ToUInt64(validatorAppId.GetValueOrDefault()),
 				Convert.ToInt64(asset1Id.GetValueOrDefault()),
 				Convert.ToInt64(asset2Id.GetValueOrDefault()));

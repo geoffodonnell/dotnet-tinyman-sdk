@@ -38,7 +38,7 @@ namespace Tinyman.V1 {
 			}
 		}
 
-		public static LogicsigSignature GetPoolLogicSig(
+		public static LogicsigSignature GetPoolLogicsigSignature(
 			ulong validatorAppId, long assetIdA, long assetIdB, bool usePatch = true) {
 
 			Initialize();
@@ -52,7 +52,7 @@ namespace Tinyman.V1 {
 				{ "asset_id_2", assetIdMin }
 			});
 
-			return GetLogicSig(bytes, usePatch);
+			return GetLogicsigSignature(bytes, usePatch);
 		}
 
 		private static void Initialize() {
@@ -68,20 +68,20 @@ namespace Tinyman.V1 {
 			}
 		}
 
-		private static LogicsigSignature GetLogicSig(byte[] bytes, bool usePatch) {
+		private static LogicsigSignature GetLogicsigSignature(byte[] bytes, bool usePatch) {
 
-			if (TryCreateLogicSig(bytes, out var result, out var exception)) {
+			if (TryCreateLogicsigSignature(bytes, out var result, out var exception)) {
 				return result;
 			}
 
-			if (usePatch && TryCreateLogicSigWithPatch(bytes, out result, out exception)) {
+			if (usePatch && TryCreateLogicsigSignatureWithPatch(bytes, out result, out exception)) {
 				return result;
 			}
 
 			throw exception;
 		}
 
-		private static bool TryCreateLogicSig(
+		private static bool TryCreateLogicsigSignature(
 			byte[] bytes, out LogicsigSignature result, out Exception exception) {
 
 			try {
@@ -100,7 +100,7 @@ namespace Tinyman.V1 {
 			}
 		}
 
-		private static bool TryCreateLogicSigWithPatch(
+		private static bool TryCreateLogicsigSignatureWithPatch(
 			byte[] bytes, out LogicsigSignature result, out Exception exception) {
 
 			try {
