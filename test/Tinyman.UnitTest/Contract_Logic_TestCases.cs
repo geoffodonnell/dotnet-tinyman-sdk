@@ -39,7 +39,7 @@ namespace Tinyman.UnitTest {
 		public void Get_Pool_Logic_With_Patch() {
 
 			var logicSig = Contract
-				.GetPoolLogicSig(AppId, AssetId1, AssetId2, true);
+				.GetPoolLogicsigSignature(AppId, AssetId1, AssetId2, true);
 
 			var poolLogic = Base64
 				.ToBase64String(logicSig.logic);
@@ -51,7 +51,7 @@ namespace Tinyman.UnitTest {
 		public void Get_Pool_Logic_Assets_Reversed_With_Patch() {
 
 			var logicSig = Contract
-				.GetPoolLogicSig(AppId, AssetId2, AssetId1, true);
+				.GetPoolLogicsigSignature(AppId, AssetId2, AssetId1, true);
 
 			var poolLogic = Base64
 				.ToBase64String(logicSig.logic);
@@ -64,7 +64,7 @@ namespace Tinyman.UnitTest {
 
 			Assert.ThrowsException<ArgumentException>(() => {
 				var logicSig = Contract
-					.GetPoolLogicSig(AppId, AssetId1, AssetId2, false);
+					.GetPoolLogicsigSignature(AppId, AssetId1, AssetId2, false);
 			});
 		}
 
@@ -73,7 +73,7 @@ namespace Tinyman.UnitTest {
 
 			Assert.ThrowsException<ArgumentException>(() => {
 				var logicSig = Contract
-					.GetPoolLogicSig(AppId, AssetId2, AssetId1, false);
+					.GetPoolLogicsigSignature(AppId, AssetId2, AssetId1, false);
 			});
 		}
 
