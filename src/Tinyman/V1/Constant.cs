@@ -8,7 +8,7 @@
 		public const ulong TestnetValidatorAppId = 21580889;
 		public const ulong MainnetValidatorAppId = 0;
 
-		public const ulong BurnFee = 4000;
+		public const ulong BurnFee = 3000;
 		public const ulong MintFee = 2000;
 		public const ulong RedeemFee = 2000;
 		public const ulong SwapFee = 2000;
