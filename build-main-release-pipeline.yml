@@ -9,7 +9,7 @@ variables:
   nugetPackageId: 'Tinyman'
   majorVersion: '0'
   minorVersion: '0'
-  patchVersion: '1'
+  patchVersion: '2'
 
 pool:
   vmImage: ubuntu-latest
