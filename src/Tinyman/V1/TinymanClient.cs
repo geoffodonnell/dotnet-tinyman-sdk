@@ -229,7 +229,7 @@ namespace Tinyman.V1 {
 
 			if (result.Asset2.Id != Convert.ToInt64(asset2Id.GetValueOrDefault())) {
 				throw new Exception(
-					$"Expected Poo2 Asset1 ID of '{result.Asset2.Id}' got {Convert.ToInt64(asset2Id.GetValueOrDefault())}");
+					$"Expected Pool Asset2 ID of '{result.Asset2.Id}' got {Convert.ToInt64(asset2Id.GetValueOrDefault())}");
 			}
 
 			return result;
