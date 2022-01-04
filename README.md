@@ -3,13 +3,14 @@
 [![NuGet version](https://badge.fury.io/nu/tinyman.svg)](https://badge.fury.io/nu/tinyman)
 [![Donate Algo](https://img.shields.io/badge/Donate-ALGO-000000.svg?style=flat)](https://algoexplorer.io/address/EJMR773OGLFAJY5L2BCZKNA5PXLDJOWJK4ED4XDYTYH57CG3JMGQGI25DQ)
 
-Tinyman .NET SDK
-
 # Overview
 This library provides access to the [Tinyman AMM](https://docs.tinyman.org/) on the Algorand blockchain.
 
-## Status
-Tinyman is currently live on testnet, this SDK is under active development.
+## Known Issues
+
+### :exclamation: High Severity
+* The V1 pools should NOT be used as they are vulnerable to a liquidity draining attack.
+	* See the announcement [here](https://tinymanorg.medium.com/official-announcement-about-the-incidents-of-01-01-2022-56abb19d8b19) for more information.
 
 # Installation
 Releases are available at [nuget.org](https://www.nuget.org/packages/Tinyman/).
