@@ -4,15 +4,19 @@ namespace Tinyman.V1.Model {
 
 	public class Asset {
 
-		public virtual long Id { get; internal set; }
+		public virtual ulong Id { get; internal set; }
 
 		public virtual string Name { get; internal set; }
 
 		public virtual string UnitName { get; internal set; }
 
-		public virtual long Decimals { get; internal set; }
+		public virtual int Decimals { get; internal set; }
 			   		 
 		internal Asset() {
+		}
+
+		public override string ToString() {
+			return $"{Name} ({Id})";
 		}
 
 		public override bool Equals(object obj) {

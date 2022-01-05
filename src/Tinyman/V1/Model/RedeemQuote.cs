@@ -8,6 +8,8 @@ namespace Tinyman.V1.Model {
 
 		public virtual Address PoolAddress { get; internal set; }
 
+		public virtual Pool Pool { get; internal set; }
+
 		internal RedeemQuote() { }
 
 	}

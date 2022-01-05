@@ -1,12 +1,14 @@
-﻿using Algorand.V2;
-using Algorand.V2.Model;
+﻿using Algorand.V2.Algod;
+using Algorand.V2.Algod.Model;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Tinyman.V1.Asc;
 using Account = Algorand.Account;
 using SignedTransaction = Algorand.SignedTransaction;
@@ -14,7 +16,7 @@ using Transaction = Algorand.Transaction;
 
 namespace Tinyman.V1 {
 
-    public static class Util {
+	public static class Util {
                
         internal static byte[] GetProgram(
             ProgramLogic logic, Dictionary<string, object> variables) {
@@ -76,11 +78,12 @@ namespace Tinyman.V1 {
             return result.ToArray();
         }  
 
-        public static PendingTransactionResponse SignAndSubmitTransactions(
-            AlgodApi client,
+        public static async Task<PostTransactionsResponse> SignAndSubmitTransactions(
+            DefaultApi client,
             Transaction[] transactions,
             List<SignedTransaction> signedTransactions,
-            Account account) {
+            Account account,
+            bool wait = true) {
 
             var gid = Algorand.TxGroup.ComputeGroupID(transactions);
 
@@ -99,14 +102,21 @@ namespace Tinyman.V1 {
                 .SelectMany(Algorand.Encoder.EncodeToMsgPack)
                 .ToArray();
 
-            var response = client.RawTransaction(bytes);
+            var payload = new MemoryStream(bytes);
+            var response = await client.TransactionsAsync(payload);
 
-            return WaitForConfirmation(client, response.TxId);
+			if (wait) {
+                await WaitForConfirmation(client, response.TxId);
+            }
+
+            return response;
         }
 
-        public static PendingTransactionResponse WaitForConfirmation(AlgodApi client, string txId) {
+        public static async Task<PendingTransactionResponse> WaitForConfirmation(
+            DefaultApi client,
+            string txId) {
 
-            return Algorand.Utils.WaitTransactionToComplete(client, txId);
+            return await Algorand.Utils.WaitTransactionToComplete(client, txId);
         }
 
         public static byte[] IntToBytes(ulong value) {

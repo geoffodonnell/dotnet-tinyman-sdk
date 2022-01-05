@@ -1,5 +1,5 @@
 ﻿using Algorand;
-using Algorand.V2.Model;
+using Algorand.V2.Indexer.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -87,7 +87,7 @@ namespace Tinyman.Patch {
                 Address assetCloseTo, Address freezeTarget, ulong? assetFreezeID, bool freezeState,
                 // application fields
                 List<byte[]> applicationArgs, OnCompletion onCompletion, TEALProgram approvalProgram, List<Address> accounts,
-                List<long> foreignApps, List<long> foreignAssets, StateSchema globalStateSchema, ulong? applicationId,
+                List<ulong> foreignApps, List<ulong> foreignAssets, StateSchema globalStateSchema, ulong? applicationId,
                 StateSchema localStateSchema, TEALProgram clearStateProgram) {
 
             this.type = type;

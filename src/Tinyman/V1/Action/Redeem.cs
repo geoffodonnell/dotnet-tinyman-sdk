@@ -9,14 +9,15 @@ namespace Tinyman.V1.Action {
 
 		public Address PoolAddress { get; internal set; }
 
-		internal Pool Pool { get; set; }
+		public Pool Pool { get; internal set; }
 
 		internal Redeem() { }
 
 		public static Redeem FromQuote(RedeemQuote quote) {
 			return new Redeem {
 				Amount = quote.Amount,
-				PoolAddress = quote.PoolAddress
+				PoolAddress = quote.PoolAddress,
+				Pool = quote.Pool
 			};
 		}
 

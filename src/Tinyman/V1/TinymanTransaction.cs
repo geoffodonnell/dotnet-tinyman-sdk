@@ -1,11 +1,13 @@
 ﻿using Algorand;
-using Algorand.V2.Model;
+using Algorand.V2.Algod.Model;
+using Algorand.V2.Indexer.Model;
 using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tinyman.V1.Model;
 using Asset = Tinyman.V1.Model.Asset;
+using AssetParams = Algorand.V2.Algod.Model.AssetParams;
 using Transaction = Algorand.Transaction;
 
 namespace Tinyman.V1 {
@@ -55,7 +57,7 @@ namespace Tinyman.V1 {
 		/// <param name="txParams">Network parameters</param>
 		/// <returns></returns>
 		public static TransactionGroup PrepareAssetOptinTransactions(
-			long assetId, Address sender, TransactionParametersResponse txParams) {
+			ulong assetId, Address sender, TransactionParametersResponse txParams) {
 
 			var transaction = Algorand.Utils.GetAssetOptingInTransaction(
 				sender, assetId, txParams);
@@ -194,7 +196,7 @@ namespace Tinyman.V1 {
 			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 				poolAddress,
 				sender,
-				Convert.ToInt64(assetAmount1.Asset.Id),
+				assetAmount1.Asset.Id,
 				Convert.ToUInt64(assetAmount1.Amount),
 				txParams));
 
@@ -206,7 +208,7 @@ namespace Tinyman.V1 {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					poolAddress,
 					sender,
-					Convert.ToInt64(assetAmount2.Asset.Id),
+					assetAmount2.Asset.Id,
 					Convert.ToUInt64(assetAmount2.Amount),
 					txParams));
 			}
@@ -215,7 +217,7 @@ namespace Tinyman.V1 {
 			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 				sender,
 				poolAddress,
-				Convert.ToInt64(assetAmountLiquidity.Asset.Id),
+				assetAmountLiquidity.Asset.Id,
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
 				txParams));
 
@@ -284,7 +286,7 @@ namespace Tinyman.V1 {
 			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 				sender,
 				poolAddress,
-				Convert.ToInt64(assetAmount1.Asset.Id),
+				assetAmount1.Asset.Id,
 				Convert.ToUInt64(assetAmount1.Amount),
 				txParams));
 
@@ -296,7 +298,7 @@ namespace Tinyman.V1 {
 				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 					sender,
 					poolAddress,
-					Convert.ToInt64(assetAmount2.Asset.Id),
+					assetAmount2.Asset.Id,
 					Convert.ToUInt64(assetAmount2.Amount),
 					txParams));
 			}
@@ -305,7 +307,7 @@ namespace Tinyman.V1 {
 			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
 				poolAddress,
 				sender,
-				Convert.ToInt64(assetAmountLiquidity.Asset.Id),
+				assetAmountLiquidity.Asset.Id,
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
 				txParams));
 

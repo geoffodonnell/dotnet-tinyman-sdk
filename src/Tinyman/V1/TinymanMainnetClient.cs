@@ -1,17 +1,20 @@
 ﻿using Algorand.V2;
 using System;
+using System.Net.Http;
 
 namespace Tinyman.V1 {
 
 	public class TinymanMainnetClient : TinymanClient {
 
 		public TinymanMainnetClient()
-			: this (new AlgodApi(Constant.AlgodMainnetHost, String.Empty)) {
-		}
+			: this (Constant.AlgodMainnetHost, String.Empty) { }
 
-		public TinymanMainnetClient(AlgodApi algodApi)
-			: base(algodApi, Constant.MainnetValidatorAppId) {
-		}
+		public TinymanMainnetClient(HttpClient httpClient, string url)
+			: base(httpClient, url, Constant.MainnetValidatorAppId) { }
+
+		public TinymanMainnetClient(string url, string token)
+			: base(url, token, Constant.MainnetValidatorAppId) { }
+
 	}
 
 }

@@ -1,4 +1,4 @@
-﻿using Algorand.V2.Model;
+﻿using Algorand.V2.Algod.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
@@ -11,13 +11,14 @@ namespace Tinyman.UnitTest {
 	[TestClass]
 	public class TransactionGroup_TestCases {
 
-		public static TransactionParametersResponse TxParams = new TransactionParametersResponse(
-				"https://github.com/algorandfoundation/specs/tree/abc54f79f9ad679d2d22f0fb9909fb005c16f8a1",
-				0,
-				Base64.Decode(Strings.ToUtf8ByteArray("SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=")),
-				"testnet-v1.0",
-				10000,
-				1000);
+		public static TransactionParametersResponse TxParams = new TransactionParametersResponse {
+				ConsensusVersion = "https://github.com/algorandfoundation/specs/tree/abc54f79f9ad679d2d22f0fb9909fb005c16f8a1",
+				Fee = 0,
+				GenesisHash = Base64.Decode(Strings.ToUtf8ByteArray("SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=")),
+				GenesisId = "testnet-v1.0",
+				LastRound = 10000,
+				MinFee = 1000
+		};
 
 		private static Account Account = new Account(
 			"autumn coach siege genius key " +

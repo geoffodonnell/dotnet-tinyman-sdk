@@ -39,7 +39,7 @@ namespace Tinyman.V1 {
 		}
 
 		public static LogicsigSignature GetPoolLogicsigSignature(
-			ulong validatorAppId, long assetIdA, long assetIdB, bool usePatch = true) {
+			ulong validatorAppId, ulong assetIdA, ulong assetIdB, bool usePatch = true) {
 
 			Initialize();
 

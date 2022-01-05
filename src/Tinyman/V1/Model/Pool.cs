@@ -26,11 +26,11 @@
 
 		public virtual ulong OutstandingLiquidityAssetAmount { get; internal set; }
 
-		public virtual long ValidatorAppId { get; internal set; }
+		public virtual ulong ValidatorAppId { get; internal set; }
 
-		public virtual long AlgoBalance { get; internal set; }
+		public virtual ulong AlgoBalance { get; internal set; }
 
-		public virtual long Round { get; internal set; }
+		public virtual ulong Round { get; internal set; }
 
 		public virtual ulong Asset1Price { get => Asset2Reserves / Asset1Reserves; }
 

@@ -1,9 +1,12 @@
 ﻿using Algorand;
 using Algorand.V2;
-using Algorand.V2.Model;
+using Algorand.V2.Algod;
+using Algorand.V2.Algod.Model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Tinyman.Patch;
 using Account = Algorand.Account;
 using LogicsigSignature = Algorand.LogicsigSignature;
@@ -52,7 +55,7 @@ namespace Tinyman.V1.Model {
 			PerformSign(account.Address, s => account.SignTransaction(s));
 		}
 
-		internal PostTransactionsResponse Submit(AlgodApi algodApi, bool wait = false) {
+		internal async Task<PostTransactionsResponse> SubmitAsync(DefaultApi client, bool wait = true) {
 			
 			if (!IsSigned) {
 				throw new Exception(
@@ -64,14 +67,15 @@ namespace Tinyman.V1.Model {
 			foreach (var tx in SignedTransactions) {
 				 bytes.AddRange(Algorand.Encoder.EncodeToMsgPack(tx));
 			}
-			
-			var response = algodApi.RawTransactionWithHttpInfo(bytes.ToArray());
+
+			var payload = new MemoryStream(bytes.ToArray());
+			var response = await client.TransactionsAsync(payload);
 
 			if (wait) {
-				Algorand.Utils.WaitTransactionToComplete(algodApi, response.Data.TxId);
+				await Util.WaitForConfirmation(client, response.TxId);
 			}
 
-			return response.Data;
+			return response;
 		}
 
 		protected virtual void PerformSign(
