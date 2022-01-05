@@ -8,12 +8,16 @@ using Transaction = Algorand.Transaction;
 
 namespace Tinyman.Patch {
 
-	/// <summary>
-	/// The purpose of this class is to intercept serialization of the Transaction object. The 
-	/// canonical class Algorand.Transaction should serialize the foreignAssets property ("apas") into 
-	/// an array of UNSIGNED 64-bit integers, not SIGNED 64-bit integers.
-	/// </summary>
-	[JsonConverter(typeof(PatchTransactionConverter))]
+    /// <summary>
+    /// The purpose of this class is to intercept serialization of the Transaction object. The 
+    /// canonical class Algorand.Transaction should serialize the foreignAssets property ("apas") into 
+    /// an array of UNSIGNED 64-bit integers, not SIGNED 64-bit integers.
+    /// </summary>
+    /// <remarks>
+    /// This class is deprecated and will be removed in a future release.
+    /// </remarks>
+    [Obsolete]
+    [JsonConverter(typeof(PatchTransactionConverter))]
 	public class PatchTransaction : Transaction {
 
 		public static PatchTransaction Create(Transaction transaction) {

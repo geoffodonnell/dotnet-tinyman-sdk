@@ -176,7 +176,7 @@ namespace Tinyman.V1 {
 		/// <returns>Whether or not the address is opted in</returns>
 		public virtual async Task<bool> IsOptedInAsync(Address address) {
 
-			var info = await mDefaultApi.AccountsAsync(address.EncodeAsString(), Format.Json);
+			var info = await mDefaultApi.AccountsAsync(address.EncodeAsString(), null);
 
 			foreach (var entry in info.AppsLocalState) {
 
@@ -187,7 +187,6 @@ namespace Tinyman.V1 {
 
 			return false;
 		}
-
 
 		public virtual async Task<PostTransactionsResponse> OptInAsync(
 			Account account,
@@ -230,7 +229,7 @@ namespace Tinyman.V1 {
 
 			txs.Sign(account);
 
-			return await SubmitAsync(txs, true);
+			return await SubmitAsync(txs, wait);
 		}
 
 		public virtual async Task<PostTransactionsResponse> BurnAsync(
@@ -257,6 +256,7 @@ namespace Tinyman.V1 {
 			return await SubmitAsync(txs, wait);
 		}
 
+		[Obsolete("Tinyman V1 pools are vulnerable to liquidity draining attacks; new liquidity should not be provided.")]
 		public virtual async Task<PostTransactionsResponse> MintAsync(
 			Account account,
 			Mint action,
@@ -267,6 +267,7 @@ namespace Tinyman.V1 {
 			return await MintAsync(account, action, txParams, wait);
 		}
 
+		[Obsolete("Tinyman V1 pools are vulnerable to liquidity draining attacks; new liquidity should not be provided.")]
 		public virtual async Task<PostTransactionsResponse> MintAsync(
 			Account account,
 			Mint action,

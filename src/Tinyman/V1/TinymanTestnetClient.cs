@@ -6,7 +6,7 @@ namespace Tinyman.V1 {
 	public class TinymanTestnetClient: TinymanClient {
 
 		public TinymanTestnetClient()
-			: this(Constant.AlgodMainnetHost, String.Empty) { }
+			: this(Constant.AlgodTestnetHost, String.Empty) { }
 
 		public TinymanTestnetClient(HttpClient httpClient, string url)
 			: base(httpClient, url, Constant.TestnetValidatorAppId) { }

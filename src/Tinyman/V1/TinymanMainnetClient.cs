@@ -6,7 +6,7 @@ namespace Tinyman.V1 {
 	public class TinymanMainnetClient : TinymanClient {
 
 		public TinymanMainnetClient()
-			: this (Constant.AlgodMainnetHost, String.Empty) { }
+			: this(Constant.AlgodMainnetHost, String.Empty) { }
 
 		public TinymanMainnetClient(HttpClient httpClient, string url)
 			: base(httpClient, url, Constant.MainnetValidatorAppId) { }
