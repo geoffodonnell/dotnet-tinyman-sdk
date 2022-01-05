@@ -8,8 +8,8 @@ variables:
   buildConfiguration: 'Release'
   nugetPackageId: 'Tinyman'
   majorVersion: '0'
-  minorVersion: '0'
-  patchVersion: '2'
+  minorVersion: '1'
+  patchVersion: '0'
 
 pool:
   vmImage: ubuntu-latest
