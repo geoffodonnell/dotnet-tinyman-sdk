@@ -1,5 +1,4 @@
 ﻿using Algorand;
-using Algorand.V2;
 using Algorand.V2.Algod;
 using Algorand.V2.Algod.Model;
 using System;

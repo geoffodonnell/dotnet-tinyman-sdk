@@ -1,5 +1,4 @@
-﻿using Algorand.V2;
-using System;
+﻿using System;
 using System.Net.Http;
 
 namespace Tinyman.V1 {

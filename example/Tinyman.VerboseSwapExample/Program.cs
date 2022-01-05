@@ -1,6 +1,8 @@
 ﻿using Algorand;
+using Algorand.V2;
 using System;
 using System.Configuration;
+using System.Threading.Tasks;
 using Tinyman.V1;
 using Tinyman.V1.Model;
 
@@ -8,7 +10,7 @@ namespace Tinyman.VerboseSwapExample {
 
 	class Program {
 
-		static void Main(string[] args) {
+		static async Task Main(string[] args) {
 
 			var settings = ConfigurationManager.AppSettings;
 			var mnemonic = settings.Get("Account.Mnemonic");
@@ -21,16 +23,17 @@ namespace Tinyman.VerboseSwapExample {
 
 			// Initialize the client
 			var appId = Constant.TestnetValidatorAppId;
-			var algodApi = new Algorand.V2.AlgodApi(
-				Constant.AlgodTestnetHost, String.Empty);
-			var client = new TinymanClient(algodApi, appId);
+			var url = Constant.AlgodTestnetHost;
+			var token = String.Empty;
+			var httpClient = HttpClientConfigurator.ConfigureHttpClient(url, token);
+			var client = new TinymanClient(httpClient, url, appId);
 
 			// Ensure the account is opted in
-			var isOptedIn = client.IsOptedIn(account.Address);
+			var isOptedIn = await client.IsOptedInAsync(account.Address);
 
 			if (!isOptedIn) {
 
-				var txParams = algodApi.TransactionParams();
+				var txParams = await client.FetchTransactionParamsAsync();
 
 				// Use utility method to create the transaction group
 				var optInTxGroup = TinymanTransaction
@@ -49,17 +52,17 @@ namespace Tinyman.VerboseSwapExample {
 					}
 				}
 
-				var optInResult = client.Submit(optInTxGroup);
+				var optInResult = await client.SubmitAsync(optInTxGroup);
 
 				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.TxId}");
 			}
 
 			// Get the assets
-			var tinyUsdc = client.FetchAsset(21582668);
-			var algo = client.FetchAsset(0);
+			var tinyUsdc = await client.FetchAssetAsync(21582668);
+			var algo = await client.FetchAssetAsync(0);
 
 			// Get the pool
-			var pool = client.FetchPool(algo, tinyUsdc);
+			var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 			// Get a quote to swap 1 Algo for tinyUsdc
 			var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
@@ -70,7 +73,7 @@ namespace Tinyman.VerboseSwapExample {
 			// Perform the swap
 			try {
 
-				var txParams = algodApi.TransactionParams();
+				var txParams = await client.FetchTransactionParamsAsync();
 
 				// Use utility method to create the transaction group
 				var swapTxGroup = TinymanTransaction.PrepareSwapTransactions(
@@ -95,7 +98,7 @@ namespace Tinyman.VerboseSwapExample {
 					}
 				}
 
-				var swapResult = client.Submit(swapTxGroup);
+				var swapResult = await client.SubmitAsync(swapTxGroup);
 
 				Console.WriteLine($"Swap complete, transaction ID: {swapResult.TxId}");
 

@@ -1,6 +1,8 @@
 ﻿using Algorand;
+using Algorand.V2;
 using System;
 using System.Configuration;
+using System.Threading.Tasks;
 using Tinyman.V1;
 using Tinyman.V1.Model;
 
@@ -8,7 +10,7 @@ namespace Tinyman.VerboseBurnExample {
 
 	class Program {
 
-		static void Main(string[] args) {
+		static async Task Main(string[] args) {
 
 			var settings = ConfigurationManager.AppSettings;
 			var mnemonic = settings.Get("Account.Mnemonic");
@@ -21,16 +23,17 @@ namespace Tinyman.VerboseBurnExample {
 
 			// Initialize the client
 			var appId = Constant.TestnetValidatorAppId;
-			var algodApi = new Algorand.V2.AlgodApi(
-				Constant.AlgodTestnetHost, String.Empty);
-			var client = new TinymanClient(algodApi, appId);
+			var url = Constant.AlgodTestnetHost;
+			var token = String.Empty;
+			var httpClient = HttpClientConfigurator.ConfigureHttpClient(url, token);
+			var client = new TinymanClient(httpClient, url, appId);
 
 			// Ensure the account is opted in
-			var isOptedIn = client.IsOptedIn(account.Address);
+			var isOptedIn = await client.IsOptedInAsync(account.Address);
 
 			if (!isOptedIn) {
 
-				var txParams = algodApi.TransactionParams();
+				var txParams = await client.FetchTransactionParamsAsync();
 
 				// Use utility method to create the transaction group
 				var optInTxGroup = TinymanTransaction
@@ -49,20 +52,20 @@ namespace Tinyman.VerboseBurnExample {
 					}
 				}
 
-				var optInResult = client.Submit(optInTxGroup);
+				var optInResult = await client.SubmitAsync(optInTxGroup);
 
 				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.TxId}");
 			}
 
 			// Get the assets
-			var tinyUsdc = client.FetchAsset(21582668);
-			var algo = client.FetchAsset(0);
+			var tinyUsdc = await client.FetchAssetAsync(21582668);
+			var algo = await client.FetchAssetAsync(0);
 
 			// Get the pool
-			var pool = client.FetchPool(algo, tinyUsdc);
+			var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 			// Get a quote to swap the entire liquidity pool asset balance for pooled assets
-			var amount = client.GetBalance(account.Address, pool.LiquidityAsset);
+			var amount = await client.GetBalanceAsync(account.Address, pool.LiquidityAsset);
 			var quote = pool.CalculateBurnQuote(amount, 0.05);
 
 			// Check the quote, ensure it's something that you want to execute
@@ -70,7 +73,7 @@ namespace Tinyman.VerboseBurnExample {
 			// Perform the burning
 			try {
 
-				var txParams = algodApi.TransactionParams();
+				var txParams = await client.FetchTransactionParamsAsync();
 
 				// Use utility method to create the transaction group
 				var burnTxGroup = TinymanTransaction.PrepareBurnTransactions(
@@ -95,7 +98,7 @@ namespace Tinyman.VerboseBurnExample {
 					}
 				}
 
-				var burnResult = client.Submit(burnTxGroup);
+				var burnResult = await client.SubmitAsync(burnTxGroup);
 
 				Console.WriteLine($"Burn complete, transaction ID: {burnResult.TxId}");
 

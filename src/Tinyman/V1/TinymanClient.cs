@@ -59,6 +59,15 @@ namespace Tinyman.V1 {
 		}
 
 		/// <summary>
+		/// Retrieve the current network parameters.
+		/// </summary>
+		/// <returns>Current network parameters</returns>
+		public virtual async Task<TransactionParametersResponse> FetchTransactionParamsAsync() {
+
+			return await mDefaultApi.ParamsAsync();
+		}
+
+		/// <summary>
 		/// Retrieve a pool given an asset pair.
 		/// </summary>
 		/// <param name="asset1">First asset</param>
@@ -165,7 +174,7 @@ namespace Tinyman.V1 {
 		/// </summary>
 		/// <param name="address">Address of account</param>
 		/// <returns>Whether or not the address is opted in</returns>
-		public virtual async Task<bool> IsOptedIn(Address address) {
+		public virtual async Task<bool> IsOptedInAsync(Address address) {
 
 			var info = await mDefaultApi.AccountsAsync(address.EncodeAsString(), Format.Json);
 

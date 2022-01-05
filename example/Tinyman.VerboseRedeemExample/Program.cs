@@ -1,6 +1,8 @@
 ﻿using Algorand;
+using Algorand.V2;
 using System;
 using System.Configuration;
+using System.Threading.Tasks;
 using Tinyman.V1;
 using Tinyman.V1.Model;
 
@@ -8,7 +10,7 @@ namespace Tinyman.VerboseRedeemExample {
 
 	class Program {
 
-		static void Main(string[] args) {
+		static async Task Main(string[] args) {
 
 			var settings = ConfigurationManager.AppSettings;
 			var mnemonic = settings.Get("Account.Mnemonic");
@@ -21,16 +23,17 @@ namespace Tinyman.VerboseRedeemExample {
 
 			// Initialize the client
 			var appId = Constant.TestnetValidatorAppId;
-			var algodApi = new Algorand.V2.AlgodApi(
-				Constant.AlgodTestnetHost, String.Empty);
-			var client = new TinymanClient(algodApi, appId);
+			var url = Constant.AlgodTestnetHost;
+			var token = String.Empty;
+			var httpClient = HttpClientConfigurator.ConfigureHttpClient(url, token);
+			var client = new TinymanClient(httpClient, url, appId);
 
 			// Ensure the account is opted in
-			var isOptedIn = client.IsOptedIn(account.Address);
+			var isOptedIn = await client.IsOptedInAsync(account.Address);
 
 			if (!isOptedIn) {
 
-				var txParams = algodApi.TransactionParams();
+				var txParams = await client.FetchTransactionParamsAsync();
 
 				// Use utility method to create the transaction group
 				var optInTxGroup = TinymanTransaction
@@ -49,13 +52,13 @@ namespace Tinyman.VerboseRedeemExample {
 					}
 				}
 
-				var optInResult = client.Submit(optInTxGroup);
+				var optInResult = await client.SubmitAsync(optInTxGroup);
 
 				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.TxId}");
 			}
 
 			// Fetch the amounts
-			var excessAmounts = client.FetchExcessAmounts(account.Address);
+			var excessAmounts = await client.FetchExcessAmountsAsync(account.Address);
 
 			if (excessAmounts == null || excessAmounts.Count == 0) {
 				Console.WriteLine("No excess amounts to redeem");
@@ -67,8 +70,8 @@ namespace Tinyman.VerboseRedeemExample {
 				// Redeem each amount
 				foreach (var quote in excessAmounts) {
 
-					var txParams = algodApi.TransactionParams();
-					var pool = client.FetchPool(quote.PoolAddress);
+					var txParams = await client.FetchTransactionParamsAsync();
+					var pool = await client.FetchPoolAsync(quote.PoolAddress);
 
 					// Use utility method to create the transaction group
 					var redeemTxGroup = TinymanTransaction.PrepareRedeemTransactions(
@@ -93,7 +96,7 @@ namespace Tinyman.VerboseRedeemExample {
 						}
 					}
 
-					var redeemResult = client.Submit(redeemTxGroup);
+					var redeemResult = await client.SubmitAsync(redeemTxGroup);
 
 					Console.WriteLine(
 						$"Redeemed {quote.Amount} from {quote.PoolAddress.EncodeAsString()}; transaction ID: {redeemResult.TxId}");

@@ -1,6 +1,7 @@
 ﻿using Algorand;
 using System;
 using System.Configuration;
+using System.Threading.Tasks;
 using Tinyman.V1;
 using Tinyman.V1.Action;
 
@@ -8,7 +9,7 @@ namespace Tinyman.RedeemExample {
 
 	class Program {
 
-		static void Main(string[] args) {
+		static async Task Main(string[] args) {
 
 			var settings = ConfigurationManager.AppSettings;
 			var mnemonic = settings.Get("Account.Mnemonic");
@@ -23,14 +24,14 @@ namespace Tinyman.RedeemExample {
 			var client = new TinymanTestnetClient();
 
 			// Ensure the account is opted in
-			var isOptedIn = client.IsOptedIn(account.Address);
+			var isOptedIn = await client.IsOptedInAsync(account.Address);
 
 			if (!isOptedIn) {
-				client.OptIn(account);
+				await client.OptInAsync(account);
 			}
 
 			// Fetch the amounts
-			var excessAmounts = client.FetchExcessAmounts(account.Address);
+			var excessAmounts = await client.FetchExcessAmountsAsync(account.Address);
 
 			if (excessAmounts == null || excessAmounts.Count == 0) {
 				Console.WriteLine("No excess amounts to redeem");
@@ -43,7 +44,7 @@ namespace Tinyman.RedeemExample {
 				foreach (var quote in excessAmounts) {
 
 					var action = Redeem.FromQuote(quote);
-					var result = client.Redeem(account, action);
+					var result = await client.RedeemAsync(account, action);
 
 					Console.WriteLine(
 						$"Redeemed {quote.Amount} from {quote.PoolAddress.EncodeAsString()}; transaction ID: {result.TxId}");

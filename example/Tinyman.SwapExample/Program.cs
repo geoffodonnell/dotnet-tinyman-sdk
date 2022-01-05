@@ -1,6 +1,7 @@
 ﻿using Algorand;
 using System;
 using System.Configuration;
+using System.Threading.Tasks;
 using Tinyman.V1;
 using Tinyman.V1.Action;
 using Tinyman.V1.Model;
@@ -9,7 +10,7 @@ namespace Tinyman.SwapExample {
 
 	class Program {
 
-		static void Main(string[] args) {
+		static async Task Main(string[] args) {
 
 			var settings = ConfigurationManager.AppSettings;
 			var mnemonic = settings.Get("Account.Mnemonic");
@@ -24,18 +25,18 @@ namespace Tinyman.SwapExample {
 			var client = new TinymanTestnetClient();
 
 			// Ensure the account is opted in
-			var isOptedIn = client.IsOptedIn(account.Address);
+			var isOptedIn = await client.IsOptedInAsync(account.Address);
 
 			if (!isOptedIn) {
-				client.OptIn(account);
+				await client.OptInAsync(account);
 			}
 
 			// Get the assets
-			var tinyUsdc = client.FetchAsset(21582668);
-			var algo = client.FetchAsset(0);
+			var tinyUsdc = await client.FetchAssetAsync(21582668);
+			var algo = await client.FetchAssetAsync(0);
 
 			// Get the pool
-			var pool = client.FetchPool(algo, tinyUsdc);
+			var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 			// Get a quote to swap 1 Algo for tinyUsdc
 			var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
@@ -48,7 +49,7 @@ namespace Tinyman.SwapExample {
 
 			// Perform the swap
 			try {
-				var result = client.Swap(account, action);
+				var result = await client.SwapAsync(account, action);
 
 				Console.WriteLine($"Swap complete, transaction ID: {result.TxId}");
 
