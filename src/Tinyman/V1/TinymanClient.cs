@@ -1,4 +1,5 @@
 ﻿using Algorand;
+using Algorand.Common;
 using Algorand.V2;
 using Algorand.V2.Algod;
 using Algorand.V2.Algod.Model;
@@ -25,16 +26,23 @@ namespace Tinyman.V1 {
 	/// </summary>
 	public class TinymanClient {
 
-		protected readonly DefaultApi mDefaultApi;
+		protected readonly IDefaultApi mDefaultApi;
 		protected readonly HttpClient mHttpClient;
 		protected readonly ulong mValidatorAppId;
 		protected readonly ConcurrentDictionary<ulong, Asset> mAssetCache;
 
-		public HttpClient HttpClient { get => mHttpClient; }
-
-		public DefaultApi DefaultApi { get => mDefaultApi; }
+		public IDefaultApi DefaultApi { get => mDefaultApi; }
 
 		public ulong ValidatorAppId { get => mValidatorAppId; }
+
+		public TinymanClient(
+			IDefaultApi defaultApi, ulong validatorAppId) {
+
+			mHttpClient = null;
+			mDefaultApi = defaultApi;
+			mValidatorAppId = validatorAppId;
+			mAssetCache = new ConcurrentDictionary<ulong, Asset>();
+		}
 
 		public TinymanClient(
 			HttpClient httpClient, string url, ulong validatorAppId) {
@@ -120,7 +128,8 @@ namespace Tinyman.V1 {
 		public virtual async Task<PostTransactionsResponse> SubmitAsync(
 			TransactionGroup transactionGroup, bool wait = true) {
 
-			return await transactionGroup.SubmitAsync(mDefaultApi, wait);
+			return await mDefaultApi
+				.SubmitTransactionGroupAsync(transactionGroup, wait);
 		}
 
 		/// <summary>

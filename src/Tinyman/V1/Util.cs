@@ -1,4 +1,6 @@
-﻿using Algorand.V2.Algod;
+﻿using Algorand.Common;
+using Algorand.Common.Asc;
+using Algorand.V2.Algod;
 using Algorand.V2.Algod.Model;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
@@ -9,7 +11,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Tinyman.V1.Asc;
 using Account = Algorand.Account;
 using SignedTransaction = Algorand.SignedTransaction;
 using Transaction = Algorand.Transaction;
@@ -106,17 +107,10 @@ namespace Tinyman.V1 {
             var response = await client.TransactionsAsync(payload);
 
 			if (wait) {
-                await WaitForConfirmation(client, response.TxId);
+                await client.WaitForTransactionToComplete(response.TxId);
             }
 
             return response;
-        }
-
-        public static async Task<PendingTransactionResponse> WaitForConfirmation(
-            DefaultApi client,
-            string txId) {
-
-            return await Algorand.Utils.WaitTransactionToComplete(client, txId);
         }
 
         public static byte[] IntToBytes(ulong value) {

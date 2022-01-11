@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Algorand.V2.Algod;
+using System;
 using System.Net.Http;
 
 namespace Tinyman.V1 {
@@ -7,6 +8,9 @@ namespace Tinyman.V1 {
 
 		public TinymanTestnetClient()
 			: this(Constant.AlgodTestnetHost, String.Empty) { }
+
+		public TinymanTestnetClient(IDefaultApi defaultApi)
+			: base(defaultApi, Constant.TestnetValidatorAppId) { }
 
 		public TinymanTestnetClient(HttpClient httpClient, string url)
 			: base(httpClient, url, Constant.TestnetValidatorAppId) { }

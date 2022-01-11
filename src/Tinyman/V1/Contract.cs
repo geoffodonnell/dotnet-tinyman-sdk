@@ -1,80 +1,83 @@
 ﻿using Algorand;
+using Algorand.Common.Asc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Tinyman.V1.Asc;
 
 namespace Tinyman.V1 {
 
 	public static class Contract {
 
-		private const string mResourceFileName = "Tinyman.V1.asc.json";
+		private const string mResourceFileNameV1_0 = "Tinyman.V1.asc.v1_0.json";
+		private const string mResourceFileNameV1_1 = "Tinyman.V1.asc.v1_1.json";
 		private const string mPoolLogicSigName = "pool_logicsig";
 		private const string mValidatorAppName = "validator_app";
 		private const string mResourceFileLoadErrorFormat =
 			"An error occured while loading the embedded resource file: '{0}'";
 
-		private static ContractCollection mContracts;
-		private static LogicSigContract mPoolLogicSigDef;
-		private static AppContract mValidatorAppDef;
+		private static LogicSigContract mPoolLogicSigDefV1_0;
+		private static LogicSigContract mPoolLogicSigDefV1_1;
 
 		private static readonly object mLock = new object();
+		private static bool mIsInitialized;
 
-		public static byte[] ValidatorAppApprovalProgramBytes {
-			get {
-
-				Initialize();
-
-				return Util.GetProgram(mValidatorAppDef.ApprovalProgram, null);
-			}
+		static Contract() {
+			mIsInitialized = false;
 		}
 
-		public static byte[] ValidatorAppClearProgramBytes {
-			get {
-				Initialize();
-				
-				return Util.GetProgram(mValidatorAppDef.ClearProgram, null);
-			}
+		public static string GetPoolAddress(
+			ulong validatorAppId, ulong assetIdA, ulong assetIdB) {
+
+			var lsig = GetPoolLogicsigSignature(
+				validatorAppId, assetIdA, assetIdB);
+
+			return lsig?.Address?.EncodeAsString();
 		}
 
 		public static LogicsigSignature GetPoolLogicsigSignature(
-			ulong validatorAppId, ulong assetIdA, ulong assetIdB, bool usePatch = true) {
+			ulong validatorAppId, ulong assetIdA, ulong assetIdB) {
 
 			Initialize();
 
+			var logic = default(ProgramLogic);
 			var assetIdMax = Math.Max(assetIdA, assetIdB);
 			var assetIdMin = Math.Min(assetIdA, assetIdB);
+			
+			if (validatorAppId == Constant.MainnetValidatorAppIdV1_0 ||
+				validatorAppId == Constant.TestnetValidatorAppIdV1_0) {
 
-			var bytes = Util.GetProgram(mPoolLogicSigDef.Logic, new Dictionary<string, object> {
+				logic = mPoolLogicSigDefV1_0.Logic;
+			} else {
+				logic = mPoolLogicSigDefV1_1.Logic;
+			}
+
+			var bytes = Util.GetProgram(logic, new Dictionary<string, object> {
 				{ "validator_app_id", validatorAppId },
 				{ "asset_id_1", assetIdMax },
 				{ "asset_id_2", assetIdMin }
 			});
 
-			return GetLogicsigSignature(bytes, usePatch);
+			return GetLogicsigSignature(bytes);
 		}
 
 		private static void Initialize() {
 
-			if (mContracts != null) {
+			if (mIsInitialized) {
 				return;
 			}
 
 			lock (mLock) {
-				if (mContracts == null) {
+				if (!mIsInitialized) {
 					LoadContractsFromResource();
+					mIsInitialized = true;
 				}
 			}
 		}
 
-		private static LogicsigSignature GetLogicsigSignature(byte[] bytes, bool usePatch) {
+		private static LogicsigSignature GetLogicsigSignature(byte[] bytes) {
 
 			if (TryCreateLogicsigSignature(bytes, out var result, out var exception)) {
-				return result;
-			}
-
-			if (usePatch && TryCreateLogicsigSignatureWithPatch(bytes, out result, out exception)) {
 				return result;
 			}
 
@@ -100,56 +103,39 @@ namespace Tinyman.V1 {
 			}
 		}
 
-		private static bool TryCreateLogicsigSignatureWithPatch(
-			byte[] bytes, out LogicsigSignature result, out Exception exception) {
+		private static void LoadContractsFromResource() {
 
-			try {
-
-				result = new LogicsigSignature {
-					logic = bytes
-				};
-
-				Patch.Logic.CheckProgram(bytes, null);
-
-				exception = null;
-
-				return true;
-
-			} catch (Exception ex) {
-
-				result = null;
-				exception = ex;
-
-				return false;
-			}
+			mPoolLogicSigDefV1_0 = LoadPoolLogicSig(mResourceFileNameV1_0);
+			mPoolLogicSigDefV1_1 = LoadPoolLogicSig(mResourceFileNameV1_1);
 		}
 
-		private static void LoadContractsFromResource() {
+		private static LogicSigContract LoadPoolLogicSig(string fileName) {
 
 			var assembly = typeof(Contract).Assembly;
 			var serializer = JsonSerializer.CreateDefault();
 
-			var stream = assembly.GetManifestResourceStream(mResourceFileName);
+			var stream = assembly.GetManifestResourceStream(fileName);
 
 			if (stream == null) {
 				throw new Exception(
-					String.Format(mResourceFileLoadErrorFormat, mResourceFileName));
-			}			
-			
+					String.Format(mResourceFileLoadErrorFormat, fileName));
+			}
+
+			ContractCollection contracts = null;
+
 			try {
 				using (var reader = new StreamReader(stream))
 				using (var json = new JsonTextReader(reader)) {
-					mContracts = serializer.Deserialize<ContractCollection>(json);
+					contracts = serializer.Deserialize<ContractCollection>(json);
 				}
 			} catch (Exception ex) {
 				throw new Exception(
-					String.Format(mResourceFileLoadErrorFormat, mResourceFileName), ex);
+					String.Format(mResourceFileLoadErrorFormat, fileName), ex);
 			}
 
 			stream.Dispose();
 
-			mPoolLogicSigDef = mContracts.Contracts[mPoolLogicSigName] as LogicSigContract;
-			mValidatorAppDef = mContracts.Contracts[mValidatorAppName] as AppContract;
+			return contracts.Contracts[mPoolLogicSigName] as LogicSigContract;
 		}
 
 	}

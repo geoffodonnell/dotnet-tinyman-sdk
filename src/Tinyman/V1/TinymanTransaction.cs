@@ -1,4 +1,5 @@
 ﻿using Algorand;
+using Algorand.Common;
 using Algorand.V2.Algod.Model;
 using Algorand.V2.Indexer.Model;
 using Org.BouncyCastle.Utilities;
@@ -113,12 +114,24 @@ namespace Tinyman.V1 {
 
 			transactions.Add(appOptinTx);
 
+			var name = String.Empty;
+			var unitName = String.Empty;
+
+			if (validatorAppId == Constant.TestnetValidatorAppIdV1_0 ||
+				validatorAppId == Constant.MainnetValidatorAppIdV1_0) {
+				unitName = "TM1POOL";
+				name = $"Tinyman Pool {asset1.UnitName}-{asset2.UnitName}";
+			} else {
+				unitName = "TM1POOL11";
+				name = $"TinymanPool1.1 {asset1.UnitName}-{asset2.UnitName}";
+			}
+
 			transactions.Add(Algorand.Utils.GetCreateAssetTransaction(new AssetParams() {
 				Creator = poolAddress.EncodeAsString(),
 				Total = 0xFFFFFFFFFFFFFFFF,
 				Decimals = 6,
-				UnitName = "TM1POOL",
-				Name = $"Tinyman Pool {asset1.UnitName}-{asset2.UnitName}",
+				UnitName = unitName,
+				Name = name,
 				Url = "https://tinyman.org",
 				DefaultFrozen = false
 			}, txParams));

@@ -4,9 +4,15 @@
 
 		public const string AlgodTestnetHost = "https://api.testnet.algoexplorer.io";
 		public const string AlgodMainnetHost = "https://api.algoexplorer.io";
-		
-		public const ulong TestnetValidatorAppId = 21580889;
-		public const ulong MainnetValidatorAppId = 350338509;
+
+		public const ulong TestnetValidatorAppIdV1_0 = 21580889;
+		public const ulong TestnetValidatorAppIdV1_1 = 57743973;
+
+		public const ulong MainnetValidatorAppIdV1_0 = 350338509;
+		public const ulong MainnetValidatorAppIdV1_1 = 0;
+
+		public const ulong TestnetValidatorAppId = TestnetValidatorAppIdV1_1;
+		public const ulong MainnetValidatorAppId = MainnetValidatorAppIdV1_1;
 
 		public const ulong BurnFee = 3000;
 		public const ulong MintFee = 2000;
