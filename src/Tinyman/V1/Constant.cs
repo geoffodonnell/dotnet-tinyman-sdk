@@ -6,7 +6,7 @@
 		public const string AlgodMainnetHost = "https://api.algoexplorer.io";
 
 		public const ulong TestnetValidatorAppIdV1_0 = 21580889;
-		public const ulong TestnetValidatorAppIdV1_1 = 57743973;
+		public const ulong TestnetValidatorAppIdV1_1 = 62368684;
 
 		public const ulong MainnetValidatorAppIdV1_0 = 350338509;
 		public const ulong MainnetValidatorAppIdV1_1 = 0;

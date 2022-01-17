@@ -265,7 +265,6 @@ namespace Tinyman.V1 {
 			return await SubmitAsync(txs, wait);
 		}
 
-		[Obsolete("Tinyman V1 pools are vulnerable to liquidity draining attacks; new liquidity should not be provided.")]
 		public virtual async Task<PostTransactionsResponse> MintAsync(
 			Account account,
 			Mint action,
@@ -276,7 +275,6 @@ namespace Tinyman.V1 {
 			return await MintAsync(account, action, txParams, wait);
 		}
 
-		[Obsolete("Tinyman V1 pools are vulnerable to liquidity draining attacks; new liquidity should not be provided.")]
 		public virtual async Task<PostTransactionsResponse> MintAsync(
 			Account account,
 			Mint action,

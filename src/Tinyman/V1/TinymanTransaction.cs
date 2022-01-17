@@ -24,7 +24,7 @@ namespace Tinyman.V1 {
 		/// <param name="validatorAppId">Tinyman application ID</param>
 		/// <param name="sender">Account address</param>
 		/// <param name="txParams">Network parameters</param>
-		/// <returns></returns>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareAppOptinTransactions(
 			ulong validatorAppId, Address sender, TransactionParametersResponse txParams) {
 
@@ -40,7 +40,7 @@ namespace Tinyman.V1 {
 		/// <param name="validatorAppId">Tinyman application ID</param>
 		/// <param name="sender">Account address</param>
 		/// <param name="txParams">Network parameters</param>
-		/// <returns></returns>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareAppOptoutTransactions(
 			ulong validatorAppId, Address sender, TransactionParametersResponse txParams) {
 
@@ -56,7 +56,7 @@ namespace Tinyman.V1 {
 		/// <param name="assetId">Asset ID</param>
 		/// <param name="sender">Account address</param>
 		/// <param name="txParams">Network parameters</param>
-		/// <returns></returns>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareAssetOptinTransactions(
 			ulong assetId, Address sender, TransactionParametersResponse txParams) {
 
