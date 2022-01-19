@@ -97,8 +97,18 @@ namespace Tinyman.V1 {
 		/// <returns>The pool</returns>
 		public virtual async Task<Pool> FetchPoolAsync(Address poolAddress) {
 
+			return await FetchPoolAsync(poolAddress.EncodeAsString());
+		}
+
+		/// <summary>
+		/// Retrieve a pool given the pool address.
+		/// </summary>
+		/// <param name="poolAddress">The pool address</param>
+		/// <returns>The pool</returns>
+		public virtual async Task<Pool> FetchPoolAsync(string poolAddress) {
+
 			var accountInfo = await mDefaultApi
-				.AccountsAsync(poolAddress.EncodeAsString(), Format.Json);
+				.AccountsAsync(poolAddress, Format.Json);
 
 			return await CreatePoolFromAccountInfoAsync(accountInfo);
 		}
