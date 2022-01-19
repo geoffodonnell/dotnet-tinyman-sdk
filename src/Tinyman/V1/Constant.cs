@@ -9,7 +9,7 @@
 		public const ulong TestnetValidatorAppIdV1_1 = 62368684;
 
 		public const ulong MainnetValidatorAppIdV1_0 = 350338509;
-		public const ulong MainnetValidatorAppIdV1_1 = 0;
+		public const ulong MainnetValidatorAppIdV1_1 = 552635992;
 
 		public const ulong TestnetValidatorAppId = TestnetValidatorAppIdV1_1;
 		public const ulong MainnetValidatorAppId = MainnetValidatorAppIdV1_1;

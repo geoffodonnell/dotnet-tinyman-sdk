@@ -122,7 +122,7 @@ namespace Tinyman.V1 {
 				unitName = "TM1POOL";
 				name = $"Tinyman Pool {asset1.UnitName}-{asset2.UnitName}";
 			} else {
-				unitName = "TM1POOL11";
+				unitName = "TMPOOL11";
 				name = $"TinymanPool1.1 {asset1.UnitName}-{asset2.UnitName}";
 			}
 
