@@ -83,8 +83,7 @@ namespace Tinyman.V1 {
 		/// <returns>The pool</returns>
 		public virtual async Task<Pool> FetchPoolAsync(Asset asset1, Asset asset2) {
 
-			var poolLogicSig = Contract.GetPoolLogicsigSignature(mValidatorAppId, asset1.Id, asset2.Id);
-			var poolAddress = poolLogicSig.Address.EncodeAsString();
+			var poolAddress = Contract.GetPoolAddress(mValidatorAppId, asset1.Id, asset2.Id);
 			var accountInfo = await mDefaultApi.AccountsAsync(poolAddress, Format.Json);
 
 			return await CreatePoolFromAccountInfoAsync(accountInfo, asset1, asset2);
@@ -549,11 +548,10 @@ namespace Tinyman.V1 {
 			var asset1Id = Util.GetStateInt(validatorAppState, "a1");
 			var asset2Id = Util.GetStateInt(validatorAppState, "a2");
 
-			var poolLogicSig = Contract.GetPoolLogicsigSignature(
+			var poolAddress = Contract.GetPoolAddress(
 				validatorAppId.GetValueOrDefault(),
 				asset1Id.GetValueOrDefault(),
 				asset2Id.GetValueOrDefault());
-			var poolAddress = poolLogicSig.Address.ToString();
 
 			var asset1Reserves = Util.GetStateInt(validatorAppState, "s1");
 			var asset2Reserves = Util.GetStateInt(validatorAppState, "s2");

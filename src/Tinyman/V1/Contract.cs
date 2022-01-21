@@ -20,30 +20,76 @@ namespace Tinyman.V1 {
 		private static LogicSigContract mPoolLogicSigDefV1_1;
 
 		private static readonly object mLock = new object();
+		private static readonly Dictionary<string, string> mPoolAddressCache
+			= new Dictionary<string, string>();
 		private static bool mIsInitialized;
 
 		static Contract() {
 			mIsInitialized = false;
 		}
 
+		/// <summary>
+		/// Get a pool address
+		/// </summary>
+		/// <param name="validatorAppId">Validator application ID</param>
+		/// <param name="assetIdA">Asset A ID</param>
+		/// <param name="assetIdB">Asset B ID</param>
+		/// <returns>Pool address</returns>
+		/// <remarks>Pool addresses are internally cached. Call <see cref="ClearPoolAddressCache"/> to empty the cache.</remarks>
 		public static string GetPoolAddress(
 			ulong validatorAppId, ulong assetIdA, ulong assetIdB) {
 
-			var lsig = GetPoolLogicsigSignature(
-				validatorAppId, assetIdA, assetIdB);
+			var assetIdMax = Math.Max(assetIdA, assetIdB);
+			var assetIdMin = Math.Min(assetIdA, assetIdB);
+			var key = $"{validatorAppId}-{assetIdMax}-{assetIdMin}";
 
-			return lsig?.Address?.EncodeAsString();
+			if (mPoolAddressCache.TryGetValue(key, out var result)) {
+				return result;
+			}
+
+			Initialize();
+
+			var lsig = GetPoolLogicsigSignatureUnchecked(
+				validatorAppId, assetIdMax, assetIdMin);
+
+			result = lsig?.Address?.EncodeAsString();
+
+			mPoolAddressCache[key] = result;
+
+			return result;
 		}
 
+		/// <summary>
+		/// Get a pool logicsig signature
+		/// </summary>
+		/// <param name="validatorAppId">Validator application ID</param>
+		/// <param name="assetIdA">Asset A ID</param>
+		/// <param name="assetIdB">Asset B ID</param>
+		/// <returns>Pool logicsig signature</returns>
+		/// <remarks>Pool logicsig signatures are NOT internally cached.</remarks>
 		public static LogicsigSignature GetPoolLogicsigSignature(
 			ulong validatorAppId, ulong assetIdA, ulong assetIdB) {
 
 			Initialize();
 
-			var logic = default(ProgramLogic);
 			var assetIdMax = Math.Max(assetIdA, assetIdB);
 			var assetIdMin = Math.Min(assetIdA, assetIdB);
-			
+
+			return GetPoolLogicsigSignatureUnchecked(validatorAppId, assetIdMax, assetIdMin);
+		}
+
+		/// <summary>
+		/// Clear the pool address cache.
+		/// </summary>
+		public static void ClearPoolDataCache() {
+			mPoolAddressCache.Clear();
+		}
+
+		private static LogicsigSignature GetPoolLogicsigSignatureUnchecked(
+			ulong validatorAppId, ulong assetIdMax, ulong assetIdMin) {
+
+			var logic = default(ProgramLogic);
+
 			if (validatorAppId == Constant.MainnetValidatorAppIdV1_0 ||
 				validatorAppId == Constant.TestnetValidatorAppIdV1_0) {
 
