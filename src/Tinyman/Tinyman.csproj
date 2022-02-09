@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <PackageReference Include="Algorand" Version="0.2.1" />
-    <PackageReference Include="Algorand.Common" Version="0.0.0.1" />
+    <PackageReference Include="Algorand.Common" Version="0.0.0.2" />
     <PackageReference Include="BouncyCastle.NetCore" Version="1.8.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Memory" Version="4.5.4" />

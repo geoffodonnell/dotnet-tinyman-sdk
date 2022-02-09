@@ -509,6 +509,87 @@ namespace Tinyman.V1 {
 			return result;
 		}
 
+		/// <summary>
+		/// Redeem pool fees
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="asset1">Asset 1</param>
+		/// <param name="asset2">Asset 2</param>
+		/// <param name="assetLiquidity">Pool liquidity asset</param>
+		/// <param name="assetAmount">Asset amount to redeem</param>
+		/// <param name="creator">Creator</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns>Transaction group to execute action</returns>
+		public static TransactionGroup PrepareRedeemFeesTransactions(
+			ulong validatorAppId,
+			Asset asset1,
+			Asset asset2,
+			Asset assetLiquidity,
+			AssetAmount assetAmount,
+			Address creator,
+			Address sender,
+			TransactionParametersResponse txParams) {
+
+			if (assetLiquidity.Id != assetAmount.Asset.Id) {
+				throw new Exception("Amount to redeem must be liquidity pool asset.");
+			}
+
+			var poolLogicSig = Contract.GetPoolLogicsigSignature(
+				validatorAppId, asset1.Id, asset2.Id);
+			var poolAddress = poolLogicSig.Address;
+
+			var transactions = new List<Transaction>();	
+
+			// PaymentTxn
+			transactions.Add(Algorand.Utils.GetPaymentTransaction(
+					sender,
+					poolAddress,
+					Constant.RedeemFeesFee,
+					"fee",
+					txParams));
+
+			// ApplicationNoOpTxn
+			var callTx = Algorand.Utils.GetApplicationCallTransaction(
+				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
+
+			callTx.onCompletion = OnCompletion.Noop;
+			callTx.applicationArgs = new List<byte[]> {
+				Strings.ToUtf8ByteArray("fees")
+			};
+			callTx.foreignAssets = new List<ulong> {
+				asset1.Id
+			};
+
+			if (asset2.Id != 0) {
+				callTx.foreignAssets.Add(asset2.Id);
+			}
+
+			callTx.foreignAssets.Add(assetLiquidity.Id);
+
+			transactions.Add(callTx);
+
+			// AssetTransferTxn - Receive from pool
+			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+				poolAddress,
+				creator,
+				assetAmount.Asset.Id,
+				assetAmount.Amount,
+				txParams));
+
+			foreach (var tx in transactions) {
+				if (String.IsNullOrWhiteSpace(tx.genesisID)) {
+					tx.genesisID = txParams.GenesisId;
+				}
+			}
+
+			var result = new TransactionGroup(transactions);
+
+			result.SignWithLogicSig(poolLogicSig);
+
+			return result;
+		}
+
 	}
 
 }

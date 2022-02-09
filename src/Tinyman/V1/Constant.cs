@@ -17,6 +17,7 @@
 		public const ulong BurnFee = 3000;
 		public const ulong MintFee = 2000;
 		public const ulong RedeemFee = 2000;
+		public const ulong RedeemFeesFee = 2000;
 		public const ulong SwapFee = 2000;
 
 	}

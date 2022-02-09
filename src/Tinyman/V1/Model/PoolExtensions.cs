@@ -180,7 +180,7 @@ namespace Tinyman.V1.Model {
 			// Pool exists does not contain assets
 			} else {
 
-				if (amount1 != amount2) {
+				if (amount1 == null || amount2 == null) {
 					throw new Exception("Amounts required for both assets for first mint!");
 				}
 
