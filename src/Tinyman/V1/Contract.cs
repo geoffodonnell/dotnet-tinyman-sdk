@@ -35,7 +35,7 @@ namespace Tinyman.V1 {
 		/// <param name="assetIdA">Asset A ID</param>
 		/// <param name="assetIdB">Asset B ID</param>
 		/// <returns>Pool address</returns>
-		/// <remarks>Pool addresses are internally cached. Call <see cref="ClearPoolAddressCache"/> to empty the cache.</remarks>
+		/// <remarks>Pool addresses are internally cached. Call <see cref="ClearPoolDataCache"/> to empty the cache.</remarks>
 		public static string GetPoolAddress(
 			ulong validatorAppId, ulong assetIdA, ulong assetIdB) {
 
