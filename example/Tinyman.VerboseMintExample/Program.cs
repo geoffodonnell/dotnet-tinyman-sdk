@@ -13,7 +13,7 @@ namespace Tinyman.VerboseMintExample {
 		static async Task Main(string[] args) {
 
 			var settings = ConfigurationManager.AppSettings;
-			var mnemonic = settings.Get("Account.Mnemonic");
+			var mnemonic = settings.Get("Account.Mnemonic")?.Replace(",", "");
 
 			if (String.IsNullOrWhiteSpace(mnemonic)) {
 				throw new Exception("'Account.Mnemonic' key is not set in App.Config.");

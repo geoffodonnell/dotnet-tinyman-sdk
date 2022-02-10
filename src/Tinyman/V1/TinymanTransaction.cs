@@ -6,6 +6,7 @@ using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Tinyman.V1.Model;
 using Asset = Tinyman.V1.Model.Asset;
 using AssetParams = Algorand.V2.Algod.Model.AssetParams;
@@ -126,6 +127,9 @@ namespace Tinyman.V1 {
 				name = $"TinymanPool1.1 {asset1.UnitName}-{asset2.UnitName}";
 			}
 
+			var metadataHash = Encoding.UTF8.GetBytes(
+				Algorand.Utils.GetRandomAssetMetaHash()).Take(32).ToArray();
+
 			transactions.Add(Algorand.Utils.GetCreateAssetTransaction(new AssetParams() {
 				Creator = poolAddress.EncodeAsString(),
 				Total = 0xFFFFFFFFFFFFFFFF,
@@ -133,7 +137,8 @@ namespace Tinyman.V1 {
 				UnitName = unitName,
 				Name = name,
 				Url = "https://tinyman.org",
-				DefaultFrozen = false
+				DefaultFrozen = false,
+				MetadataHash = metadataHash
 			}, txParams));
 
 			transactions.Add(

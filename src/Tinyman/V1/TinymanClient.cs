@@ -349,7 +349,6 @@ namespace Tinyman.V1 {
 		/// <summary>
 		/// Convenience method for retreiving an asset balance for an account 
 		/// </summary>
-		/// <param name="client">Tinyman V1 client</param>
 		/// <param name="address">Account address</param>
 		/// <param name="asset">Asset</param>
 		/// <returns>Asset amount</returns>

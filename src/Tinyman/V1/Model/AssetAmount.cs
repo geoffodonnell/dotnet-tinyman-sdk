@@ -8,9 +8,9 @@ namespace Tinyman.V1.Model {
 		private static string AssetMismatchMessage =
 			"AssetAmount arithmetic operators are only valid for matching Assets.";
 
-		public virtual Asset Asset { get; internal set; }
+		public virtual Asset Asset { get; set; }
 
-		public virtual ulong Amount { get; internal set; }
+		public virtual ulong Amount { get; set; }
 
 		public AssetAmount() { }
 
