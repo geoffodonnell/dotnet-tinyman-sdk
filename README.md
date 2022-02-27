@@ -8,7 +8,7 @@ This library provides access to the [Tinyman AMM](https://docs.tinyman.org/) on 
 
 ## Known Issues
 
-### :exclamation: High Severity :exclamation:
+### High Severity
 * The V1 pools should NOT be used as they are vulnerable to a liquidity draining attack.
 	* See the announcement [here](https://tinymanorg.medium.com/official-announcement-about-the-incidents-of-01-01-2022-56abb19d8b19) for more information.
 
@@ -24,6 +24,14 @@ PM> Install-Package -Id Tinyman
 ```
 dotnet add package Tinyman
 ```
+
+# Getting Started
+Other than initializing a client instance, no specific setup is required. However, if your application generates a high volume of requests it is suggested that you setup your own Algod node. See the links below for more information:
+* [Algorand node on Linux/Mac](https://developer.algorand.org/docs/run-a-node/setup/install/)
+* [Algorand node on Windows](https://github.com/randlabs/algorand-windows-node)
+
+## Notes
+Default clients connect to Algod nodes maintained by [AlgoNode.io](https://algonode.io/) (Thanks AlgoNode!). It's important that your application handle rate limiting (HTTP 429) responses by decreasing the frequency of requests. See [this guide](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/implement-http-call-retries-exponential-backoff-polly) for a discussion on the topic.
 
 # Usage
 

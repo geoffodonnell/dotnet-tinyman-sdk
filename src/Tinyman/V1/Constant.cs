@@ -2,8 +2,8 @@
 
 	public static class Constant {
 
-		public const string AlgodTestnetHost = "https://api.testnet.algoexplorer.io";
-		public const string AlgodMainnetHost = "https://api.algoexplorer.io";
+		public const string AlgodTestnetHost = "https://testnet-api.algonode.cloud";
+		public const string AlgodMainnetHost = "https://mainnet-api.algonode.cloud";
 
 		public const ulong TestnetValidatorAppIdV1_0 = 21580889;
 		public const ulong TestnetValidatorAppIdV1_1 = 62368684;
