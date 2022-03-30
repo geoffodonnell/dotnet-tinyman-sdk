@@ -9,17 +9,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman", "..\src\Tinyman\T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman.VerboseSwapExample", "Tinyman.VerboseSwapExample\Tinyman.VerboseSwapExample.csproj", "{006C80E4-D1B1-4D45-ACF4-E175B3EE2C5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.MintExample", "Tinyman.MintExample\Tinyman.MintExample.csproj", "{0470A400-E555-442E-A675-205BF863E6B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman.MintExample", "Tinyman.MintExample\Tinyman.MintExample.csproj", "{0470A400-E555-442E-A675-205BF863E6B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.VerboseMintExample", "Tinyman.VerboseMintExample\Tinyman.VerboseMintExample.csproj", "{2ABBF249-8824-46D7-8BE1-B1751691D5EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman.VerboseMintExample", "Tinyman.VerboseMintExample\Tinyman.VerboseMintExample.csproj", "{2ABBF249-8824-46D7-8BE1-B1751691D5EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.BurnExample", "Tinyman.BurnExample\Tinyman.BurnExample.csproj", "{171452C5-3686-4550-BF19-F6E9DF2DE25D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman.BurnExample", "Tinyman.BurnExample\Tinyman.BurnExample.csproj", "{171452C5-3686-4550-BF19-F6E9DF2DE25D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.VerboseBurnExample", "Tinyman.VerboseBurnExample\Tinyman.VerboseBurnExample.csproj", "{FD0CDFE1-3A97-4B83-B567-DF07668E128E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman.VerboseBurnExample", "Tinyman.VerboseBurnExample\Tinyman.VerboseBurnExample.csproj", "{FD0CDFE1-3A97-4B83-B567-DF07668E128E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.RedeemExample", "Tinyman.RedeemExample\Tinyman.RedeemExample.csproj", "{61C5946C-BC2F-4B80-BAB5-3267E81081A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman.RedeemExample", "Tinyman.RedeemExample\Tinyman.RedeemExample.csproj", "{61C5946C-BC2F-4B80-BAB5-3267E81081A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tinyman.VerboseRedeemExample", "Tinyman.VerboseRedeemExample\Tinyman.VerboseRedeemExample.csproj", "{03E67F3C-F86D-4F51-AEF2-6014C7C39A09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tinyman.VerboseRedeemExample", "Tinyman.VerboseRedeemExample\Tinyman.VerboseRedeemExample.csproj", "{03E67F3C-F86D-4F51-AEF2-6014C7C39A09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

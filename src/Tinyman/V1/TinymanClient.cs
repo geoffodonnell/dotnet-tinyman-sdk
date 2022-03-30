@@ -48,9 +48,7 @@ namespace Tinyman.V1 {
 			HttpClient httpClient, string url, ulong validatorAppId) {
 
 			mHttpClient = httpClient;
-			mDefaultApi = new DefaultApi(mHttpClient) {
-				BaseUrl = url
-			};
+			mDefaultApi = new DefaultApi(mHttpClient);
 			mValidatorAppId = validatorAppId;
 			mAssetCache = new ConcurrentDictionary<ulong, Asset>();
 		}
@@ -59,9 +57,7 @@ namespace Tinyman.V1 {
 			string url, string token, ulong validatorAppId) {
 
 			mHttpClient = HttpClientConfigurator.ConfigureHttpClient(url, token);
-			mDefaultApi = new DefaultApi(mHttpClient) {
-				BaseUrl = url
-			};
+			mDefaultApi = new DefaultApi(mHttpClient);
 			mValidatorAppId = validatorAppId;
 			mAssetCache = new ConcurrentDictionary<ulong, Asset>();
 		}
@@ -624,7 +620,7 @@ namespace Tinyman.V1 {
 				Id = (ulong)asset.Index,
 				Name = asset.Params.Name,
 				UnitName = asset.Params.UnitName,
-				Decimals = asset.Params.Decimals
+				Decimals = (int)asset.Params.Decimals
 			};
 		}
 
