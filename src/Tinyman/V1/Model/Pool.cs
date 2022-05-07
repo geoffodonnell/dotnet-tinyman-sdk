@@ -2,39 +2,41 @@
 
 	public class Pool {
 
-		public virtual bool Exists { get; internal set; }
+		public virtual bool Exists { get; set; }
 
-		public virtual string Address { get; internal set; }
+		public virtual string Address { get; set; }
 
-		public virtual Asset Asset1 { get; internal set; }
+		public virtual Asset Asset1 { get; set; }
 
-		public virtual Asset Asset2 { get; internal set; }
+		public virtual Asset Asset2 { get; set; }
 
-		public virtual Asset LiquidityAsset { get; internal set; }
+		public virtual Asset LiquidityAsset { get; set; }
 
-		public virtual ulong Asset1Reserves { get; internal set;  }
+		public virtual ulong Asset1Reserves { get; set;  }
 
-		public virtual ulong Asset2Reserves { get; internal set; }
+		public virtual ulong Asset2Reserves { get; set; }
 
-		public virtual ulong IssuedLiquidity { get; internal set; }
+		public virtual ulong IssuedLiquidity { get; set; }
 
-		public virtual ulong UnclaimedProtocolFees { get; internal set; }
+		public virtual ulong UnclaimedProtocolFees { get; set; }
 
-		public virtual ulong OutstandingAsset1Amount { get; internal set; }
+		public virtual ulong OutstandingAsset1Amount { get; set; }
 
-		public virtual ulong OutstandingAsset2Amount { get; internal set; }
+		public virtual ulong OutstandingAsset2Amount { get; set; }
 
-		public virtual ulong OutstandingLiquidityAssetAmount { get; internal set; }
+		public virtual ulong OutstandingLiquidityAssetAmount { get; set; }
 
-		public virtual ulong ValidatorAppId { get; internal set; }
+		public virtual ulong ValidatorAppId { get; set; }
 
-		public virtual ulong AlgoBalance { get; internal set; }
+		public virtual ulong AlgoBalance { get; set; }
 
-		public virtual ulong Round { get; internal set; }
+		public virtual ulong Round { get; set; }
 
 		public virtual ulong Asset1Price { get => Asset2Reserves / Asset1Reserves; }
 
 		public virtual ulong Asset2Price { get => Asset1Reserves / Asset2Reserves; }
+
+		public Pool() { }
 
 		internal Pool(Asset asset1, Asset asset2) {
 		
