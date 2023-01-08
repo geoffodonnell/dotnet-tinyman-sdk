@@ -136,7 +136,7 @@ namespace Tinyman.V1 {
 			try {
 
 				result = new LogicsigSignature() { 
-					logic = bytes
+					Logic = bytes
 				};
 				exception = null;
 

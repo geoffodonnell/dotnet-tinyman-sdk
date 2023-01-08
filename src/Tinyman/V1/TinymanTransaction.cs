@@ -1,7 +1,7 @@
 ﻿using Algorand;
+using Algorand.Algod.Model;
+using Algorand.Algod.Model.Transactions;
 using Algorand.Common;
-using Algorand.V2.Algod.Model;
-using Algorand.V2.Indexer.Model;
 using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
@@ -9,8 +9,6 @@ using System.Linq;
 using System.Text;
 using Tinyman.V1.Model;
 using Asset = Tinyman.V1.Model.Asset;
-using AssetParams = Algorand.V2.Algod.Model.AssetParams;
-using Transaction = Algorand.Transaction;
 
 namespace Tinyman.V1 {
 
@@ -29,7 +27,7 @@ namespace Tinyman.V1 {
 		public static TransactionGroup PrepareAppOptinTransactions(
 			ulong validatorAppId, Address sender, TransactionParametersResponse txParams) {
 
-			var transaction = Algorand.Utils.GetApplicationOptinTransaction(
+			var transaction = TxnFactory.AppOptIn(
 				sender, Convert.ToUInt64(validatorAppId), txParams);
 
 			return new TransactionGroup(new[] { transaction });
@@ -45,8 +43,8 @@ namespace Tinyman.V1 {
 		public static TransactionGroup PrepareAppOptoutTransactions(
 			ulong validatorAppId, Address sender, TransactionParametersResponse txParams) {
 
-			var transaction = Algorand.Utils.GetApplicationClearTransaction(
-				sender, Convert.ToUInt64(validatorAppId), txParams);
+			var transaction = TxnFactory.AppCall(
+				sender, Convert.ToUInt64(validatorAppId), txParams, onCompletion: OnCompletion.Clear);
 
 			return new TransactionGroup(new[] { transaction });
 		}
@@ -61,7 +59,7 @@ namespace Tinyman.V1 {
 		public static TransactionGroup PrepareAssetOptinTransactions(
 			ulong assetId, Address sender, TransactionParametersResponse txParams) {
 
-			var transaction = Algorand.Utils.GetAssetOptingInTransaction(
+			var transaction = TxnFactory.AssetOptIn(
 				sender, assetId, txParams);
 
 			return new TransactionGroup(new[] { transaction });
@@ -96,22 +94,33 @@ namespace Tinyman.V1 {
 
 			var transactions = new List<Transaction>();
 
-			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Convert.ToUInt64(asset2.Id > 0 ? 961000 : 860000), "fee", txParams));
+			transactions.Add(TxnFactory.Pay(
+					sender, 
+					poolAddress,
+					Convert.ToUInt64(asset2.Id > 0 ? 961000 : 860000),
+					txParams,
+					note: Strings.ToUtf8ByteArray("fee")));
 
-			var appOptinTx = Algorand.Utils.GetApplicationOptinTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
+			// AppCall
+			var applicationArgs = new byte[][] {
+				Strings.ToUtf8ByteArray("bootstrap"),
+				Util.IntToBytes(asset1.Id),
+				Util.IntToBytes(asset2.Id)
+			};
 
-			appOptinTx.applicationArgs = new List<byte[]>();
-			appOptinTx.applicationArgs.Add(Strings.ToUtf8ByteArray("bootstrap"));
-			appOptinTx.applicationArgs.Add(Util.IntToBytes(asset1.Id));
-			appOptinTx.applicationArgs.Add(Util.IntToBytes(asset2.Id));
-
-			appOptinTx.foreignAssets.Add(asset1.Id);
+			var foreignAssets = new List<ulong>() { asset1.Id };
 
 			if (asset2.Id != 0) {
-				appOptinTx.foreignAssets.Add(asset2.Id);
+				foreignAssets.Add(asset2.Id);
 			}
+
+			var appOptinTx = TxnFactory.AppCall(
+				poolAddress,
+				Convert.ToUInt64(validatorAppId),
+				txParams, 
+				onCompletion: OnCompletion.Optin,
+				applicationArgs: applicationArgs,
+				foreignAssets: foreignAssets.ToArray());
 
 			transactions.Add(appOptinTx);
 
@@ -128,10 +137,10 @@ namespace Tinyman.V1 {
 			}
 
 			var metadataHash = Encoding.UTF8.GetBytes(
-				Algorand.Utils.GetRandomAssetMetaHash()).Take(32).ToArray();
+				Algorand.Utils.Utils.GetRandomAssetMetaHash()).Take(32).ToArray();
 
-			transactions.Add(Algorand.Utils.GetCreateAssetTransaction(new AssetParams() {
-				Creator = poolAddress.EncodeAsString(),
+			transactions.Add(TxnFactory.AssetCreate(new AssetParams() {
+				Creator = poolAddress,
 				Total = 0xFFFFFFFFFFFFFFFF,
 				Decimals = 6,
 				UnitName = unitName,
@@ -141,12 +150,10 @@ namespace Tinyman.V1 {
 				MetadataHash = metadataHash
 			}, txParams));
 
-			transactions.Add(
-				Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset1.Id, txParams));
+			transactions.Add(TxnFactory.AssetOptIn(poolAddress, asset1.Id, txParams));
 
 			if (asset2.Id > 0) {
-				transactions.Add(
-					Algorand.Utils.GetAssetOptingInTransaction(poolAddress, asset2.Id, txParams));
+				transactions.Add(TxnFactory.AssetOptIn(poolAddress, asset2.Id, txParams));
 			}
 
 			var result = new TransactionGroup(transactions);
@@ -188,55 +195,66 @@ namespace Tinyman.V1 {
 			var transactions = new List<Transaction>();
 
 			// PaymentTxn
-			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constant.BurnFee, "fee", txParams));
+			transactions.Add(TxnFactory.Pay(
+					sender,
+					poolAddress,
+					Constant.BurnFee,
+					txParams,
+					note: Strings.ToUtf8ByteArray("fee")));
 
 			// ApplicationNoOpTxn
-			var callTx = Algorand.Utils.GetApplicationCallTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
-
-			callTx.onCompletion = OnCompletion.Noop;
-			callTx.applicationArgs = new List<byte[]>();
-			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("burn"));
-			callTx.accounts.Add(sender);
-			callTx.foreignAssets.Add(assetAmount1.Asset.Id);
-			callTx.foreignAssets.Add(assetAmountLiquidity.Asset.Id);
+			var applicationArgs = new byte[][] {
+				Strings.ToUtf8ByteArray("burn")
+			};
+			var accounts = new Address[] {
+				sender
+			};
+			var foreignAssets = new List<ulong>() {
+				assetAmount1.Asset.Id,
+				assetAmountLiquidity.Asset.Id
+			};
 
 			if (assetAmount2.Asset.Id != 0) {
-				callTx.foreignAssets.Add(assetAmount2.Asset.Id);
+				foreignAssets.Add(assetAmount2.Asset.Id);
 			}
 
-			callTx.foreignAssets = callTx.foreignAssets.OrderBy(s => s).ToList();
+			var callTx = TxnFactory.AppCall(
+				poolAddress,
+				Convert.ToUInt64(validatorAppId),
+				txParams,
+				accounts: accounts,
+				applicationArgs: applicationArgs,
+				foreignAssets: foreignAssets.OrderBy(s => s).ToArray());
 
 			transactions.Add(callTx);
 
 			// AssetTransferTxn
-			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+			transactions.Add(TxnFactory.Pay(
 				poolAddress,
 				sender,
-				assetAmount1.Asset.Id,
 				Convert.ToUInt64(assetAmount1.Amount),
+				assetAmount1.Asset.Id,
 				txParams));
 
 			// AssetTransferTxn
 			if (assetAmount2.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, Convert.ToUInt64(assetAmount2.Amount), "", txParams));
+				transactions.Add(TxnFactory.Pay(
+					poolAddress, sender, Convert.ToUInt64(assetAmount2.Amount), txParams));
 			} else {
-				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+				transactions.Add(TxnFactory.Pay(
 					poolAddress,
 					sender,
-					assetAmount2.Asset.Id,
 					Convert.ToUInt64(assetAmount2.Amount),
+					assetAmount2.Asset.Id,
 					txParams));
 			}
 
 			// AssetTransferTxn
-			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+			transactions.Add(TxnFactory.Pay(
 				sender,
 				poolAddress,
-				assetAmountLiquidity.Asset.Id,
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
+				assetAmountLiquidity.Asset.Id,
 				txParams));
 
 			var result = new TransactionGroup(transactions);
@@ -278,55 +296,66 @@ namespace Tinyman.V1 {
 			var transactions = new List<Transaction>();
 
 			// PaymentTxn
-			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constant.MintFee, "fee", txParams));
+			transactions.Add(TxnFactory.Pay(
+					sender,
+					poolAddress,
+					Constant.MintFee,
+					txParams,
+					note: Strings.ToUtf8ByteArray("fee")));
 
 			// ApplicationNoOpTxn
-			var callTx = Algorand.Utils.GetApplicationCallTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
-
-			callTx.onCompletion = OnCompletion.Noop;
-			callTx.applicationArgs = new List<byte[]>();
-			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("mint"));
-			callTx.accounts.Add(sender);
-			callTx.foreignAssets.Add(assetAmount1.Asset.Id);
-			callTx.foreignAssets.Add(assetAmountLiquidity.Asset.Id);
+			var applicationArgs = new byte[][] {
+				Strings.ToUtf8ByteArray("mint")
+			};
+			var accounts = new Address[] {
+				sender
+			};
+			var foreignAssets = new List<ulong>() {
+				assetAmount1.Asset.Id,
+				assetAmountLiquidity.Asset.Id
+			};
 
 			if (assetAmount2.Asset.Id != 0) {
-				callTx.foreignAssets.Add(assetAmount2.Asset.Id);
+				foreignAssets.Add(assetAmount2.Asset.Id);
 			}
 
-			callTx.foreignAssets = callTx.foreignAssets.OrderBy(s => s).ToList();
+			var callTx = TxnFactory.AppCall(
+				poolAddress,
+				Convert.ToUInt64(validatorAppId),
+				txParams,
+				accounts: accounts,
+				applicationArgs: applicationArgs,
+				foreignAssets: foreignAssets.OrderBy(s => s).ToArray());
 
 			transactions.Add(callTx);
 
 			// AssetTransferTxn
-			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+			transactions.Add(TxnFactory.Pay(
 				sender,
 				poolAddress,
-				assetAmount1.Asset.Id,
 				Convert.ToUInt64(assetAmount1.Amount),
+				assetAmount1.Asset.Id,
 				txParams));
 
 			// AssetTransferTxn
 			if (assetAmount2.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Convert.ToUInt64(assetAmount2.Amount), "", txParams));
+				transactions.Add(TxnFactory.Pay(
+					sender, poolAddress, Convert.ToUInt64(assetAmount2.Amount), txParams));
 			} else {
-				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+				transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
-					assetAmount2.Asset.Id,
 					Convert.ToUInt64(assetAmount2.Amount),
+					assetAmount2.Asset.Id,
 					txParams));
 			}
 
 			// AssetTransferTxn
-			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+			transactions.Add(TxnFactory.Pay(
 				poolAddress,
 				sender,
-				assetAmountLiquidity.Asset.Id,
 				Convert.ToUInt64(assetAmountLiquidity.Amount),
+				assetAmountLiquidity.Asset.Id,
 				txParams));
 
 			var result = new TransactionGroup(transactions);
@@ -370,44 +399,51 @@ namespace Tinyman.V1 {
 			var transactions = new List<Transaction>();
 					   			 		  		  		 	   			
 			// PaymentTxn
-			transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, Constant.RedeemFee, null, txParams));
+			transactions.Add(TxnFactory.Pay(
+					sender, poolAddress, Constant.RedeemFee, txParams));
 
 			// ApplicationNoOpTxn
-			var callTx = Algorand.Utils.GetApplicationCallTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
-
-			callTx.onCompletion = OnCompletion.Noop;
-			callTx.applicationArgs = new List<byte[]>();
-			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("redeem"));
-			callTx.accounts.Add(sender);
-			callTx.foreignAssets.Add(asset1.Id);
-			callTx.foreignAssets.Add(assetLiquidity.Id);
+			var applicationArgs = new byte[][] {
+				Strings.ToUtf8ByteArray("redeem")
+			};
+			var accounts = new Address[] {
+				sender
+			};
+			var foreignAssets = new List<ulong>() {
+				asset1.Id,
+				assetLiquidity.Id
+			};
 
 			if (asset2.Id != 0) {
-				callTx.foreignAssets.Add(asset2.Id);
+				foreignAssets.Add(asset2.Id);
 			}
 
-			callTx.foreignAssets = callTx.foreignAssets.OrderBy(s => s).ToList();
+			var callTx = TxnFactory.AppCall(
+				poolAddress,
+				Convert.ToUInt64(validatorAppId),
+				txParams,
+				accounts: accounts,
+				applicationArgs: applicationArgs,
+				foreignAssets: foreignAssets.OrderBy(s => s).ToArray());
 
 			transactions.Add(callTx);
 
 			// AssetTransferTxn
 			if (assetAmount.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, Convert.ToUInt64(assetAmount.Amount), null, txParams));
+				transactions.Add(TxnFactory.Pay(
+					poolAddress, sender, Convert.ToUInt64(assetAmount.Amount), txParams));
 			} else {
-				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+				transactions.Add(TxnFactory.Pay(
 					poolAddress,
 					sender,
-					assetAmount.Asset.Id,
 					assetAmount.Amount,
+					assetAmount.Asset.Id,
 					txParams));
 			}
 			
 			foreach (var tx in transactions) {
-				if (String.IsNullOrWhiteSpace(tx.genesisID)) {
-					tx.genesisID = txParams.GenesisId;
+				if (String.IsNullOrWhiteSpace(tx.GenesisID)) {
+					tx.GenesisID = txParams.GenesisId;
 				}
 			}
 
@@ -445,65 +481,73 @@ namespace Tinyman.V1 {
 			var transactions = new List<Transaction>();
 
 			// PaymentTxn
-			transactions.Add(Algorand.Utils.GetPaymentTransaction(
+			transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
 					Constant.SwapFee,
-					"fee",
-					txParams));
+					txParams,
+					note: Strings.ToUtf8ByteArray("fee")));
 
 			// ApplicationNoOpTxn
-			var callTx = Algorand.Utils.GetApplicationCallTransaction(
-				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
+			var applicationArgs = new byte[][] {
+				Strings.ToUtf8ByteArray("swap"),
+				Strings.ToUtf8ByteArray(swapType == SwapType.FixedInput ? "fi" : "fo")
+			};
 
-			callTx.onCompletion = OnCompletion.Noop;
-			callTx.applicationArgs = new List<byte[]>();
-			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray("swap"));
-			callTx.applicationArgs.Add(Strings.ToUtf8ByteArray(swapType == SwapType.FixedInput ? "fi" : "fo"));
-			callTx.accounts.Add(sender);
+			var accounts = new Address[] {
+				sender
+			};
+			var foreignAssets = new List<ulong>();
 
 			if (amountIn.Asset.Id != 0) {
-				callTx.foreignAssets.Add(amountIn.Asset.Id);
+				foreignAssets.Add(amountIn.Asset.Id);
 			}
 
 			if (amountOut.Asset.Id != 0) {
-				callTx.foreignAssets.Add(amountOut.Asset.Id);
+				foreignAssets.Add(amountOut.Asset.Id);
 			}
 
-			callTx.foreignAssets.Add(assetLiquidity.Id);
-			callTx.foreignAssets = callTx.foreignAssets.OrderBy(s => s).ToList();
+			foreignAssets.Add(assetLiquidity.Id);
+
+			var callTx = TxnFactory.AppCall(
+				poolAddress,
+				Convert.ToUInt64(validatorAppId),
+				txParams,
+				accounts: accounts,
+				applicationArgs: applicationArgs,
+				foreignAssets: foreignAssets.OrderBy(s => s).ToArray());
 
 			transactions.Add(callTx);
 
 			// AssetTransferTxn - Send to pool
 			if (amountIn.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					sender, poolAddress, amountIn.Amount, null, txParams));
+				transactions.Add(TxnFactory.Pay(
+					sender, poolAddress, amountIn.Amount, txParams));
 			} else {
-				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+				transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
-					amountIn.Asset.Id,
 					amountIn.Amount,
+					amountIn.Asset.Id,
 					txParams));
 			}
 
 			// AssetTransferTxn - Receive from pool
 			if (amountOut.Asset.Id == 0) {
-				transactions.Add(Algorand.Utils.GetPaymentTransaction(
-					poolAddress, sender, amountOut.Amount, null, txParams));
+				transactions.Add(TxnFactory.Pay(
+					poolAddress, sender, amountOut.Amount, txParams));
 			} else {
-				transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+				transactions.Add(TxnFactory.Pay(
 					poolAddress,
 					sender,
-					amountOut.Asset.Id,
 					amountOut.Amount,
+					amountOut.Asset.Id,
 					txParams));
 			}
 
 			foreach (var tx in transactions) {
-				if (String.IsNullOrWhiteSpace(tx.genesisID)) {
-					tx.genesisID = txParams.GenesisId;
+				if (String.IsNullOrWhiteSpace(tx.GenesisID)) {
+					tx.GenesisID = txParams.GenesisId;
 				}
 			}
 
@@ -547,44 +591,46 @@ namespace Tinyman.V1 {
 			var transactions = new List<Transaction>();	
 
 			// PaymentTxn
-			transactions.Add(Algorand.Utils.GetPaymentTransaction(
+			transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
 					Constant.RedeemFeesFee,
-					"fee",
-					txParams));
+					txParams,
+					note: Strings.ToUtf8ByteArray("fee")));
 
-			// ApplicationNoOpTxn
-			var callTx = Algorand.Utils.GetApplicationCallTransaction(
+			// ApplicationNoOpTxn			
+			var callTx = TxnFactory.AppCall(
 				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
 
-			callTx.onCompletion = OnCompletion.Noop;
-			callTx.applicationArgs = new List<byte[]> {
-				Strings.ToUtf8ByteArray("fees")
-			};
-			callTx.foreignAssets = new List<ulong> {
-				asset1.Id
-			};
+			if (callTx is ApplicationNoopTransaction noopTx) {
+				noopTx.ApplicationArgs = new List<byte[]> {
+					Strings.ToUtf8ByteArray("fees")
+				};
 
-			if (asset2.Id != 0) {
-				callTx.foreignAssets.Add(asset2.Id);
+				noopTx.ForeignAssets = new List<ulong> {
+					asset1.Id
+				};
+
+				if (asset2.Id != 0) {
+					noopTx.ForeignAssets.Add(asset2.Id);
+				}
+
+				noopTx.ForeignAssets.Add(assetLiquidity.Id);
 			}
-
-			callTx.foreignAssets.Add(assetLiquidity.Id);
 
 			transactions.Add(callTx);
 
 			// AssetTransferTxn - Receive from pool
-			transactions.Add(Algorand.Utils.GetTransferAssetTransaction(
+			transactions.Add(TxnFactory.Pay(
 				poolAddress,
 				creator,
-				assetAmount.Asset.Id,
 				assetAmount.Amount,
+				assetAmount.Asset.Id,
 				txParams));
 
 			foreach (var tx in transactions) {
-				if (String.IsNullOrWhiteSpace(tx.genesisID)) {
-					tx.genesisID = txParams.GenesisId;
+				if (String.IsNullOrWhiteSpace(tx.GenesisID)) {
+					tx.GenesisID = txParams.GenesisId;
 				}
 			}
 

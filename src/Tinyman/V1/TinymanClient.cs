@@ -1,8 +1,7 @@
 ﻿using Algorand;
+using Algorand.Algod;
+using Algorand.Algod.Model;
 using Algorand.Common;
-using Algorand.V2;
-using Algorand.V2.Algod;
-using Algorand.V2.Algod.Model;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
@@ -15,8 +14,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Tinyman.V1.Action;
 using Tinyman.V1.Model;
-using Account = Algorand.Account;
-using AccountModel = Algorand.V2.Algod.Model.Account;
 using Asset = Tinyman.V1.Model.Asset;
 
 namespace Tinyman.V1 {
@@ -68,7 +65,7 @@ namespace Tinyman.V1 {
 		/// <returns>Current network parameters</returns>
 		public virtual async Task<TransactionParametersResponse> FetchTransactionParamsAsync() {
 
-			return await mDefaultApi.ParamsAsync();
+			return await mDefaultApi.TransactionParamsAsync();
 		}
 
 		/// <summary>
@@ -80,7 +77,7 @@ namespace Tinyman.V1 {
 		public virtual async Task<Pool> FetchPoolAsync(Asset asset1, Asset asset2) {
 
 			var poolAddress = Contract.GetPoolAddress(mValidatorAppId, asset1.Id, asset2.Id);
-			var accountInfo = await mDefaultApi.AccountsAsync(poolAddress, Format.Json);
+			var accountInfo = await mDefaultApi.AccountInformationAsync(poolAddress, null, Format.Json);
 
 			return await CreatePoolFromAccountInfoAsync(accountInfo, asset1, asset2);
 		}
@@ -103,7 +100,7 @@ namespace Tinyman.V1 {
 		public virtual async Task<Pool> FetchPoolAsync(string poolAddress) {
 
 			var accountInfo = await mDefaultApi
-				.AccountsAsync(poolAddress, Format.Json);
+				.AccountInformationAsync(poolAddress, null, Format.Json);
 
 			return await CreatePoolFromAccountInfoAsync(accountInfo);
 		}
@@ -145,7 +142,7 @@ namespace Tinyman.V1 {
 		public virtual async Task<List<RedeemQuote>> FetchExcessAmountsAsync(Address address) {
 
 			var result = new List<RedeemQuote>();
-			var accountInfo = await mDefaultApi.AccountsAsync(address.EncodeAsString(), Format.Json);
+			var accountInfo = await mDefaultApi.AccountInformationAsync(address.EncodeAsString(), null, Format.Json);
 
 			var validatorApp = accountInfo?
 				.AppsLocalState?
@@ -190,7 +187,7 @@ namespace Tinyman.V1 {
 		/// <returns>Whether or not the address is opted in</returns>
 		public virtual async Task<bool> IsOptedInAsync(Address address) {
 
-			var info = await mDefaultApi.AccountsAsync(address.EncodeAsString(), null);
+			var info = await mDefaultApi.AccountInformationAsync(address.EncodeAsString(), null, null);
 
 			foreach (var entry in info.AppsLocalState) {
 
@@ -206,7 +203,7 @@ namespace Tinyman.V1 {
 			Account account,
 			bool wait = true) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return await OptInAsync(account, txParams, wait);
 		}
@@ -228,7 +225,7 @@ namespace Tinyman.V1 {
 			Account account,
 			bool wait = true) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return await OptOutAsync(account, txParams, wait);
 		}
@@ -251,7 +248,7 @@ namespace Tinyman.V1 {
 			Burn action,
 			bool wait = true) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return await BurnAsync(account, action, txParams, wait);
 		}
@@ -275,7 +272,7 @@ namespace Tinyman.V1 {
 			Mint action,
 			bool wait = true) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return await MintAsync(account, action, txParams, wait);
 		}
@@ -299,7 +296,7 @@ namespace Tinyman.V1 {
 			Swap action,
 			bool wait = true) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return await SwapAsync(account, action, txParams, wait);
 		}
@@ -323,7 +320,7 @@ namespace Tinyman.V1 {
 			Redeem action,
 			bool wait = true) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return await RedeemAsync(account, action, txParams, wait);
 		}
@@ -352,7 +349,8 @@ namespace Tinyman.V1 {
 			Address address,
 			Asset asset) {
 
-			var info = await mDefaultApi.AccountsAsync(address.EncodeAsString(), Format.Json);
+			var info = await mDefaultApi
+				.AccountInformationAsync(address.EncodeAsString(), null, Format.Json);
 
 			if (asset.Id == 0) {
 				return new AssetAmount(asset, Convert.ToUInt64(info.AmountWithoutPendingRewards));
@@ -369,7 +367,7 @@ namespace Tinyman.V1 {
 		public virtual async Task<TransactionGroup> PrepareOptInTransactions(
 			Address sender) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return PrepareOptInTransactions(sender, txParams);
 		}
@@ -389,7 +387,7 @@ namespace Tinyman.V1 {
 		public virtual async Task<TransactionGroup> PrepareOptOutTransactionsAsync(
 			Address sender) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return PrepareOptOutTransactions(sender, txParams);
 		}
@@ -410,7 +408,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			Burn action) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return PrepareBurnTransactions(sender, txParams, action);
 		}
@@ -435,7 +433,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			Mint action) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return PrepareMintTransactions(sender, txParams, action);
 		}
@@ -460,7 +458,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			Swap action) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return PrepareSwapTransactions(sender, txParams, action);
 		}
@@ -486,7 +484,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			Redeem action) {
 
-			var txParams = await mDefaultApi.ParamsAsync();
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return PrepareRedeemTransactions(sender, txParams, action);
 		}
@@ -508,7 +506,7 @@ namespace Tinyman.V1 {
 			return result;
 		}
 
-		protected virtual async Task<Pool> CreatePoolFromAccountInfoAsync(AccountModel accountInfo) {
+		protected virtual async Task<Pool> CreatePoolFromAccountInfoAsync(Account accountInfo) {
 
 			var validatorAppState = accountInfo
 				.AppsLocalState
@@ -526,7 +524,7 @@ namespace Tinyman.V1 {
 		}
 
 		protected virtual async Task<Pool> CreatePoolFromAccountInfoAsync(
-			AccountModel accountInfo, Asset asset1, Asset asset2) {
+			Account accountInfo, Asset asset1, Asset asset2) {
 
 			var validatorAppId = accountInfo.AppsLocalState.FirstOrDefault()?.Id;
 
@@ -614,7 +612,7 @@ namespace Tinyman.V1 {
 				};
 			}
 
-			var asset = await mDefaultApi.AssetsAsync(id);
+			var asset = await mDefaultApi.GetAssetByIDAsync(id);
 
 			return new Asset {
 				Id = (ulong)asset.Index,

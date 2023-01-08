@@ -46,7 +46,7 @@ namespace Tinyman.UnitTest {
 				.GetPoolLogicsigSignature(AppIdV1_0, AssetId1, AssetId2);
 
 			var poolLogic = Base64
-				.ToBase64String(logicSig.logic);
+				.ToBase64String(logicSig.Logic);
 
 			Assert.AreEqual(poolLogic, PoolLogicAsBase64V1_0);
 		}
@@ -58,7 +58,7 @@ namespace Tinyman.UnitTest {
 				.GetPoolLogicsigSignature(AppIdV1_0, AssetId2, AssetId1);
 
 			var poolLogic = Base64
-				.ToBase64String(logicSig.logic);
+				.ToBase64String(logicSig.Logic);
 
 			Assert.AreEqual(poolLogic, PoolLogicAsBase64V1_0);
 		}
@@ -70,7 +70,7 @@ namespace Tinyman.UnitTest {
 				.GetPoolLogicsigSignature(AppIdV1_1, AssetId1, AssetId2);
 
 			var poolLogic = Base64
-				.ToBase64String(logicSig.logic);
+				.ToBase64String(logicSig.Logic);
 
 			Assert.AreEqual(poolLogic, PoolLogicAsBase64V1_1);
 		}
@@ -82,7 +82,7 @@ namespace Tinyman.UnitTest {
 				.GetPoolLogicsigSignature(AppIdV1_1, AssetId2, AssetId1);
 
 			var poolLogic = Base64
-				.ToBase64String(logicSig.logic);
+				.ToBase64String(logicSig.Logic);
 
 			Assert.AreEqual(poolLogic, PoolLogicAsBase64V1_1);
 		}

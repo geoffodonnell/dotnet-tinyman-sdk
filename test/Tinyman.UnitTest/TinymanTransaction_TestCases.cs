@@ -1,11 +1,12 @@
-﻿using Algorand.V2.Algod.Model;
+﻿using Algorand.Algod.Model;
+using Algorand.Algod.Model.Transactions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using Tinyman.V1;
 using Tinyman.V1.Model;
-using Account = Algorand.Account;
+using Account = Algorand.Algod.Model.Account;
 using Asset = Tinyman.V1.Model.Asset;
 
 namespace Tinyman.UnitTest {
@@ -118,10 +119,10 @@ namespace Tinyman.UnitTest {
 			Assert.IsNotNull(group.Transactions[2]);
 			Assert.IsNotNull(group.Transactions[3]);
 
-			Assert.IsTrue(group.Transactions[0].type == Algorand.Transaction.Type.Payment);
-			Assert.IsTrue(group.Transactions[1].type == Algorand.Transaction.Type.ApplicationCall);
-			Assert.IsTrue(group.Transactions[2].type == Algorand.Transaction.Type.AssetConfig);
-			Assert.IsTrue(group.Transactions[3].type == Algorand.Transaction.Type.AssetTransfer);
+			Assert.IsTrue(group.Transactions[0] is PaymentTransaction);
+			Assert.IsTrue(group.Transactions[1] is ApplicationCallTransaction);
+			Assert.IsTrue(group.Transactions[2] is AssetCreateTransaction);
+			Assert.IsTrue(group.Transactions[3] is AssetAcceptTransaction);
 
 			Assert.IsNull(group.SignedTransactions[0]);
 			Assert.IsNotNull(group.SignedTransactions[1]);

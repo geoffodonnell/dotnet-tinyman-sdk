@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
 		<Description>This library provides access to the Tinyman AMM on the Algorand blockchain.</Description>
     <Company></Company>
     <PackageProjectUrl>https://github.com/geoffodonnell/dotnet-tinyman-sdk</PackageProjectUrl>
@@ -25,9 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Algorand.Common" Version="1.0.1.1" />
-    <PackageReference Include="Algorand2" Version="0.2.1.7" />
-    <PackageReference Include="BouncyCastle.NetCore" Version="1.8.8" />
+		<PackageReference Include="Algorand.Common" Version="1.1.0.1" />
+		<PackageReference Include="Algorand2" Version="1.0.0.15" />
+		<PackageReference Include="BouncyCastle.NetCore" Version="1.8.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>

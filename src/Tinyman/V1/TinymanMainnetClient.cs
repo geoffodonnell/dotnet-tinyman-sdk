@@ -1,4 +1,4 @@
-﻿using Algorand.V2.Algod;
+﻿using Algorand.Algod;
 using System;
 using System.Net.Http;
 

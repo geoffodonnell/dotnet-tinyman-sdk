@@ -1,19 +1,16 @@
 ﻿using Algorand.Common;
 using Algorand.Common.Asc;
-using Algorand.V2.Algod;
-using Algorand.V2.Algod.Model;
+using Algorand.Algod;
+using Algorand.Algod.Model;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Account = Algorand.Account;
-using SignedTransaction = Algorand.SignedTransaction;
-using Transaction = Algorand.Transaction;
+using Algorand.Algod.Model.Transactions;
 
 namespace Tinyman.V1 {
 
@@ -86,28 +83,21 @@ namespace Tinyman.V1 {
             Account account,
             bool wait = true) {
 
-            var gid = Algorand.TxGroup.ComputeGroupID(transactions);
+            Algorand.TxGroup.AssignGroupID(transactions);
 
             for (var i = 0; i < transactions.Length; i++) {
 
                 var tx = transactions[i];
 
-                tx.AssignGroupID(gid);
-
-                if (tx.sender.Equals(account.Address)) {                    
-                    signedTransactions[i] = account.SignTransaction(tx);
+                if (tx.Sender.Equals(account.Address)) {                    
+                    signedTransactions[i] = tx.Sign(account);
                 }
             }
 
-            var bytes = signedTransactions
-                .SelectMany(Algorand.Encoder.EncodeToMsgPack)
-                .ToArray();
-
-            var payload = new MemoryStream(bytes);
-            var response = await client.TransactionsAsync(payload);
+            var response = await client.TransactionsAsync(signedTransactions);
 
 			if (wait) {
-                await client.WaitForTransactionToComplete(response.TxId);
+                await client.WaitForTransactionToComplete(response.Txid);
             }
 
             return response;
