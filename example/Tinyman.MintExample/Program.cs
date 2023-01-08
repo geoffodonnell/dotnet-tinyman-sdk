@@ -1,4 +1,4 @@
-﻿using Algorand;
+﻿using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
@@ -39,7 +39,7 @@ namespace Tinyman.MintExample {
 			var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 			// Get a quote to add 1 Algo and the corresponding tinyUsdc amount to the pool
-			var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
+			var amountIn = Algorand.Utils.Utils.AlgosToMicroalgos(1.0);
 			var quote = pool.CalculateMintQuote(new AssetAmount(algo, amountIn), 0.05);
 
 			// Check the quote, ensure it's something that you want to execute
@@ -51,7 +51,7 @@ namespace Tinyman.MintExample {
 			try {
 				var result = await client.MintAsync(account, action);
 
-				Console.WriteLine($"Mint complete, transaction ID: {result.TxId}");
+				Console.WriteLine($"Mint complete, transaction ID: {result.Txid}");
 
 			} catch (Exception ex) {
 				Console.WriteLine($"An error occured: {ex.Message}");

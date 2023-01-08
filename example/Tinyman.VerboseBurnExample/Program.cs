@@ -1,5 +1,5 @@
 ﻿using Algorand;
-using Algorand.V2;
+using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
@@ -47,14 +47,14 @@ namespace Tinyman.VerboseBurnExample {
 					// Inspect transaction
 
 					// Sign transaction
-					if (tx.sender.Equals(account.Address)) {
-						optInTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
+					if (tx.Sender.Equals(account.Address)) {
+						optInTxGroup.SignedTransactions[i] = tx.Sign(account);
 					}
 				}
 
 				var optInResult = await client.SubmitAsync(optInTxGroup);
 
-				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.TxId}");
+				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.Txid}");
 			}
 
 			// Get the assets
@@ -89,18 +89,18 @@ namespace Tinyman.VerboseBurnExample {
 				for (var i = 0; i < burnTxGroup.Transactions.Length; i++) {
 					var tx = burnTxGroup.Transactions[i];
 
-					if (tx.sender.Equals(account.Address)) {
+					if (tx.Sender.Equals(account.Address)) {
 
 						// Inspect transaction
 
 						// Sign transaction
-						burnTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
+						burnTxGroup.SignedTransactions[i] = tx.Sign(account);
 					}
 				}
 
 				var burnResult = await client.SubmitAsync(burnTxGroup);
 
-				Console.WriteLine($"Burn complete, transaction ID: {burnResult.TxId}");
+				Console.WriteLine($"Burn complete, transaction ID: {burnResult.Txid}");
 
 			} catch (Exception ex) {
 				Console.WriteLine($"An error occured: {ex.Message}");

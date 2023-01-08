@@ -1,4 +1,4 @@
-﻿using Algorand;
+﻿using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
@@ -51,7 +51,7 @@ namespace Tinyman.BurnExample {
 			try {
 				var result = await client.BurnAsync(account, action);
 
-				Console.WriteLine($"Burn complete, transaction ID: {result.TxId}");
+				Console.WriteLine($"Burn complete, transaction ID: {result.Txid}");
 
 			} catch (Exception ex) {
 				Console.WriteLine($"An error occured: {ex.Message}");

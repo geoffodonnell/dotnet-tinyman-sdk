@@ -1,5 +1,5 @@
 ﻿using Algorand;
-using Algorand.V2;
+using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
@@ -47,14 +47,14 @@ namespace Tinyman.VerboseMintExample {
 					// Inspect transaction
 
 					// Sign transaction
-					if (tx.sender.Equals(account.Address)) {
-						optInTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
+					if (tx.Sender.Equals(account.Address)) {
+						optInTxGroup.SignedTransactions[i] = tx.Sign(account);
 					}
 				}
 
 				var optInResult = await client.SubmitAsync(optInTxGroup);
 
-				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.TxId}");
+				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.Txid}");
 			}
 
 			// Get the assets
@@ -65,7 +65,7 @@ namespace Tinyman.VerboseMintExample {
 			var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 			// Get a quote to add 1 Algo and the corresponding tinyUsdc amount to the pool
-			var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
+			var amountIn = Algorand.Utils.Utils.AlgosToMicroalgos(1.0);
 			var quote = pool.CalculateMintQuote(new AssetAmount(algo, amountIn), 0.05);
 
 			// Check the quote, ensure it's something that you want to execute
@@ -92,14 +92,14 @@ namespace Tinyman.VerboseMintExample {
 					// Inspect transaction
 
 					// Sign transaction
-					if (tx.sender.Equals(account.Address)) {
-						mintTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
+					if (tx.Sender.Equals(account.Address)) {
+						mintTxGroup.SignedTransactions[i] = tx.Sign(account);
 					}
 				}
 
 				var mintResult = await client.SubmitAsync(mintTxGroup);
 
-				Console.WriteLine($"Swap complete, transaction ID: {mintResult.TxId}");
+				Console.WriteLine($"Swap complete, transaction ID: {mintResult.Txid}");
 
 			} catch (Exception ex) {
 				Console.WriteLine($"An error occured: {ex.Message}");

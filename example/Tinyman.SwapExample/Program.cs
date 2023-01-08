@@ -1,4 +1,4 @@
-﻿using Algorand;
+﻿using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
@@ -39,7 +39,7 @@ namespace Tinyman.SwapExample {
 			var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 			// Get a quote to swap 1 Algo for tinyUsdc
-			var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
+			var amountIn = Algorand.Utils.Utils.AlgosToMicroalgos(1.0);
 			var quote = pool.CalculateFixedInputSwapQuote(new AssetAmount(algo, amountIn), 0.05);
 
 			// Check the quote, ensure it's something that you want to execute
@@ -51,7 +51,7 @@ namespace Tinyman.SwapExample {
 			try {
 				var result = await client.SwapAsync(account, action);
 
-				Console.WriteLine($"Swap complete, transaction ID: {result.TxId}");
+				Console.WriteLine($"Swap complete, transaction ID: {result.Txid}");
 
 			} catch (Exception ex) {
 				Console.WriteLine($"An error occured: {ex.Message}");

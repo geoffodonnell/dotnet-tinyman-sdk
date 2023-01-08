@@ -1,5 +1,5 @@
 ﻿using Algorand;
-using Algorand.V2;
+using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
@@ -47,14 +47,14 @@ namespace Tinyman.VerboseRedeemExample {
 					// Inspect transaction
 
 					// Sign transaction
-					if (tx.sender.Equals(account.Address)) {
-						optInTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
+					if (tx.Sender.Equals(account.Address)) {
+						optInTxGroup.SignedTransactions[i] = tx.Sign(account);
 					}
 				}
 
 				var optInResult = await client.SubmitAsync(optInTxGroup);
 
-				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.TxId}");
+				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.Txid}");
 			}
 
 			// Fetch the amounts
@@ -91,15 +91,15 @@ namespace Tinyman.VerboseRedeemExample {
 						// Inspect transaction
 
 						// Sign transaction
-						if (tx.sender.Equals(account.Address)) {
-							redeemTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
+						if (tx.Sender.Equals(account.Address)) {
+							redeemTxGroup.SignedTransactions[i] = tx.Sign(account);
 						}
 					}
 
 					var redeemResult = await client.SubmitAsync(redeemTxGroup);
 
 					Console.WriteLine(
-						$"Redeemed {quote.Amount} from {quote.PoolAddress.EncodeAsString()}; transaction ID: {redeemResult.TxId}");
+						$"Redeemed {quote.Amount} from {quote.PoolAddress.EncodeAsString()}; transaction ID: {redeemResult.Txid}");
 				}
 
 			} catch (Exception ex) {

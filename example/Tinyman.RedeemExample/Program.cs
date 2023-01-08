@@ -1,4 +1,4 @@
-﻿using Algorand;
+﻿using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
@@ -47,7 +47,7 @@ namespace Tinyman.RedeemExample {
 					var result = await client.RedeemAsync(account, action);
 
 					Console.WriteLine(
-						$"Redeemed {quote.Amount} from {quote.PoolAddress.EncodeAsString()}; transaction ID: {result.TxId}");
+						$"Redeemed {quote.Amount} from {quote.PoolAddress.EncodeAsString()}; transaction ID: {result.Txid}");
 				}
 
 			} catch (Exception ex) {

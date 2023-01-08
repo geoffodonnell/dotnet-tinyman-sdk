@@ -1,5 +1,5 @@
 ﻿using Algorand;
-using Algorand.V2;
+using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
@@ -47,14 +47,14 @@ namespace Tinyman.VerboseSwapExample {
 					// Inspect transaction
 
 					// Sign transaction
-					if (tx.sender.Equals(account.Address)) {
-						optInTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
+					if (tx.Sender.Equals(account.Address)) {
+						optInTxGroup.SignedTransactions[i] = tx.Sign(account);
 					}
 				}
 
 				var optInResult = await client.SubmitAsync(optInTxGroup);
 
-				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.TxId}");
+				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.Txid}");
 			}
 
 			// Get the assets
@@ -65,7 +65,7 @@ namespace Tinyman.VerboseSwapExample {
 			var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 			// Get a quote to swap 1 Algo for tinyUsdc
-			var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
+			var amountIn = Algorand.Utils.Utils.AlgosToMicroalgos(1.0);
 			var quote = pool.CalculateFixedInputSwapQuote(new AssetAmount(algo, amountIn), 0.05);
 
 			// Check the quote, ensure it's something that you want to execute
@@ -93,14 +93,14 @@ namespace Tinyman.VerboseSwapExample {
 					// Inspect transaction
 
 					// Sign transaction
-					if (tx.sender.Equals(account.Address)) {
-						swapTxGroup.SignedTransactions[i] = account.SignTransaction(tx);
+					if (tx.Sender.Equals(account.Address)) {
+						swapTxGroup.SignedTransactions[i] = tx.Sign(account);
 					}
 				}
 
 				var swapResult = await client.SubmitAsync(swapTxGroup);
 
-				Console.WriteLine($"Swap complete, transaction ID: {swapResult.TxId}");
+				Console.WriteLine($"Swap complete, transaction ID: {swapResult.Txid}");
 
 			} catch (Exception ex) {
 				Console.WriteLine($"An error occured: {ex.Message}");
