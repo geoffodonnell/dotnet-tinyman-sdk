@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Tinyman.V1.Model {
+namespace Tinyman.Model {
 
 	public class Asset {
 
@@ -11,7 +11,7 @@ namespace Tinyman.V1.Model {
 		public virtual string UnitName { get; set; }
 
 		public virtual int Decimals { get; set; }
-			   		 
+
 		public Asset() {
 		}
 

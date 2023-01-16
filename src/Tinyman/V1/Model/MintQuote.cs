@@ -1,4 +1,5 @@
 ﻿using System;
+using Tinyman.Model;
 
 namespace Tinyman.V1.Model {
 

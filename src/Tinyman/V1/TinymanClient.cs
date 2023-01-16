@@ -12,16 +12,17 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Tinyman.Model;
 using Tinyman.V1.Action;
 using Tinyman.V1.Model;
-using Asset = Tinyman.V1.Model.Asset;
+using Asset = Tinyman.Model.Asset;
 
 namespace Tinyman.V1 {
 
-	/// <summary>
-	/// Provides methods for interacting with Tinyman AMM via Algorand REST API.
-	/// </summary>
-	public class TinymanClient {
+    /// <summary>
+    /// Provides methods for interacting with Tinyman AMM via Algorand REST API.
+    /// </summary>
+    public class TinymanClient {
 
 		protected readonly IDefaultApi mDefaultApi;
 		protected readonly HttpClient mHttpClient;

@@ -1,8 +1,9 @@
 ﻿using Algorand;
+using Tinyman.Model;
 
 namespace Tinyman.V1.Model {
 
-	public class RedeemQuote {
+    public class RedeemQuote {
 
 		public virtual AssetAmount Amount { get; internal set; }
 

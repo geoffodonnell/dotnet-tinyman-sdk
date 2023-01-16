@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Tinyman.V1 {
+namespace Tinyman {
 
 	public static class TupleExtensions {
 

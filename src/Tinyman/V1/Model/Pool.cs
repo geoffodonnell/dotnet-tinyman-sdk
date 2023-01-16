@@ -1,6 +1,8 @@
-﻿namespace Tinyman.V1.Model {
+﻿using Tinyman.Model;
 
-	public class Pool {
+namespace Tinyman.V1.Model {
+
+    public class Pool {
 
 		public virtual bool Exists { get; set; }
 

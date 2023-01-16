@@ -18,11 +18,13 @@
   <ItemGroup>
     <None Remove="V1\asc.v1_0.json" />
     <None Remove="V1\asc.v1_1.json" />
+    <None Remove="V2\amm_approval.map.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="V1\asc.v1_0.json" />
     <EmbeddedResource Include="V1\asc.v1_1.json" />
+    <EmbeddedResource Include="V2\amm_approval.map.json" />
   </ItemGroup>
 
   <ItemGroup>

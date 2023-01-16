@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Tinyman.V1.Model {
+namespace Tinyman.Model {
 
 	public class AssetAmount {
 
@@ -66,7 +66,7 @@ namespace Tinyman.V1.Model {
 		public static bool operator ==(AssetAmount a, ulong b) {
 			return a.Amount == b;
 		}
-		
+
 		public static bool operator !=(AssetAmount a, AssetAmount b) {
 			if (a.Asset.Id != b.Asset.Id) {
 				throw new ArgumentException(AssetMismatchMessage);
@@ -80,7 +80,7 @@ namespace Tinyman.V1.Model {
 		}
 
 		public static AssetAmount operator +(AssetAmount a, AssetAmount b) {
-			if(a.Asset.Id != b.Asset.Id) {
+			if (a.Asset.Id != b.Asset.Id) {
 				throw new ArgumentException(AssetMismatchMessage);
 			}
 
@@ -131,7 +131,7 @@ namespace Tinyman.V1.Model {
 
 		public override string ToString() {
 
-			var amount = Amount / (Math.Pow(10, Asset.Decimals));
+			var amount = Amount / Math.Pow(10, Asset.Decimals);
 
 			return $"{amount} {Asset.UnitName}";
 		}
@@ -146,6 +146,7 @@ namespace Tinyman.V1.Model {
 			hashCode = hashCode * -1521134295 + Amount.GetHashCode();
 			return hashCode;
 		}
+
 	}
 
 }

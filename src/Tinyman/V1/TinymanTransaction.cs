@@ -7,15 +7,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Tinyman.V1.Model;
-using Asset = Tinyman.V1.Model.Asset;
+using Tinyman.Model;
+using Asset = Tinyman.Model.Asset;
 
 namespace Tinyman.V1 {
 
-	/// <summary>
-	/// Create transaction groups for common actions
-	/// </summary>
-	public static class TinymanTransaction {
+    /// <summary>
+    /// Create transaction groups for common actions
+    /// </summary>
+    public static class TinymanTransaction {
 
 		/// <summary>
 		/// Prepare a transaction group to opt-in to Tinyman

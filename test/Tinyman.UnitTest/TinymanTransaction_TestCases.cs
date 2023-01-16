@@ -4,14 +4,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
+using Tinyman.Model;
 using Tinyman.V1;
-using Tinyman.V1.Model;
 using Account = Algorand.Algod.Model.Account;
-using Asset = Tinyman.V1.Model.Asset;
+using Asset = Tinyman.Model.Asset;
 
 namespace Tinyman.UnitTest {
 
-	[TestClass]
+    [TestClass]
 	public class TinymanTransaction_TestCases {
 
 		public static ulong AppId = Tinyman.V1.Constant.MainnetValidatorAppIdV1_1;

@@ -1,8 +1,9 @@
-﻿using Tinyman.V1.Model;
+﻿using Tinyman.Model;
+using Tinyman.V1.Model;
 
 namespace Tinyman.V1.Action {
 
-	public class Swap {
+    public class Swap {
 
 		public AssetAmount AmountIn { get; internal set; }
 

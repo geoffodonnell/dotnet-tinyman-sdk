@@ -1,9 +1,10 @@
 ﻿using Algorand;
+using Tinyman.Model;
 using Tinyman.V1.Model;
 
 namespace Tinyman.V1.Action {
 
-	public class Redeem {
+    public class Redeem {
 
 		public AssetAmount Amount { get; internal set; }
 

@@ -1,9 +1,10 @@
 ﻿using System;
+using Tinyman.Model;
 using Tinyman.V1.Model;
 
 namespace Tinyman.V1.Action {
 
-	public class Mint {
+    public class Mint {
 
 		public Tuple<AssetAmount, AssetAmount> Amounts { get; internal set; }
 
