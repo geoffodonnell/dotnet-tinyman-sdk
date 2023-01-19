@@ -4,7 +4,7 @@ using System.Net.Http;
 
 namespace Tinyman.V1 {
 
-	public class TinymanTestnetClient: TinymanClient {
+	public class TinymanTestnetClient : TinymanClient {
 
 		public TinymanTestnetClient()
 			: this(Constant.AlgodTestnetHost, String.Empty) { }

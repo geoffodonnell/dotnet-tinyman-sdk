@@ -11,8 +11,8 @@ namespace Tinyman.V2 {
 		private static byte[] mPoolLogicSigTemplate;
 		private static bool mIsInitialized;
 
-		private static readonly object mLock = new object ();
-		private static readonly Dictionary<string, Address> mPoolAddressCache = new Dictionary<string, Address> ();
+		private static readonly object mLock = new object();
+		private static readonly Dictionary<string, Address> mPoolAddressCache = new Dictionary<string, Address>();
 
 		static Contract() {
 			mIsInitialized = false;
