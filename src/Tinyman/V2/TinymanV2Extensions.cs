@@ -8,11 +8,15 @@ namespace Tinyman.V2 {
 
 		public static byte[] ToApplicationArgument(this SwapType value) {
 
-			return value switch {
-				SwapType.FixedInput => Constant.FixedInputAppArgument,
-				SwapType.FixedOutput => Constant.FixedOutputAppArgument,
-				_ => throw new ArgumentException($"{nameof(value)} is not valid.")
-			};
+			if (value == SwapType.FixedInput) {
+				return Constant.FixedInputAppArgument;
+			}
+
+			if (value == SwapType.FixedOutput) {
+				return Constant.FixedOutputAppArgument;
+			}
+
+			throw new ArgumentException($"{nameof(value)} is not valid.");
 		}
 
 		public static byte[] ToApplicationNote(this string note) {

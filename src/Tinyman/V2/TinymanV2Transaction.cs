@@ -8,53 +8,218 @@ using Tinyman.Model;
 
 namespace Tinyman.V2 {
 
-    public static class TinymanV2Transaction {
+	public static class TinymanV2Transaction {
 
-		public static TransactionGroup PrepareSwapTransactions(
+		/// <summary>
+		/// Prepare a transaction group, targeting a V2 pool, to burn the liquidity
+		/// pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="assetAmount1Minimum"> Minimum asset 1 amount</param>
+		/// <param name="assetAmount2Minimum">Minimum asset 2 amount</param>
+		/// <param name="assetAmountLiquidity">Liquidity asset amount</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="appCallNote">Note for application call transaction</param>
+		/// <returns>Transaction group to execute action</returns>
+		public static TransactionGroup PrepareBurnTransactions(
 			ulong validatorAppId,
-			AssetAmount amountIn,
-			AssetAmount amountOut,
-			SwapType swapType,
+			AssetAmount assetAmount1Minimum,
+			AssetAmount assetAmount2Minimum,
+			AssetAmount assetAmountLiquidity,
 			Address sender,
 			TransactionParametersResponse txParams,
 			string appCallNote = null) {
 
 			var transactions = new List<Transaction>();
-            var poolAddress = Contract.GetPoolAddress(validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
-            var minFee = Math.Max(Constant.DefaultMinFee, txParams.MinFee);
-            var appCallFee = swapType switch {
-                SwapType.FixedInput => minFee * 2, // App call contains 1 inner transaction
-				SwapType.FixedOutput => minFee * 3, // App call contains 2 inner transactions
-				_ => throw new ArgumentException($"{nameof(swapType)} is not valid.")
-			};
+			var poolAddress = Contract.GetPoolAddress(
+				validatorAppId, assetAmount1Minimum.Asset.Id, assetAmount2Minimum.Asset.Id);
+			var minFee = Math.Max(Constant.DefaultMinFee, txParams.MinFee);
+			var appCallFee = minFee * 3; // App call contains 2 inner transactions
+
+			// Asset Transfer Txn
+			transactions.Add(TxnFactory.Pay(
+				sender,
+				poolAddress,
+				assetAmountLiquidity.Amount,
+				assetAmountLiquidity.Asset.Id,
+				txParams));
+
+			// App Call Txn
+			transactions.Add(TxnFactory.AppCall(
+				sender,
+				validatorAppId,
+				txParams,
+				applicationArgs: new byte[][] {
+					Constant.RemoveLiquidityAppArgument,
+					ApplicationArgument.Number(assetAmount1Minimum.Amount),
+					ApplicationArgument.Number(assetAmount2Minimum.Amount)
+				},
+				foreignAssets: new[] {
+					assetAmount1Minimum.Asset.Id,
+					assetAmount2Minimum.Asset.Id
+				},
+				accounts: new[] {
+					poolAddress
+				},
+				note: appCallNote.ToApplicationNote(),
+				fee: appCallFee));
+
+			return new TransactionGroup(transactions);
+		}
+
+		/// <summary>
+		/// Prepare a transaction group to mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman application ID</param>
+		/// <param name="assetAmount1">Asset 1 amount</param>
+		/// <param name="assetAmount2">Asset 2 amount</param>
+		/// <param name="assetAmountLiquidityMinimum">Minimum liquidity asset amount</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="appCallNote">Note for application call transaction</param>
+		/// <returns>Transaction group to execute action</returns>
+		public static TransactionGroup PrepareMintTransactions(
+			ulong validatorAppId,
+			AssetAmount assetAmount1,
+			AssetAmount assetAmount2,
+			AssetAmount assetAmountLiquidityMinimum,
+			Address sender,
+			TransactionParametersResponse txParams,
+			string appCallNote = null) {
+
+			var transactions = new List<Transaction>();
+			var poolAddress = Contract.GetPoolAddress(
+				validatorAppId, assetAmount1.Asset.Id, assetAmount2.Asset.Id);
+			var minFee = Math.Max(Constant.DefaultMinFee, txParams.MinFee);
+			var appCallFee = minFee * 3; // App call contains 2 inner transactions
+
+			// Asset Transfer Txn
+			transactions.Add(TxnFactory.Pay(
+				sender,
+				poolAddress,
+				assetAmount1.Amount,
+				assetAmount1.Asset.Id,
+				txParams));
+
+			// Asset Transfer Txn
+			transactions.Add(TxnFactory.Pay(
+				sender,
+				poolAddress,
+				assetAmount2.Amount,
+				assetAmount2.Asset.Id,
+				txParams));
+
+			// App Call Txn
+			transactions.Add(TxnFactory.AppCall(
+				sender,
+				validatorAppId,
+				txParams,
+				applicationArgs: new byte[][] {
+					Constant.AddLiquidityAppArgument,
+					Constant.AddLiquidityFlexibleModeAppArgument,
+					ApplicationArgument.Number(assetAmountLiquidityMinimum.Amount)
+				},
+				foreignAssets: new[] {
+					assetAmountLiquidityMinimum.Asset.Id
+				},
+				accounts: new[] {
+					poolAddress
+				},
+				note: appCallNote.ToApplicationNote(),
+				fee: appCallFee));
+
+			return new TransactionGroup(transactions);
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		/// <summary>
+		/// Prepare a transaction group to swap assets using a V2 pool.
+		/// </summary>
+		/// <param name="validatorAppId">Tinyman V2 application ID</param>
+		/// <param name="amountIn">Amount to send to pool</param>
+		/// <param name="amountOut">Amount to receive from pool</param>
+		/// <param name="swapType">Swap type</param>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="appCallNote">Note for application call transaction</param>
+		/// <returns>Transaction group to execute action</returns>
+		/// <exception cref="ArgumentException"></exception>
+		public static TransactionGroup PrepareSwapTransactions(
+		ulong validatorAppId,
+		AssetAmount amountIn,
+		AssetAmount amountOut,
+		SwapType swapType,
+		Address sender,
+		TransactionParametersResponse txParams,
+		string appCallNote = null) {
+
+			var transactions = new List<Transaction>();
+			var poolAddress = Contract.GetPoolAddress(validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
+			var minFee = Math.Max(Constant.DefaultMinFee, txParams.MinFee);
+			ulong appCallFee = 0;
+			
+			if (swapType == SwapType.FixedInput) {
+				appCallFee = minFee * 2; // App call contains 1 inner transaction
+			} else if (swapType == SwapType.FixedOutput) {
+				appCallFee = minFee * 3; // App call contains 2 inner transactions
+			} else {
+				throw new ArgumentException($"{nameof(swapType)} is not valid.");
+			}
 
 			// Payment Txn
 			transactions.Add(TxnFactory.Pay(
-                sender,
-                poolAddress,
-                amountIn.Amount,
-                amountIn.Asset.Id,
-                txParams));
+				sender,
+				poolAddress,
+				amountIn.Amount,
+				amountIn.Asset.Id,
+				txParams));
 
-            // App Call Txn
-            transactions.Add(TxnFactory.AppCall(
-                sender,
-                validatorAppId,
-                txParams,
-                applicationArgs: new byte[][] {
-                    Constant.SwapAppArgument,
+			// App Call Txn
+			transactions.Add(TxnFactory.AppCall(
+				sender,
+				validatorAppId,
+				txParams,
+				applicationArgs: new byte[][] {
+					Constant.SwapAppArgument,
 					swapType.ToApplicationArgument(),
-                    ApplicationArgument.Number(amountOut.Amount)
+					ApplicationArgument.Number(amountOut.Amount)
 				},
-                foreignAssets: new[] {
-                    amountIn.Asset.Id,
-                    amountOut.Asset.Id
-                },
-                accounts: new[] {
-                    poolAddress
-                },
-                note: appCallNote.ToApplicationNote(),
-                fee: appCallFee
+				foreignAssets: new[] {
+					amountIn.Asset.Id,
+					amountOut.Asset.Id
+				},
+				accounts: new[] {
+					poolAddress
+				},
+				note: appCallNote.ToApplicationNote(),
+				fee: appCallFee
 			));
 
 			return new TransactionGroup(transactions);
