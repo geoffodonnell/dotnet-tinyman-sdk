@@ -100,101 +100,83 @@ namespace Tinyman.V2 {
 
 		protected virtual async Task<TinymanV2Pool> CreatePoolFromAccountInfoAsync(Account accountInfo) {
 
-			throw new NotImplementedException();
+			var validatorAppState = accountInfo
+				.AppsLocalState
+				.FirstOrDefault()?
+				.KeyValue
+				.ToDictionary(s => s.Key, s => s.Value);
 
-			//var validatorAppState = accountInfo
-			//	.AppsLocalState
-			//	.FirstOrDefault()?
-			//	.KeyValue
-			//	.ToDictionary(s => s.Key, s => s.Value);
+			var asset1Id = Util.GetStateInt(validatorAppState, "asset_1_id");
+			var asset2Id = Util.GetStateInt(validatorAppState, "asset_2_id");
 
-			//var asset1Id = Util.GetStateInt(validatorAppState, "a1");
-			//var asset2Id = Util.GetStateInt(validatorAppState, "a2");
+			var asset1 = await FetchAssetAsync(asset1Id.Value);
+			var asset2 = await FetchAssetAsync(asset2Id.Value);
 
-			//var asset1 = await FetchAssetAsync(asset1Id.Value);
-			//var asset2 = await FetchAssetAsync(asset2Id.Value);
-
-			//return await CreatePoolFromAccountInfoAsync(accountInfo, asset1, asset2);
+			return await CreatePoolFromAccountInfoAsync(accountInfo, asset1, asset2);
 		}
 
 		protected virtual async Task<TinymanV2Pool> CreatePoolFromAccountInfoAsync(
 			Account accountInfo, Asset asset1, Asset asset2) {
 
-			throw new NotImplementedException();
+			var expectedAsset1Id = Math.Max(asset1.Id, asset2.Id);
+			var expectedAsset2Id = Math.Min(asset1.Id, asset2.Id);
+			var poolAddress = accountInfo.Address.EncodeAsString();
+			var validatorAppId = accountInfo.AppsLocalState.FirstOrDefault()?.Id;
 
-			//var validatorAppId = accountInfo.AppsLocalState.FirstOrDefault()?.Id;
+			if (!validatorAppId.HasValue) {
+				return new TinymanV2Pool(asset1, asset2) {
+					Exists = false,
+					Address = poolAddress,
+					Round = accountInfo.Round
+				};
+			}
 
-			//if (!validatorAppId.HasValue) {
-			//	throw new Exception($"'{nameof(validatorAppId)}' not found in pool state.");
-			//}
+			var validatorAppState = accountInfo
+				.AppsLocalState
+				.FirstOrDefault()?
+				.KeyValue
+				.ToDictionary(s => s.Key, s => s.Value);
 
-			//var validatorAppState = accountInfo
-			//	.AppsLocalState
-			//	.FirstOrDefault()?
-			//	.KeyValue
-			//	.ToDictionary(s => s.Key, s => s.Value);
+			var asset1Id = Util.GetStateInt(validatorAppState, "asset_1_id");
+			var asset2Id = Util.GetStateInt(validatorAppState, "asset_2_id");
+			var asset1Reserves = Util.GetStateInt(validatorAppState, "asset_1_reserves");
+			var asset2Reserves = Util.GetStateInt(validatorAppState, "asset_2_reserves");
+			var issuedLiquidity = Util.GetStateInt(validatorAppState, "issued_pool_tokens");
+			var asset1ProtocolFees = Util.GetStateInt(validatorAppState, "asset_1_protocol_fees");
+			var asset2ProtocolFees = Util.GetStateInt(validatorAppState, "asset_2_protocol_fees");
+			var totalFeeShare = Util.GetStateInt(validatorAppState, "total_fee_share");
+			var protocolFeeRatio = Util.GetStateInt(validatorAppState, "protocol_fee_ratio");
+			var liquidityAssetId = Util.GetStateInt(validatorAppState, "pool_token_asset_id");
 
-			//var asset1Id = Util.GetStateInt(validatorAppState, "a1");
-			//var asset2Id = Util.GetStateInt(validatorAppState, "a2");
+			var liquidityAsset = await FetchAssetAsync((ulong)liquidityAssetId.Value);
 
-			//var poolAddress = TinymanV1Contract.GetPoolAddress(
-			//	validatorAppId.GetValueOrDefault(),
-			//	asset1Id.GetValueOrDefault(),
-			//	asset2Id.GetValueOrDefault());
+			var result = new TinymanV2Pool(asset1, asset2) {
+				Exists = true,
+				Address = poolAddress,
+				LiquidityAsset = liquidityAsset,
+				Asset1Reserves = asset1Reserves.GetValueOrDefault(),
+				Asset2Reserves = asset2Reserves.GetValueOrDefault(),
+				IssuedLiquidity = issuedLiquidity.GetValueOrDefault(),
+				Asset1ProtocolFees = asset1ProtocolFees.GetValueOrDefault(),
+				Asset2ProtocolFees = asset2ProtocolFees.GetValueOrDefault(),
+				TotalFeeShare = totalFeeShare.GetValueOrDefault(),
+				ProtocolFeeRatio = protocolFeeRatio.GetValueOrDefault(),
+				ValidatorAppId = validatorAppId.GetValueOrDefault(),
+				AlgoBalance = accountInfo.Amount,
+				Round = accountInfo.Round
+			};
 
-			//var asset1Reserves = Util.GetStateInt(validatorAppState, "s1");
-			//var asset2Reserves = Util.GetStateInt(validatorAppState, "s2");
-			//var issuedLiquidity = Util.GetStateInt(validatorAppState, "ilt");
-			//var unclaimedProtocolFees = Util.GetStateInt(validatorAppState, "p");
+			if (asset1Id.GetValueOrDefault() != expectedAsset1Id) {
+				throw new Exception(
+					$"Expected Pool Asset1 ID of '{expectedAsset1Id}' got {asset1Id.GetValueOrDefault()}");
+			}
 
-			//var liquidityAssetId = accountInfo?
-			//	.CreatedAssets
-			//	.FirstOrDefault()?
-			//	.Index;
+			if (asset2Id.GetValueOrDefault() != expectedAsset2Id) {
+				throw new Exception(
+					$"Expected Pool Asset2 ID of '{expectedAsset2Id}' got {asset2Id.GetValueOrDefault()}");
+			}
 
-			//var liquidityAsset = default(Asset);
-			//var exists = liquidityAssetId != null;
-
-			//if (exists) {
-			//	liquidityAsset = await FetchAssetAsync((ulong)liquidityAssetId.Value);
-			//}
-
-			//var outstandingAsset1Amount = Util.GetStateInt(
-			//	validatorAppState, Util.IntToStateKey(asset1Id.GetValueOrDefault()));
-
-			//var outstandingAsset2Amount = Util.GetStateInt(
-			//	validatorAppState, Util.IntToStateKey(asset2Id.GetValueOrDefault()));
-
-			//var outstandingLiquidityAssetAmount = Util.GetStateInt(
-			//	validatorAppState, Util.IntToStateKey(liquidityAssetId.GetValueOrDefault()));
-
-			//var result = new TinymanV2Pool(asset1, asset2) {
-			//	Exists = exists,
-			//	Address = poolAddress,
-			//	LiquidityAsset = liquidityAsset,
-			//	Asset1Reserves = asset1Reserves.GetValueOrDefault(),
-			//	Asset2Reserves = asset2Reserves.GetValueOrDefault(),
-			//	IssuedLiquidity = issuedLiquidity.GetValueOrDefault(),
-			//	UnclaimedProtocolFees = unclaimedProtocolFees.GetValueOrDefault(),
-			//	OutstandingAsset1Amount = outstandingAsset1Amount.GetValueOrDefault(),
-			//	OutstandingAsset2Amount = outstandingAsset2Amount.GetValueOrDefault(),
-			//	OutstandingLiquidityAssetAmount = outstandingLiquidityAssetAmount.GetValueOrDefault(),
-			//	ValidatorAppId = validatorAppId.GetValueOrDefault(),
-			//	AlgoBalance = accountInfo.Amount,
-			//	Round = accountInfo.Round
-			//};
-
-			//if (result.Asset1.Id != asset1Id.GetValueOrDefault()) {
-			//	throw new Exception(
-			//		$"Expected Pool Asset1 ID of '{result.Asset1.Id}' got {Convert.ToInt64(asset1Id.GetValueOrDefault())}");
-			//}
-
-			//if (result.Asset2.Id != asset2Id.GetValueOrDefault()) {
-			//	throw new Exception(
-			//		$"Expected Pool Asset2 ID of '{result.Asset2.Id}' got {Convert.ToInt64(asset2Id.GetValueOrDefault())}");
-			//}
-
-			//return result;
+			return result;
 		}
 
 	}

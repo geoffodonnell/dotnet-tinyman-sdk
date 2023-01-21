@@ -6,6 +6,14 @@ namespace Tinyman.V1 {
 
 	public class TinymanV1Pool : Pool {
 
+		public virtual ulong UnclaimedProtocolFees { get; set; }
+
+		public virtual ulong OutstandingAsset1Amount { get; set; }
+
+		public virtual ulong OutstandingAsset2Amount { get; set; }
+
+		public virtual ulong OutstandingLiquidityAssetAmount { get; set; }
+
 		public TinymanV1Pool() { }
 
 		internal TinymanV1Pool(Asset asset1, Asset asset2) {

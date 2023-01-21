@@ -80,6 +80,7 @@ namespace Tinyman.V2 {
 
 			var bytes = new byte[mPoolLogicSigTemplate.Length];
 
+			Array.Copy(mPoolLogicSigTemplate, bytes, bytes.Length);
 			Array.Copy(ToBytes(validatorAppId), 0, bytes, 3, 8);
 			Array.Copy(ToBytes(assetIdMax), 0, bytes, 11, 8);
 			Array.Copy(ToBytes(assetIdMin), 0, bytes, 19, 8);
