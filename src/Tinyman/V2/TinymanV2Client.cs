@@ -1,10 +1,12 @@
 ﻿using Algorand;
 using Algorand.Algod;
 using Algorand.Algod.Model;
+using Algorand.Common;
 using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Tinyman.Model;
 using Asset = Tinyman.Model.Asset;
 
 namespace Tinyman.V2 {
@@ -77,6 +79,68 @@ namespace Tinyman.V2 {
 				.AccountInformationAsync(poolAddress, null, Format.Json);
 
 			return await CreatePoolFromAccountInfoAsync(accountInfo);
+		}
+
+		/// <inheritdoc />
+		public override TransactionGroup PrepareBurnTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			BurnQuote quote) {
+
+			var result = TinymanV2Transaction.PrepareBurnTransactions(
+				mValidatorAppId,
+				quote.AmountsOutWithSlippage.Item1,
+				quote.AmountsOutWithSlippage.Item2,
+				quote.LiquidityAssetAmount,
+				sender,
+				txParams);
+
+			return result;
+		}
+
+		/// <inheritdoc />
+		public override TransactionGroup PrepareMintTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			MintQuote quote) {
+
+			var result = TinymanV2Transaction.PrepareMintTransactions(
+				mValidatorAppId,
+				quote.AmountsIn.Item1,
+				quote.AmountsIn.Item2,
+				quote.LiquidityAssetAmountWithSlippage,
+				sender,
+				txParams);
+
+			return result;
+		}
+
+		/// <inheritdoc />
+		public override TransactionGroup PrepareSwapTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			SwapQuote quote) {
+
+			var amountIn = default(AssetAmount);
+			var amountOut = default(AssetAmount);
+
+			if (quote.SwapType == SwapType.FixedInput) {
+				amountIn = quote.AmountIn;
+				amountOut = quote.AmountOutWithSlippage;
+			} else {
+				amountIn = quote.AmountInWithSlippage;
+				amountOut = quote.AmountOut;
+			}
+
+			var result = TinymanV2Transaction.PrepareSwapTransactions(
+				mValidatorAppId,
+				amountIn,
+				amountOut,
+				quote.SwapType,
+				sender,
+				txParams);
+
+			return result;
 		}
 
 		protected virtual async Task<TinymanV2Pool> CreatePoolFromAccountInfoAsync(Account accountInfo) {
