@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Tinyman.V2 {
 
-	public static class Contract {
+	public static class TinymanV2Contract {
 
 		private static byte[] mPoolLogicSigTemplate;
 		private static bool mIsInitialized;
@@ -14,7 +14,7 @@ namespace Tinyman.V2 {
 		private static readonly object mLock = new object();
 		private static readonly Dictionary<string, Address> mPoolAddressCache = new Dictionary<string, Address>();
 
-		static Contract() {
+		static TinymanV2Contract() {
 			mIsInitialized = false;
 		}
 
@@ -95,7 +95,7 @@ namespace Tinyman.V2 {
 
 			lock (mLock) {
 				if (!mIsInitialized) {
-					mPoolLogicSigTemplate = Base64.Decode(Constant.PoolLogicSigTemplateAsB64);
+					mPoolLogicSigTemplate = Base64.Decode(TinymanV2Constant.PoolLogicSigTemplateAsB64);
 					mIsInitialized = true;
 				}
 			}

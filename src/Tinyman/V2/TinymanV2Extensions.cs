@@ -9,11 +9,11 @@ namespace Tinyman.V2 {
 		public static byte[] ToApplicationArgument(this SwapType value) {
 
 			if (value == SwapType.FixedInput) {
-				return Constant.FixedInputAppArgument;
+				return TinymanV2Constant.FixedInputAppArgument;
 			}
 
 			if (value == SwapType.FixedOutput) {
-				return Constant.FixedOutputAppArgument;
+				return TinymanV2Constant.FixedOutputAppArgument;
 			}
 
 			throw new ArgumentException($"{nameof(value)} is not valid.");

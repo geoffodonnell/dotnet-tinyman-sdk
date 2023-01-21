@@ -1,7 +1,6 @@
 ﻿using System;
-using Tinyman.Model;
 
-namespace Tinyman.V1.Model {
+namespace Tinyman.Model {
 
 	public class MintQuote {
 
@@ -15,7 +14,7 @@ namespace Tinyman.V1.Model {
 
 		public virtual AssetAmount LiquidityAssetAmountWithSlippage {
 			get {
-				return LiquidityAssetAmount - (LiquidityAssetAmount * Slippage);
+				return LiquidityAssetAmount - LiquidityAssetAmount * Slippage;
 			}
 		}
 

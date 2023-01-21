@@ -34,7 +34,7 @@ namespace Tinyman.V2 {
 			string appCallNote = null) {
 
 			var transactions = new List<Transaction>();
-			var poolLogicsigSignature = Contract.GetPoolLogicsigSignature(validatorAppId, asset1.Id, asset2.Id);
+			var poolLogicsigSignature = TinymanV2Contract.GetPoolLogicsigSignature(validatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicsigSignature.Address;
 
 			var assetIdMax = Math.Max(asset1.Id, asset2.Id);	
@@ -56,7 +56,7 @@ namespace Tinyman.V2 {
 				txParams,
 				onCompletion: OnCompletion.Optin,
 				applicationArgs: new byte[][] {
-					Constant.BootstrapAppArgument
+					TinymanV2Constant.BootstrapAppArgument
 				},
 				foreignAssets: new[] {
 					assetIdMax,
@@ -97,9 +97,9 @@ namespace Tinyman.V2 {
 			string appCallNote = null) {
 
 			var transactions = new List<Transaction>();
-			var poolAddress = Contract.GetPoolAddress(
+			var poolAddress = TinymanV2Contract.GetPoolAddress(
 				validatorAppId, assetAmount1Minimum.Asset.Id, assetAmount2Minimum.Asset.Id);
-			var minFee = Math.Max(Constant.DefaultMinFee, txParams.MinFee);
+			var minFee = Math.Max(TinymanV2Constant.DefaultMinFee, txParams.MinFee);
 			var appCallFee = minFee * 3; // App call contains 2 inner transactions
 
 			// Asset Transfer Txn
@@ -116,7 +116,7 @@ namespace Tinyman.V2 {
 				validatorAppId,
 				txParams,
 				applicationArgs: new byte[][] {
-					Constant.RemoveLiquidityAppArgument,
+					TinymanV2Constant.RemoveLiquidityAppArgument,
 					ApplicationArgument.Number(assetAmount1Minimum.Amount),
 					ApplicationArgument.Number(assetAmount2Minimum.Amount)
 				},
@@ -154,9 +154,9 @@ namespace Tinyman.V2 {
 			string appCallNote = null) {
 
 			var transactions = new List<Transaction>();
-			var poolAddress = Contract.GetPoolAddress(
+			var poolAddress = TinymanV2Contract.GetPoolAddress(
 				validatorAppId, assetAmount1.Asset.Id, assetAmount2.Asset.Id);
-			var minFee = Math.Max(Constant.DefaultMinFee, txParams.MinFee);
+			var minFee = Math.Max(TinymanV2Constant.DefaultMinFee, txParams.MinFee);
 			var appCallFee = minFee * 3; // App call contains 2 inner transactions
 
 			// Asset Transfer Txn
@@ -181,8 +181,8 @@ namespace Tinyman.V2 {
 				validatorAppId,
 				txParams,
 				applicationArgs: new byte[][] {
-					Constant.AddLiquidityAppArgument,
-					Constant.AddLiquidityFlexibleModeAppArgument,
+					TinymanV2Constant.AddLiquidityAppArgument,
+					TinymanV2Constant.AddLiquidityFlexibleModeAppArgument,
 					ApplicationArgument.Number(assetAmountLiquidityMinimum.Amount)
 				},
 				foreignAssets: new[] {
@@ -219,8 +219,8 @@ namespace Tinyman.V2 {
 		string appCallNote = null) {
 
 			var transactions = new List<Transaction>();
-			var poolAddress = Contract.GetPoolAddress(validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
-			var minFee = Math.Max(Constant.DefaultMinFee, txParams.MinFee);
+			var poolAddress = TinymanV2Contract.GetPoolAddress(validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
+			var minFee = Math.Max(TinymanV2Constant.DefaultMinFee, txParams.MinFee);
 			ulong appCallFee = 0;
 			
 			if (swapType == SwapType.FixedInput) {
@@ -245,7 +245,7 @@ namespace Tinyman.V2 {
 				validatorAppId,
 				txParams,
 				applicationArgs: new byte[][] {
-					Constant.SwapAppArgument,
+					TinymanV2Constant.SwapAppArgument,
 					swapType.ToApplicationArgument(),
 					ApplicationArgument.Number(amountOut.Amount)
 				},

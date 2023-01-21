@@ -7,7 +7,7 @@ using System.IO;
 
 namespace Tinyman.V1 {
 
-	public static class Contract {
+	public static class TinymanV1Contract {
 
 		private const string mResourceFileNameV1_0 = "Tinyman.V1.asc.v1_0.json";
 		private const string mResourceFileNameV1_1 = "Tinyman.V1.asc.v1_1.json";
@@ -24,7 +24,7 @@ namespace Tinyman.V1 {
 			= new Dictionary<string, string>();
 		private static bool mIsInitialized;
 
-		static Contract() {
+		static TinymanV1Contract() {
 			mIsInitialized = false;
 		}
 
@@ -90,8 +90,8 @@ namespace Tinyman.V1 {
 
 			var logic = default(ProgramLogic);
 
-			if (validatorAppId == Constant.MainnetValidatorAppIdV1_0 ||
-				validatorAppId == Constant.TestnetValidatorAppIdV1_0) {
+			if (validatorAppId == TinymanV1Constant.MainnetValidatorAppIdV1_0 ||
+				validatorAppId == TinymanV1Constant.TestnetValidatorAppIdV1_0) {
 
 				logic = mPoolLogicSigDefV1_0.Logic;
 			} else {
@@ -159,7 +159,7 @@ namespace Tinyman.V1 {
 
 		private static LogicSigContract LoadPoolLogicSig(string fileName) {
 
-			var assembly = typeof(Contract).Assembly;
+			var assembly = typeof(TinymanV1Contract).Assembly;
 			var serializer = JsonSerializer.CreateDefault();
 
 			var stream = assembly.GetManifestResourceStream(fileName);

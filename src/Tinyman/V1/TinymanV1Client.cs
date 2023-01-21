@@ -6,67 +6,47 @@ using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Buffers.Binary;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Tinyman.Model;
-using Tinyman.V1.Action;
-using Tinyman.V1.Model;
 using Asset = Tinyman.Model.Asset;
 
 namespace Tinyman.V1 {
 
-    /// <summary>
-    /// Provides methods for interacting with Tinyman AMM via Algorand REST API.
-    /// </summary>
-    public class TinymanClient {
+	/// <summary>
+	/// Provides methods for interacting with Tinyman V1 AMM via Algorand REST API.
+	/// </summary>
+	public class TinymanV1Client : TinymanClient {
 
-		protected readonly IDefaultApi mDefaultApi;
-		protected readonly HttpClient mHttpClient;
-		protected readonly ulong mValidatorAppId;
-		protected readonly ConcurrentDictionary<ulong, Asset> mAssetCache;
+		/// <summary>
+		/// Construct a new instance.
+		/// </summary>
+		/// <param name="defaultApi">Algod API client</param>
+		/// <param name="validatorAppId">Tinyman validator application ID</param>
+		public TinymanV1Client(IDefaultApi defaultApi, ulong validatorAppId)
+			: base(defaultApi, validatorAppId) { }
 
-		public IDefaultApi DefaultApi { get => mDefaultApi; }
-
-		public ulong ValidatorAppId { get => mValidatorAppId; }
-
-		public TinymanClient(
-			IDefaultApi defaultApi, ulong validatorAppId) {
-
-			mHttpClient = null;
-			mDefaultApi = defaultApi;
-			mValidatorAppId = validatorAppId;
-			mAssetCache = new ConcurrentDictionary<ulong, Asset>();
-		}
-
-		public TinymanClient(
-			HttpClient httpClient, string url, ulong validatorAppId) {
-
-			mHttpClient = httpClient;
-			mDefaultApi = new DefaultApi(mHttpClient);
-			mValidatorAppId = validatorAppId;
-			mAssetCache = new ConcurrentDictionary<ulong, Asset>();
-		}
-
-		public TinymanClient(
-			string url, string token, ulong validatorAppId) {
-
-			mHttpClient = HttpClientConfigurator.ConfigureHttpClient(url, token);
-			mDefaultApi = new DefaultApi(mHttpClient);
-			mValidatorAppId = validatorAppId;
-			mAssetCache = new ConcurrentDictionary<ulong, Asset>();
+		/// <summary>
+		/// Construct a new instance.
+		/// </summary>
+		/// <param name="httpClient">HttpClient configured with appropriate client headers</param>
+		/// <param name="url">Algod node base URL</param>
+		/// <param name="validatorAppId">Tinyman validator application ID</param>
+		public TinymanV1Client(HttpClient httpClient, string url, ulong validatorAppId)
+			: base(httpClient, url, validatorAppId) {
 		}
 
 		/// <summary>
-		/// Retrieve the current network parameters.
+		/// Construct a new instance.
 		/// </summary>
-		/// <returns>Current network parameters</returns>
-		public virtual async Task<TransactionParametersResponse> FetchTransactionParamsAsync() {
-
-			return await mDefaultApi.TransactionParamsAsync();
+		/// <param name="url">Algod node base URL</param>
+		/// <param name="token">Algod node token</param>
+		/// <param name="validatorAppId">Tinyman validator application ID</param>
+		public TinymanV1Client(string url, string token, ulong validatorAppId) 
+			: base(url, token, validatorAppId) {
 		}
 
 		/// <summary>
@@ -75,9 +55,9 @@ namespace Tinyman.V1 {
 		/// <param name="asset1">First asset</param>
 		/// <param name="asset2">Second asset</param>
 		/// <returns>The pool</returns>
-		public virtual async Task<Pool> FetchPoolAsync(Asset asset1, Asset asset2) {
+		public virtual async Task<TinymanV1Pool> FetchPoolAsync(Asset asset1, Asset asset2) {
 
-			var poolAddress = Contract.GetPoolAddress(mValidatorAppId, asset1.Id, asset2.Id);
+			var poolAddress = TinymanV1Contract.GetPoolAddress(mValidatorAppId, asset1.Id, asset2.Id);
 			var accountInfo = await mDefaultApi.AccountInformationAsync(poolAddress, null, Format.Json);
 
 			return await CreatePoolFromAccountInfoAsync(accountInfo, asset1, asset2);
@@ -88,7 +68,7 @@ namespace Tinyman.V1 {
 		/// </summary>
 		/// <param name="poolAddress">The pool address</param>
 		/// <returns>The pool</returns>
-		public virtual async Task<Pool> FetchPoolAsync(Address poolAddress) {
+		public virtual async Task<TinymanV1Pool> FetchPoolAsync(Address poolAddress) {
 
 			return await FetchPoolAsync(poolAddress.EncodeAsString());
 		}
@@ -98,41 +78,12 @@ namespace Tinyman.V1 {
 		/// </summary>
 		/// <param name="poolAddress">The pool address</param>
 		/// <returns>The pool</returns>
-		public virtual async Task<Pool> FetchPoolAsync(string poolAddress) {
+		public virtual async Task<TinymanV1Pool> FetchPoolAsync(string poolAddress) {
 
 			var accountInfo = await mDefaultApi
 				.AccountInformationAsync(poolAddress, null, Format.Json);
 
 			return await CreatePoolFromAccountInfoAsync(accountInfo);
-		}
-
-		/// <summary>
-		/// Fetch an asset given the asset ID.
-		/// </summary>
-		/// <param name="id">The asset ID</param>
-		/// <returns>The asset</returns>
-		public virtual async Task<Asset> FetchAssetAsync(ulong id) {
-
-			if (mAssetCache.TryGetValue(id, out var value)) {
-				return value;
-			}
-
-			value = await FetchAssetFromApiAsync(id);
-
-			return mAssetCache.GetOrAdd(id, s => value);
-		}
-
-		/// <summary>
-		/// Submit a signed transaction group.
-		/// </summary>
-		/// <param name="transactionGroup">Signed transaction group</param>
-		/// <param name="wait">Wait for confirmation</param>
-		/// <returns>Transaction reponse</returns>
-		public virtual async Task<PostTransactionsResponse> SubmitAsync(
-			TransactionGroup transactionGroup, bool wait = true) {
-
-			return await mDefaultApi
-				.SubmitTransactionGroupAsync(transactionGroup, wait);
 		}
 
 		/// <summary>
@@ -173,7 +124,9 @@ namespace Tinyman.V1 {
 					result.Add(new RedeemQuote {
 						Amount = new AssetAmount(asset, value),
 						PoolAddress = poolAddress,
-						Pool = pool
+						Asset1 = pool.Asset1,
+						Asset2 = pool.Asset2,
+						LiquidityAsset = pool.LiquidityAsset
 					});
 				}
 			}
@@ -200,6 +153,12 @@ namespace Tinyman.V1 {
 			return false;
 		}
 
+		/// <summary>
+		/// Opt-in to Tinyman.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
 		public virtual async Task<PostTransactionsResponse> OptInAsync(
 			Account account,
 			bool wait = true) {
@@ -209,6 +168,13 @@ namespace Tinyman.V1 {
 			return await OptInAsync(account, txParams, wait);
 		}
 
+		/// <summary>
+		/// Opt-in to Tinyman.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
 		public virtual async Task<PostTransactionsResponse> OptInAsync(
 			Account account,
 			TransactionParametersResponse txParams,
@@ -222,6 +188,12 @@ namespace Tinyman.V1 {
 			return await SubmitAsync(txs, wait);
 		}
 
+		/// <summary>
+		/// Opt-out of Tinyman.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
 		public virtual async Task<PostTransactionsResponse> OptOutAsync(
 			Account account,
 			bool wait = true) {
@@ -231,6 +203,13 @@ namespace Tinyman.V1 {
 			return await OptOutAsync(account, txParams, wait);
 		}
 
+		/// <summary>
+		/// Opt-out of Tinyman.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
 		public virtual async Task<PostTransactionsResponse> OptOutAsync(
 			Account account,
 			TransactionParametersResponse txParams,
@@ -244,96 +223,39 @@ namespace Tinyman.V1 {
 			return await SubmitAsync(txs, wait);
 		}
 
+		/// <summary>
+		/// Burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Burn quote</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
 		public virtual async Task<PostTransactionsResponse> BurnAsync(
 			Account account,
-			Burn action,
+			BurnQuote quote,
 			bool wait = true) {
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return await BurnAsync(account, action, txParams, wait);
+			return await BurnAsync(account, quote, txParams, wait);
 		}
 
+		/// <summary>
+		/// Burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Burn quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
 		public virtual async Task<PostTransactionsResponse> BurnAsync(
 			Account account,
-			Burn action,
+			BurnQuote quote,
 			TransactionParametersResponse txParams,
 			bool wait = true) {
 
 			var txs = PrepareBurnTransactions(
-				account.Address, txParams, action);
-
-			txs.Sign(account);
-
-			return await SubmitAsync(txs, wait);
-		}
-
-		public virtual async Task<PostTransactionsResponse> MintAsync(
-			Account account,
-			Mint action,
-			bool wait = true) {
-
-			var txParams = await mDefaultApi.TransactionParamsAsync();
-
-			return await MintAsync(account, action, txParams, wait);
-		}
-
-		public virtual async Task<PostTransactionsResponse> MintAsync(
-			Account account,
-			Mint action,
-			TransactionParametersResponse txParams,
-			bool wait = true) {
-
-			var txs = PrepareMintTransactions(
-				account.Address, txParams, action);
-
-			txs.Sign(account);
-
-			return await SubmitAsync(txs, wait);
-		}
-
-		public virtual async Task<PostTransactionsResponse> SwapAsync(
-			Account account,
-			Swap action,
-			bool wait = true) {
-
-			var txParams = await mDefaultApi.TransactionParamsAsync();
-
-			return await SwapAsync(account, action, txParams, wait);
-		}
-
-		public virtual async Task<PostTransactionsResponse> SwapAsync(
-			Account account,
-			Swap action,
-			TransactionParametersResponse txParams,
-			bool wait = true) {
-
-			var txs = PrepareSwapTransactions(
-				account.Address, txParams, action);
-
-			txs.Sign(account);
-
-			return await SubmitAsync(txs, wait);
-		}
-
-		public virtual async Task<PostTransactionsResponse> RedeemAsync(
-			Account account,
-			Redeem action,
-			bool wait = true) {
-
-			var txParams = await mDefaultApi.TransactionParamsAsync();
-
-			return await RedeemAsync(account, action, txParams, wait);
-		}
-
-		public virtual async Task<PostTransactionsResponse> RedeemAsync(
-			Account account,
-			Redeem action,
-			TransactionParametersResponse txParams,
-			bool wait = true) {
-
-			var txs = PrepareRedeemTransactions(
-				account.Address, txParams, action);
+				account.Address, txParams, quote);
 
 			txs.Sign(account);
 
@@ -341,30 +263,127 @@ namespace Tinyman.V1 {
 		}
 
 		/// <summary>
-		/// Convenience method for retreiving an asset balance for an account 
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
 		/// </summary>
-		/// <param name="address">Account address</param>
-		/// <param name="asset">Asset</param>
-		/// <returns>Asset amount</returns>
-		public virtual async Task<AssetAmount> GetBalanceAsync(
-			Address address,
-			Asset asset) {
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			MintQuote quote,
+			bool wait = true) {
 
-			var info = await mDefaultApi
-				.AccountInformationAsync(address.EncodeAsString(), null, Format.Json);
+			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			if (asset.Id == 0) {
-				return new AssetAmount(asset, Convert.ToUInt64(info.AmountWithoutPendingRewards));
-			}
-
-			var amt = info?.Assets?
-				.Where(s => s.AssetId == asset.Id)
-				.Select(s => s.Amount)
-				.FirstOrDefault() ?? 0;
-
-			return new AssetAmount(asset, amt);
+			return await MintAsync(account, quote, txParams, wait);
 		}
 
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			MintQuote quote,
+			TransactionParametersResponse txParams,
+			bool wait = true) {
+
+			var txs = PrepareMintTransactions(
+				account.Address, txParams, quote);
+
+			txs.Sign(account);
+
+			return await SubmitAsync(txs, wait);
+		}
+
+		/// <summary>
+		/// Swap the assets in the provided quote.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Swap quote</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> SwapAsync(
+			Account account,
+			SwapQuote quote,
+			bool wait = true) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await SwapAsync(account, quote, txParams, wait);
+		}
+
+		/// <summary>
+		/// Swap the assets in the provided quote.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Swap quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> SwapAsync(
+			Account account,
+			SwapQuote quote,
+			TransactionParametersResponse txParams,
+			bool wait = true) {
+
+			var txs = PrepareSwapTransactions(
+				account.Address, txParams, quote);
+
+			txs.Sign(account);
+
+			return await SubmitAsync(txs, wait);
+		}
+
+		/// <summary>
+		/// Redeem a specified excess asset amount from a pool.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Redeem quote</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> RedeemAsync(
+			Account account,
+			RedeemQuote quote,
+			bool wait = true) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await RedeemAsync(account, quote, txParams, wait);
+		}
+
+		/// <summary>
+		/// Redeem a specified excess asset amount from a pool.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Redeem quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> RedeemAsync(
+			Account account,
+			RedeemQuote quote,
+			TransactionParametersResponse txParams,
+			bool wait = true) {
+
+			var txs = PrepareRedeemTransactions(
+				account.Address, txParams, quote);
+
+			txs.Sign(account);
+
+			return await SubmitAsync(txs, wait);
+		}
+
+		/// <summary>
+		/// Prepare a transaction group to opt-in to Tinyman.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual async Task<TransactionGroup> PrepareOptInTransactions(
 			Address sender) {
 
@@ -373,11 +392,17 @@ namespace Tinyman.V1 {
 			return PrepareOptInTransactions(sender, txParams);
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to opt-in to Tinyman.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual TransactionGroup PrepareOptInTransactions(
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var result = TinymanTransaction.PrepareAppOptinTransactions(
+			var result = TinymanV1Transaction.PrepareAppOptinTransactions(
 				mValidatorAppId,
 				sender,
 				txParams);
@@ -385,6 +410,11 @@ namespace Tinyman.V1 {
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to opt-out of Tinyman.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual async Task<TransactionGroup> PrepareOptOutTransactionsAsync(
 			Address sender) {
 
@@ -393,11 +423,17 @@ namespace Tinyman.V1 {
 			return PrepareOptOutTransactions(sender, txParams);
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to opt-out of Tinyman.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual TransactionGroup PrepareOptOutTransactions(
-			Address sender, 
+			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var result = TinymanTransaction.PrepareAppOptoutTransactions(
+			var result = TinymanV1Transaction.PrepareAppOptoutTransactions(
 				mValidatorAppId,
 				sender,
 				txParams);
@@ -405,109 +441,172 @@ namespace Tinyman.V1 {
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="quote">Burn quote</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual async Task<TransactionGroup> PrepareBurnTransactionsAsync(
 			Address sender,
-			Burn action) {
+			BurnQuote quote) {
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return PrepareBurnTransactions(sender, txParams, action);
+			return PrepareBurnTransactions(sender, txParams, quote);
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="quote">Burn quote</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual TransactionGroup PrepareBurnTransactions(
 			Address sender,
 			TransactionParametersResponse txParams,
-			Burn action) {
+			BurnQuote quote) {
 
-			var result = TinymanTransaction.PrepareBurnTransactions(
+			var result = TinymanV1Transaction.PrepareBurnTransactions(
 				mValidatorAppId,
-				action.Amounts.Item1,
-				action.Amounts.Item2,
-				action.LiquidityAssetAmount,
+				quote.AmountsOutWithSlippage.Item1,
+				quote.AmountsOutWithSlippage.Item2,
+				quote.LiquidityAssetAmount,
 				sender,
 				txParams);
 
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="quote">Mint quote</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual async Task<TransactionGroup> PrepareMintTransactionsAsync(
 			Address sender,
-			Mint action) {
+			MintQuote quote) {
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return PrepareMintTransactions(sender, txParams, action);
+			return PrepareMintTransactions(sender, txParams, quote);
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="quote">Mint quote</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual TransactionGroup PrepareMintTransactions(
 			Address sender,
 			TransactionParametersResponse txParams,
-			Mint action) {
+			MintQuote quote) {
 
-			var result = TinymanTransaction.PrepareMintTransactions(
+			var result = TinymanV1Transaction.PrepareMintTransactions(
 				mValidatorAppId,
-				action.Amounts.Item1,
-				action.Amounts.Item2,
-				action.LiquidityAssetAmount,
+				quote.AmountsIn.Item1,
+				quote.AmountsIn.Item2,
+				quote.LiquidityAssetAmountWithSlippage,
 				sender,
 				txParams);
 
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to swap assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="quote">Swap quote</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual async Task<TransactionGroup> PrepareSwapTransactionsAsync(
 			Address sender,
-			Swap action) {
+			SwapQuote quote) {
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return PrepareSwapTransactions(sender, txParams, action);
+			return PrepareSwapTransactions(sender, txParams, quote);
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to swap assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="quote">Swap quote</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual TransactionGroup PrepareSwapTransactions(
 			Address sender,
 			TransactionParametersResponse txParams,
-			Swap action) {
+			SwapQuote quote) {
 
-			var result = TinymanTransaction.PrepareSwapTransactions(
+			var amountIn = default(AssetAmount);
+			var amountOut = default(AssetAmount);
+
+			if (quote.SwapType == SwapType.FixedInput) {
+				amountIn = quote.AmountIn;
+				amountOut = quote.AmountOutWithSlippage;
+			} else {
+				amountIn = quote.AmountInWithSlippage;
+				amountOut = quote.AmountOut;
+			}
+
+			var result = TinymanV1Transaction.PrepareSwapTransactions(
 				mValidatorAppId,
-				action.AmountIn,
-				action.AmountOut,
-				action.Pool.LiquidityAsset,
-				action.SwapType,
+				amountIn,
+				amountOut,
+				quote.LiquidityAsset,
+				quote.SwapType,
 				sender,
 				txParams);
 
 			return result;
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to redeem a specified excess asset amount from a pool.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="quote">Redeem quote</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual async Task<TransactionGroup> PrepareRedeemTransactionsAsync(
 			Address sender,
-			Redeem action) {
+			RedeemQuote quote) {
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return PrepareRedeemTransactions(sender, txParams, action);
+			return PrepareRedeemTransactions(sender, txParams, quote);
 		}
 
+		/// <summary>
+		/// Prepare a transaction group to redeem a specified excess asset amount from a pool.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="quote">Redeem quote</param>
+		/// <returns>Transaction group to execute action</returns>
 		public virtual TransactionGroup PrepareRedeemTransactions(
 			Address sender,
 			TransactionParametersResponse txParams,
-			Redeem action) {
+			RedeemQuote quote) {
 
-			var result = TinymanTransaction.PrepareRedeemTransactions(
+			var result = TinymanV1Transaction.PrepareRedeemTransactions(
 				mValidatorAppId,
-				action.Pool.Asset1,
-				action.Pool.Asset2,
-				action.Pool.LiquidityAsset,
-				action.Amount,
+				quote.Asset1,
+				quote.Asset2,
+				quote.LiquidityAsset,
+				quote.Amount,
 				sender,
 				txParams);
 
 			return result;
 		}
 
-		protected virtual async Task<Pool> CreatePoolFromAccountInfoAsync(Account accountInfo) {
+		protected virtual async Task<TinymanV1Pool> CreatePoolFromAccountInfoAsync(Account accountInfo) {
 
 			var validatorAppState = accountInfo
 				.AppsLocalState
@@ -524,7 +623,7 @@ namespace Tinyman.V1 {
 			return await CreatePoolFromAccountInfoAsync(accountInfo, asset1, asset2);
 		}
 
-		protected virtual async Task<Pool> CreatePoolFromAccountInfoAsync(
+		protected virtual async Task<TinymanV1Pool> CreatePoolFromAccountInfoAsync(
 			Account accountInfo, Asset asset1, Asset asset2) {
 
 			var validatorAppId = accountInfo.AppsLocalState.FirstOrDefault()?.Id;
@@ -542,7 +641,7 @@ namespace Tinyman.V1 {
 			var asset1Id = Util.GetStateInt(validatorAppState, "a1");
 			var asset2Id = Util.GetStateInt(validatorAppState, "a2");
 
-			var poolAddress = Contract.GetPoolAddress(
+			var poolAddress = TinymanV1Contract.GetPoolAddress(
 				validatorAppId.GetValueOrDefault(),
 				asset1Id.GetValueOrDefault(),
 				asset2Id.GetValueOrDefault());
@@ -573,7 +672,7 @@ namespace Tinyman.V1 {
 			var outstandingLiquidityAssetAmount = Util.GetStateInt(
 				validatorAppState, Util.IntToStateKey(liquidityAssetId.GetValueOrDefault()));
 
-			var result = new Pool(asset1, asset2) {
+			var result = new TinymanV1Pool(asset1, asset2) {
 				Exists = exists,
 				Address = poolAddress,
 				LiquidityAsset = liquidityAsset,
@@ -600,27 +699,6 @@ namespace Tinyman.V1 {
 			}
 
 			return result;
-		}
-
-		protected virtual async Task<Asset> FetchAssetFromApiAsync(ulong id) {
-
-			if (id == 0) {
-				return new Asset {
-					Id = 0,
-					Name = "Algo",
-					UnitName = "ALGO",
-					Decimals = 6
-				};
-			}
-
-			var asset = await mDefaultApi.GetAssetByIDAsync(id);
-
-			return new Asset {
-				Id = (ulong)asset.Index,
-				Name = asset.Params.Name,
-				UnitName = asset.Params.UnitName,
-				Decimals = (int)asset.Params.Decimals
-			};
 		}
 
 	}

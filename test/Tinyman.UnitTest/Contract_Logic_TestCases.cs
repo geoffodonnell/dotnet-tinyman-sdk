@@ -8,8 +8,8 @@ namespace Tinyman.UnitTest {
 	[TestClass]
 	public class Contract_Logic_TestCases {
 
-		public const ulong AppIdV1_0 = Constant.TestnetValidatorAppIdV1_0;
-		public const ulong AppIdV1_1 = Constant.TestnetValidatorAppIdV1_1;
+		public const ulong AppIdV1_0 = TinymanV1Constant.TestnetValidatorAppIdV1_0;
+		public const ulong AppIdV1_1 = TinymanV1Constant.TestnetValidatorAppIdV1_1;
 
 		public const ulong AssetId1 = 0;
 		public const ulong AssetId2 = 21582668;
@@ -42,7 +42,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Get_Pool_Logic_V1_0() {
 
-			var logicSig = Contract
+			var logicSig = TinymanV1Contract
 				.GetPoolLogicsigSignature(AppIdV1_0, AssetId1, AssetId2);
 
 			var poolLogic = Base64
@@ -54,7 +54,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Get_Pool_Logic_Assets_Reversed_V1_0() {
 
-			var logicSig = Contract
+			var logicSig = TinymanV1Contract
 				.GetPoolLogicsigSignature(AppIdV1_0, AssetId2, AssetId1);
 
 			var poolLogic = Base64
@@ -66,7 +66,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Get_Pool_Logic_V1_1() {
 
-			var logicSig = Contract
+			var logicSig = TinymanV1Contract
 				.GetPoolLogicsigSignature(AppIdV1_1, AssetId1, AssetId2);
 
 			var poolLogic = Base64
@@ -78,7 +78,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Get_Pool_Logic_Assets_Reversed_V1_1() {
 
-			var logicSig = Contract
+			var logicSig = TinymanV1Contract
 				.GetPoolLogicsigSignature(AppIdV1_1, AssetId2, AssetId1);
 
 			var poolLogic = Base64

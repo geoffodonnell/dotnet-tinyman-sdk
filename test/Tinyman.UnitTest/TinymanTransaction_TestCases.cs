@@ -14,7 +14,7 @@ namespace Tinyman.UnitTest {
     [TestClass]
 	public class TinymanTransaction_TestCases {
 
-		public static ulong AppId = Tinyman.V1.Constant.MainnetValidatorAppIdV1_1;
+		public static ulong AppId = Tinyman.V1.TinymanV1Constant.MainnetValidatorAppIdV1_1;
 
 		public static Asset Asset1 = new Asset {
 			Id = 31566704,
@@ -69,7 +69,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareAppOptinTransactions() {
 
-			var group = TinymanTransaction.PrepareAppOptinTransactions(AppId, Account.Address, TxParams);
+			var group = TinymanV1Transaction.PrepareAppOptinTransactions(AppId, Account.Address, TxParams);
 
 			group.Sign(Account);
 
@@ -82,7 +82,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareAppOptoutTransactions() {
 
-			var group = TinymanTransaction.PrepareAppOptoutTransactions(AppId, Account.Address, TxParams);
+			var group = TinymanV1Transaction.PrepareAppOptoutTransactions(AppId, Account.Address, TxParams);
 
 			group.Sign(Account);
 
@@ -95,7 +95,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareAssetOptinTransactions() {
 
-			var group = TinymanTransaction.PrepareAssetOptinTransactions(Asset1.Id, Account.Address, TxParams);
+			var group = TinymanV1Transaction.PrepareAssetOptinTransactions(Asset1.Id, Account.Address, TxParams);
 
 			group.Sign(Account);
 
@@ -108,7 +108,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareBootstrapTransactions() {
 
-			var group = TinymanTransaction.PrepareBootstrapTransactions(AppId, Asset1, Asset2, Account.Address, TxParams);
+			var group = TinymanV1Transaction.PrepareBootstrapTransactions(AppId, Asset1, Asset2, Account.Address, TxParams);
 
 			Assert.IsTrue(group.Transactions.Length == 4);
 			Assert.IsTrue(group.SignedTransactions.Length == 4);
@@ -143,7 +143,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareBurnTransactions() {
 
-			var group = TinymanTransaction.PrepareBurnTransactions(
+			var group = TinymanV1Transaction.PrepareBurnTransactions(
 				AppId,
 				new AssetAmount(Asset1, 1000000),
 				new AssetAmount(Asset2, 1000000),
@@ -162,7 +162,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareMintTransactions() {
 
-			var group = TinymanTransaction.PrepareMintTransactions(
+			var group = TinymanV1Transaction.PrepareMintTransactions(
 				AppId,
 				new AssetAmount(Asset1, 1000000),
 				new AssetAmount(Asset2, 1000000),
@@ -181,7 +181,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareRedeemTransactions() {
 
-			var group = TinymanTransaction.PrepareRedeemTransactions(
+			var group = TinymanV1Transaction.PrepareRedeemTransactions(
 				AppId,
 				Asset1,
 				Asset2,
@@ -201,7 +201,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareSwapTransactions_FixedInput_01() {
 
-			var group = TinymanTransaction.PrepareSwapTransactions(
+			var group = TinymanV1Transaction.PrepareSwapTransactions(
 				AppId,
 				new AssetAmount(Asset1, 1000000),
 				new AssetAmount(Asset2, 1000000),
@@ -221,7 +221,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareSwapTransactions_FixedInput_02() {
 
-			var group = TinymanTransaction.PrepareSwapTransactions(
+			var group = TinymanV1Transaction.PrepareSwapTransactions(
 				AppId,
 				new AssetAmount(Asset2, 1000000),
 				new AssetAmount(Asset1, 1000000),
@@ -241,7 +241,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareSwapTransactions_FixedOutput_01() {
 
-			var group = TinymanTransaction.PrepareSwapTransactions(
+			var group = TinymanV1Transaction.PrepareSwapTransactions(
 				AppId,
 				new AssetAmount(Asset1, 1000000),
 				new AssetAmount(Asset2, 1000000),
@@ -261,7 +261,7 @@ namespace Tinyman.UnitTest {
 		[TestMethod]
 		public void Verify_PrepareSwapTransactions_FixedOutput_02() {
 
-			var group = TinymanTransaction.PrepareSwapTransactions(
+			var group = TinymanV1Transaction.PrepareSwapTransactions(
 				AppId,
 				new AssetAmount(Asset2, 1000000),
 				new AssetAmount(Asset1, 1000000),

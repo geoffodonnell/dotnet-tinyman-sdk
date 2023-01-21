@@ -2,7 +2,10 @@
 
 namespace Tinyman.V2 {
 
-	public static class Constant {
+	public static class TinymanV2Constant {
+
+		public const string AlgodTestnetHost = "https://testnet-api.algonode.cloud";
+		public const string AlgodMainnetHost = "https://mainnet-api.algonode.cloud";
 
 		public const ulong DefaultMinFee = 1000;
 

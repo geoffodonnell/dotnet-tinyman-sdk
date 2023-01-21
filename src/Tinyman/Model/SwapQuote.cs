@@ -1,7 +1,6 @@
 ﻿using System;
-using Tinyman.Model;
 
-namespace Tinyman.V1.Model {
+namespace Tinyman.Model {
 
 	public class SwapQuote {
 
@@ -13,9 +12,9 @@ namespace Tinyman.V1.Model {
 
 		public virtual AssetAmount SwapFees { get; internal set; }
 
-		public virtual double Slippage { get; internal set;	}
+		public virtual double Slippage { get; internal set; }
 
-		internal Pool Pool { get; set; }
+		public virtual Asset LiquidityAsset { get; internal set; }
 
 		public virtual AssetAmount AmountOutWithSlippage {
 			get {
@@ -24,7 +23,7 @@ namespace Tinyman.V1.Model {
 				}
 
 				if (SwapType == SwapType.FixedInput) {
-					return AmountOut - (AmountOut * Slippage);
+					return AmountOut - AmountOut * Slippage;
 				}
 
 				throw new ArgumentOutOfRangeException("Invalid SwapType.");
@@ -38,7 +37,7 @@ namespace Tinyman.V1.Model {
 				}
 
 				if (SwapType == SwapType.FixedOutput) {
-					return AmountIn + (AmountIn * Slippage);
+					return AmountIn + AmountIn * Slippage;
 				}
 
 				throw new ArgumentOutOfRangeException("Invalid SwapType.");
@@ -51,10 +50,6 @@ namespace Tinyman.V1.Model {
 
 		public virtual double PriceWithSlippage {
 			get => AmountOutWithSlippage.Amount / (double)AmountInWithSlippage.Amount;
-		}
-
-		public SwapQuote(Pool pool) {
-			Pool = pool;
 		}
 
 	}

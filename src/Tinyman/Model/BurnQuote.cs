@@ -1,7 +1,6 @@
 ﻿using System;
-using Tinyman.Model;
 
-namespace Tinyman.V1.Model {
+namespace Tinyman.Model {
 
 	public class BurnQuote {
 
@@ -15,7 +14,7 @@ namespace Tinyman.V1.Model {
 
 		public virtual Tuple<AssetAmount, AssetAmount> AmountsOutWithSlippage {
 			get {
-				return AmountsOut.Select(s => s - (s * Slippage));
+				return AmountsOut.Select(s => s - s * Slippage);
 			}
 		}
 

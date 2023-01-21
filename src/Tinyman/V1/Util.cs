@@ -74,8 +74,9 @@ namespace Tinyman.V1 {
             }
 
             return result.ToArray();
-        }  
+        }
 
+        [Obsolete("This method will be removed in future versions of this library.")]
         public static async Task<PostTransactionsResponse> SignAndSubmitTransactions(
             DefaultApi client,
             Transaction[] transactions,

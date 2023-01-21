@@ -1,6 +1,6 @@
 ﻿namespace Tinyman.V1 {
 
-	public static class Constant {
+	public static class TinymanV1Constant {
 
 		public const string AlgodTestnetHost = "https://testnet-api.algonode.cloud";
 		public const string AlgodMainnetHost = "https://mainnet-api.algonode.cloud";

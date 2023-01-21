@@ -15,7 +15,7 @@ namespace Tinyman.V1 {
     /// <summary>
     /// Create transaction groups for common actions
     /// </summary>
-    public static class TinymanTransaction {
+    public static class TinymanV1Transaction {
 
 		/// <summary>
 		/// Prepare a transaction group to opt-in to Tinyman
@@ -81,7 +81,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicsigSignature(validatorAppId, asset1.Id, asset2.Id);
+			var poolLogicSig = TinymanV1Contract.GetPoolLogicsigSignature(validatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicSig.Address;
 
 			// Id of Asset1 needs to be less than Asset2
@@ -127,8 +127,8 @@ namespace Tinyman.V1 {
 			var name = String.Empty;
 			var unitName = String.Empty;
 
-			if (validatorAppId == Constant.TestnetValidatorAppIdV1_0 ||
-				validatorAppId == Constant.MainnetValidatorAppIdV1_0) {
+			if (validatorAppId == TinymanV1Constant.TestnetValidatorAppIdV1_0 ||
+				validatorAppId == TinymanV1Constant.MainnetValidatorAppIdV1_0) {
 				unitName = "TM1POOL";
 				name = $"Tinyman Pool {asset1.UnitName}-{asset2.UnitName}";
 			} else {
@@ -181,7 +181,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicsigSignature(
+			var poolLogicSig = TinymanV1Contract.GetPoolLogicsigSignature(
 				validatorAppId, assetAmount1.Asset.Id, assetAmount2.Asset.Id);
 			var poolAddress = poolLogicSig.Address;
 			
@@ -198,7 +198,7 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
-					Constant.BurnFee,
+					TinymanV1Constant.BurnFee,
 					txParams,
 					note: Strings.ToUtf8ByteArray("fee")));
 
@@ -282,7 +282,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicsigSignature(
+			var poolLogicSig = TinymanV1Contract.GetPoolLogicsigSignature(
 				validatorAppId, assetAmount1.Asset.Id, assetAmount2.Asset.Id);
 			var poolAddress = poolLogicSig.Address;
 
@@ -299,7 +299,7 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
-					Constant.MintFee,
+					TinymanV1Constant.MintFee,
 					txParams,
 					note: Strings.ToUtf8ByteArray("fee")));
 
@@ -385,7 +385,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicsigSignature(
+			var poolLogicSig = TinymanV1Contract.GetPoolLogicsigSignature(
 				validatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicSig.Address;
 
@@ -400,7 +400,7 @@ namespace Tinyman.V1 {
 					   			 		  		  		 	   			
 			// PaymentTxn
 			transactions.Add(TxnFactory.Pay(
-					sender, poolAddress, Constant.RedeemFee, txParams));
+					sender, poolAddress, TinymanV1Constant.RedeemFee, txParams));
 
 			// ApplicationNoOpTxn
 			var applicationArgs = new byte[][] {
@@ -474,7 +474,7 @@ namespace Tinyman.V1 {
 			Address sender,
 			TransactionParametersResponse txParams) {
 
-			var poolLogicSig = Contract.GetPoolLogicsigSignature(
+			var poolLogicSig = TinymanV1Contract.GetPoolLogicsigSignature(
 				validatorAppId, amountIn.Asset.Id, amountOut.Asset.Id);
 			var poolAddress = poolLogicSig.Address;
 
@@ -484,7 +484,7 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
-					Constant.SwapFee,
+					TinymanV1Constant.SwapFee,
 					txParams,
 					note: Strings.ToUtf8ByteArray("fee")));
 
@@ -584,7 +584,7 @@ namespace Tinyman.V1 {
 				throw new Exception("Amount to redeem must be liquidity pool asset.");
 			}
 
-			var poolLogicSig = Contract.GetPoolLogicsigSignature(
+			var poolLogicSig = TinymanV1Contract.GetPoolLogicsigSignature(
 				validatorAppId, asset1.Id, asset2.Id);
 			var poolAddress = poolLogicSig.Address;
 
@@ -594,7 +594,7 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
-					Constant.RedeemFeesFee,
+					TinymanV1Constant.RedeemFeesFee,
 					txParams,
 					note: Strings.ToUtf8ByteArray("fee")));
 
