@@ -2,10 +2,8 @@
 using Algorand.Algod;
 using Algorand.Algod.Model;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Asset = Tinyman.Model.Asset;
 
@@ -80,23 +78,6 @@ namespace Tinyman.V2 {
 
 			return await CreatePoolFromAccountInfoAsync(accountInfo);
 		}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 		protected virtual async Task<TinymanV2Pool> CreatePoolFromAccountInfoAsync(Account accountInfo) {
 

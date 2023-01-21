@@ -14,6 +14,8 @@ namespace Tinyman.Model {
 
 		public virtual double Slippage { get; internal set; }
 
+		public virtual double? PriceImpact { get; internal set; }
+
 		public virtual Asset LiquidityAsset { get; internal set; }
 
 		public virtual AssetAmount AmountOutWithSlippage {

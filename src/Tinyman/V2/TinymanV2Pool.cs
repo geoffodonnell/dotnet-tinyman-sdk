@@ -42,6 +42,106 @@ namespace Tinyman.V2 {
 			return null;
 		}
 
+		public virtual SwapQuote CalculateFixedInputSwapQuote(
+			AssetAmount amountIn,
+			double slippage = 0.005) {
+
+			Asset assetOut;
+			ulong inputSupply;
+			ulong outputSupply;
+
+			if (amountIn.Asset == Asset1) {
+				assetOut = Asset2;
+				inputSupply = Asset1Reserves;
+				outputSupply = Asset2Reserves;
+			} else {
+				assetOut = Asset1;
+				inputSupply = Asset2Reserves;
+				outputSupply = Asset1Reserves;
+			}
+
+			if (inputSupply == 0 || outputSupply == 0) {
+				throw new Exception("Pool has no liquidity!");
+			}
+
+			var totalFeeAmount = CalculateFixedInputFeeAmount(amountIn.Amount);
+			var swapAmount = amountIn.Amount - totalFeeAmount;
+			
+			if (!TryCalculateOutputAmountOfFixedInputSwap(inputSupply, outputSupply, swapAmount, out var assetOutAmount)) {
+				throw new Exception("Insufficient reserves");
+			}
+
+			var priceImpact = CalculatePriceImpact(inputSupply, outputSupply, amountIn.Amount, assetOutAmount);
+			var amountOut = new AssetAmount(assetOut, assetOutAmount);
+			var swapFees = new AssetAmount(amountIn.Asset, totalFeeAmount);
+
+			var result = new SwapQuote() {
+				SwapType = SwapType.FixedInput,
+				AmountIn = amountIn,
+				AmountOut = amountOut,
+				SwapFees = swapFees,
+				Slippage = slippage,
+				PriceImpact = priceImpact,
+				LiquidityAsset = LiquidityAsset
+			};
+
+			return result;
+		}
+
+		protected virtual bool TryCalculateOutputAmountOfFixedInputSwap(
+			ulong inputSupply, ulong outputSupply, ulong swapAmount, out ulong swapOutputAmount) {
+
+			var k = BigInteger.Multiply(inputSupply, outputSupply);
+			var inputSide = (ulong)BigInteger.Divide(k, BigInteger.Add(inputSupply, swapAmount)) + 1;
+
+			if (outputSupply < inputSide) {
+				swapOutputAmount = 0;
+				return false;
+			}
+
+			swapOutputAmount = outputSupply - inputSide;
+
+			return true;
+		}
+
+		protected virtual ulong CalculateFixedInputFeeAmount(ulong inputAmount) {
+			return (ulong)BigInteger.Divide(
+				BigInteger.Multiply(inputAmount, TotalFeeShare), 10_000);
+		}
+
+		protected virtual ulong CalculateFixedOutputFeeAmount(ulong swapAmount) {
+
+			var inputAmount = (ulong)BigInteger.Divide(
+				BigInteger.Multiply(swapAmount, 10_000),
+				BigInteger.Subtract(10_000, TotalFeeShare));
+
+			return inputAmount - swapAmount;
+		}
+
+		protected virtual ulong CalculateProtocolFeeAmount(ulong totalFeeAmount) {
+			return totalFeeAmount / ProtocolFeeRatio;
+		}
+
+		protected virtual ulong CalculatePoolersFeeAmount(ulong totalFeeAmount) {
+
+			var protocolFeeAmount = CalculateProtocolFeeAmount(totalFeeAmount);
+
+			return totalFeeAmount - protocolFeeAmount;
+		}
+
+		protected static double CalculatePriceImpact(
+			ulong inputSupply,
+			ulong outputSupply,
+			ulong swapInputAmount,
+			ulong swapOutputAmount) {
+
+			var swapPrice = (double)swapOutputAmount / (double)swapInputAmount;
+			var poolPrice = (double)outputSupply / (double)inputSupply;
+			var result = Math.Abs(Math.Round(((double)swapPrice / (double)poolPrice) - 1, 5));
+
+			return result;
+		}
+
 	}
 
 }
