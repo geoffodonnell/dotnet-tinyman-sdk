@@ -9,6 +9,9 @@ using Asset = Tinyman.Model.Asset;
 
 namespace Tinyman.V2 {
 
+	/// <summary>
+	/// Create transaction groups for common actions on the Tinyman V2 AMM
+	/// </summary>
 	public static class TinymanV2Transaction {
 
 		/// <summary>

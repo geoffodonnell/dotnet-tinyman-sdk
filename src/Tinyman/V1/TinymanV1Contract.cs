@@ -7,6 +7,9 @@ using System.IO;
 
 namespace Tinyman.V1 {
 
+	/// <summary>
+	/// Tinyman V1 AMM contract methods
+	/// </summary>
 	public static class TinymanV1Contract {
 
 		private const string mResourceFileNameV1_0 = "Tinyman.V1.asc.v1_0.json";

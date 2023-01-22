@@ -13,7 +13,7 @@ using Asset = Tinyman.Model.Asset;
 namespace Tinyman.V1 {
 
     /// <summary>
-    /// Create transaction groups for common actions
+    /// Create transaction groups for common actions on the Tinyman V1 AMM
     /// </summary>
     public static class TinymanV1Transaction {
 

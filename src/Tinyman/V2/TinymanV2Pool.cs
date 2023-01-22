@@ -4,6 +4,9 @@ using Tinyman.Model;
 
 namespace Tinyman.V2 {
 
+	/// <summary>
+	/// Represents an asset pool within the Tinyman V2 AMM
+	/// </summary>
 	public class TinymanV2Pool : Pool {
 
 		public virtual ulong Asset1ProtocolFees { get; set; }
@@ -27,19 +30,6 @@ namespace Tinyman.V2 {
 			}
 
 			Exists = false;
-		}
-
-		public virtual AssetAmount Convert(AssetAmount amount) {
-
-			if (amount.Asset == Asset1) {
-				return new AssetAmount(Asset2, amount.Amount * Asset1Price);
-			}
-
-			if (amount.Asset == Asset2) {
-				return new AssetAmount(Asset1, amount.Amount * Asset2Price);
-			}
-
-			return null;
 		}
 
 		public virtual SwapQuote CalculateFixedInputSwapQuote(
@@ -75,7 +65,7 @@ namespace Tinyman.V2 {
 			var amountOut = new AssetAmount(assetOut, assetOutAmount);
 			var swapFees = new AssetAmount(amountIn.Asset, totalFeeAmount);
 
-			var result = new SwapQuote() {
+			var result = new SwapQuote {
 				SwapType = SwapType.FixedInput,
 				AmountIn = amountIn,
 				AmountOut = amountOut,
@@ -124,7 +114,7 @@ namespace Tinyman.V2 {
 			var amountIn = new AssetAmount(assetIn, assetInAmount);
 			var swapFees = new AssetAmount(amountIn.Asset, totalFeeAmount);
 
-			var result = new SwapQuote() {
+			var result = new SwapQuote {
 				SwapType = SwapType.FixedOutput,
 				AmountIn = amountIn,
 				AmountOut = amountOut,
@@ -132,6 +122,104 @@ namespace Tinyman.V2 {
 				Slippage = slippage,
 				PriceImpact = priceImpact,
 				LiquidityAsset = LiquidityAsset
+			};
+
+			return result;
+		}
+
+		public virtual BurnQuote CalculateBurnQuote(
+			AssetAmount amountIn,
+			double slippage = 0.005) {
+
+			if (LiquidityAsset.Id != amountIn.Asset.Id) {
+				throw new ArgumentException(
+					$"Expected '{nameof(amountIn)}' to be liquidity pool asset amount.");
+			}
+
+			ulong asset1Amount;
+			ulong asset2Amount;
+
+			if (IssuedLiquidity > (amountIn.Amount + TinymanV2Constant.LockedPoolTokens)) {
+				asset1Amount = (ulong)BigInteger.Divide(
+					BigInteger.Multiply(amountIn.Amount, Asset1Reserves), IssuedLiquidity);
+				asset2Amount = (ulong)BigInteger.Divide(
+					BigInteger.Multiply(amountIn.Amount, Asset2Reserves), IssuedLiquidity);
+			} else {
+				asset1Amount = Asset1Reserves;
+				asset2Amount = Asset2Reserves;
+			}
+
+			var result = new BurnQuote {
+				AmountsOut = new Tuple<AssetAmount, AssetAmount>(
+					new AssetAmount(Asset1, asset1Amount),
+					new AssetAmount(Asset2, asset2Amount)),
+				LiquidityAssetAmount = amountIn,
+				Slippage = slippage
+			};
+
+			return result;
+		}
+
+		public virtual MintQuote CalculateMintQuote(
+			AssetAmount amount,
+			double slippage = 0.005) {
+
+			return CalculateMintQuote(
+				new Tuple<AssetAmount, AssetAmount>(amount, null), slippage);
+		}
+
+		public virtual MintQuote CalculateMintQuote(
+			Tuple<AssetAmount, AssetAmount> amounts,
+			double slippage = 0.005) {
+
+			var amount1 = default(AssetAmount);
+			var amount2 = default(AssetAmount);
+
+			if (amounts.Item1?.Asset == Asset1) {
+				amount1 = amounts.Item1;
+				amount2 = amounts.Item2;
+			} else {
+				amount1 = amounts.Item2;
+				amount2 = amounts.Item1;
+			}
+
+			var liquidityAssetAmount = 0ul;
+
+			if (!Exists) {
+				throw new Exception("Pool has not been bootstrapped yet!");
+			}
+
+			// Pool exists and contains assets
+			if (IssuedLiquidity > 0) {
+
+				if (amount1 == null) {
+					amount1 = Convert(amount2);
+				}
+
+				if (amount2 == null) {
+					amount2 = Convert(amount1);
+				}
+
+				liquidityAssetAmount = Math.Min(
+					(ulong)BigInteger.Divide(BigInteger.Multiply(amount1.Amount, IssuedLiquidity), Asset1Reserves),
+					(ulong)BigInteger.Divide(BigInteger.Multiply(amount2.Amount, IssuedLiquidity), Asset2Reserves));
+
+				// Pool exists does not contain assets
+			} else {
+
+				if (amount1 == null || amount2 == null) {
+					throw new Exception("Amounts required for both assets for first mint!");
+				}
+
+				liquidityAssetAmount = System.Convert.ToUInt64(
+					Math.Sqrt((double)BigInteger.Multiply(amount1.Amount, amount2.Amount)) - 1000);
+				slippage = 0;
+			}
+
+			var result = new MintQuote {
+				AmountsIn = new Tuple<AssetAmount, AssetAmount>(amount1, amount2),
+				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
+				Slippage = slippage
 			};
 
 			return result;
@@ -187,6 +275,15 @@ namespace Tinyman.V2 {
 
 			return inputAmount - swapAmount;
 		}
+
+
+
+
+
+
+
+
+
 
 		protected virtual ulong CalculateProtocolFeeAmount(ulong totalFeeAmount) {
 			return totalFeeAmount / ProtocolFeeRatio;

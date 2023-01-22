@@ -10,17 +10,13 @@ namespace Tinyman.Model {
 
 		public virtual double Slippage { get; internal set; }
 
-		internal Pool Pool { get; set; }
-
 		public virtual Tuple<AssetAmount, AssetAmount> AmountsOutWithSlippage {
 			get {
 				return AmountsOut.Select(s => s - s * Slippage);
 			}
 		}
 
-		public BurnQuote(Pool pool) {
-			Pool = pool;
-		}
+		public BurnQuote() { }
 
 	}
 

@@ -54,6 +54,8 @@ namespace Tinyman.Model {
 			get => AmountOutWithSlippage.Amount / (double)AmountInWithSlippage.Amount;
 		}
 
+		public SwapQuote() { }
+
 	}
 
 }

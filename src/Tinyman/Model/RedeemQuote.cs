@@ -14,7 +14,7 @@ namespace Tinyman.Model {
 
 		public virtual Asset LiquidityAsset { get; internal set; }
 
-		internal RedeemQuote() { }
+		public RedeemQuote() { }
 
 	}
 

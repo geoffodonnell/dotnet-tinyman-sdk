@@ -4,6 +4,9 @@ using Tinyman.Model;
 
 namespace Tinyman.V2 {
 
+	/// <summary>
+	/// Extension methods
+	/// </summary>
 	public static class TinymanV2Extensions {
 
 		public static byte[] ToApplicationArgument(this SwapType value) {

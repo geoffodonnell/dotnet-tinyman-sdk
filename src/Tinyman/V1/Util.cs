@@ -14,6 +14,9 @@ using Algorand.Algod.Model.Transactions;
 
 namespace Tinyman.V1 {
 
+    /// <summary>
+    /// Usefule utility methods
+    /// </summary>
 	public static class Util {
                
         internal static byte[] GetProgram(

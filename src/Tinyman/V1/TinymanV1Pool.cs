@@ -4,6 +4,9 @@ using Tinyman.Model;
 
 namespace Tinyman.V1 {
 
+	/// <summary>
+	/// Represents an asset pool within the Tinyman V1 AMM
+	/// </summary>
 	public class TinymanV1Pool : Pool {
 
 		public virtual ulong UnclaimedProtocolFees { get; set; }
@@ -27,19 +30,6 @@ namespace Tinyman.V1 {
 			}
 
 			Exists = false;
-		}
-
-		public virtual AssetAmount Convert(AssetAmount amount) {
-
-			if (amount.Asset == Asset1) {
-				return new AssetAmount(Asset2, amount.Amount * Asset1Price);
-			}
-
-			if (amount.Asset == Asset2) {
-				return new AssetAmount(Asset1, amount.Amount * Asset2Price);
-			}
-
-			return null;
 		}
 
 		public virtual SwapQuote CalculateFixedInputSwapQuote(
@@ -77,7 +67,7 @@ namespace Tinyman.V1 {
 				Amount = assetOutAmount
 			};
 
-			var result = new SwapQuote() {
+			var result = new SwapQuote {
 				SwapType = SwapType.FixedInput,
 				AmountIn = amountIn,
 				AmountOut = amountOut,
@@ -127,7 +117,7 @@ namespace Tinyman.V1 {
 				Amount = System.Convert.ToUInt64(assetInAmount)
 			};
 
-			var result = new SwapQuote() {
+			var result = new SwapQuote {
 				SwapType = SwapType.FixedOutput,
 				AmountIn = amountIn,
 				AmountOut = amountOut,
@@ -156,7 +146,7 @@ namespace Tinyman.V1 {
 			var asset2Amount = BigInteger.Divide(
 				BigInteger.Multiply(amountIn.Amount, Asset2Reserves), IssuedLiquidity);
 
-			var result = new BurnQuote(this) {
+			var result = new BurnQuote {
 				AmountsOut = new Tuple<AssetAmount, AssetAmount>(
 					new AssetAmount(Asset1, (ulong)asset1Amount),
 					new AssetAmount(Asset2, (ulong)asset2Amount)),
@@ -223,7 +213,7 @@ namespace Tinyman.V1 {
 				slippage = 0;
 			}
 
-			var result = new MintQuote(this) {
+			var result = new MintQuote {
 				AmountsIn = new Tuple<AssetAmount, AssetAmount>(amount1, amount2),
 				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
 				Slippage = slippage

@@ -1,5 +1,8 @@
 ﻿namespace Tinyman.V1 {
 
+	/// <summary>
+	/// Tinyman V1 AMM constant values
+	/// </summary>
 	public static class TinymanV1Constant {
 
 		public const string AlgodTestnetHost = "https://testnet-api.algonode.cloud";

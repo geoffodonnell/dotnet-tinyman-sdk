@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace Tinyman.V2 {
 
+	/// <summary>
+	/// Tinyman V2 AMM contract methods
+	/// </summary>
 	public static class TinymanV2Contract {
 
 		private static byte[] mPoolLogicSigTemplate;

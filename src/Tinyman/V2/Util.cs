@@ -8,7 +8,10 @@ using System.Text;
 
 namespace Tinyman.V2 {
 
-    internal static class Util {
+	/// <summary>
+	/// Usefule utility methods
+	/// </summary>
+	internal static class Util {
                
         public static byte[] IntToBytes(ulong value) {
 
