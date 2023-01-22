@@ -21,6 +21,9 @@ namespace Tinyman.V1 {
 	/// </summary>
 	public class TinymanV1Client : TinymanClient {
 
+		/// <inheritdoc />
+		public override string Version => "v1";
+
 		/// <summary>
 		/// Construct a new instance.
 		/// </summary>

@@ -44,7 +44,7 @@ namespace Tinyman.V1 {
 
 		public virtual SwapQuote CalculateFixedInputSwapQuote(
 			AssetAmount amountIn,
-			double slippage = 0.05) {
+			double slippage = 0.005) {
 
 			Asset assetOut;
 			ulong inputSupply;
@@ -94,7 +94,7 @@ namespace Tinyman.V1 {
 
 		public virtual SwapQuote CalculateFixedOutputSwapQuote(
 			AssetAmount amountOut,
-			double slippage = 0.05) {
+			double slippage = 0.005) {
 
 			Asset assetIn;
 			ulong inputSupply;
@@ -144,7 +144,7 @@ namespace Tinyman.V1 {
 
 		public virtual BurnQuote CalculateBurnQuote(
 			AssetAmount amountIn,
-			double slippage = 0.05) {
+			double slippage = 0.005) {
 
 			if (LiquidityAsset.Id != amountIn.Asset.Id) {
 				throw new ArgumentException(
@@ -169,7 +169,7 @@ namespace Tinyman.V1 {
 
 		public virtual MintQuote CalculateMintQuote(
 			AssetAmount amount,
-			double slippage = 0.05) {
+			double slippage = 0.005) {
 
 			return CalculateMintQuote(
 				new Tuple<AssetAmount, AssetAmount>(amount, null), slippage);
@@ -177,7 +177,7 @@ namespace Tinyman.V1 {
 
 		public virtual MintQuote CalculateMintQuote(
 			Tuple<AssetAmount, AssetAmount> amounts,
-			double slippage = 0.05) {
+			double slippage = 0.005) {
 
 			var amount1 = default(AssetAmount);
 			var amount2 = default(AssetAmount);

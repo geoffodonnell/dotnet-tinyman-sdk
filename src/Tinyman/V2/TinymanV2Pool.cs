@@ -88,6 +88,55 @@ namespace Tinyman.V2 {
 			return result;
 		}
 
+		public virtual SwapQuote CalculateFixedOutputSwapQuote(
+			AssetAmount amountOut,
+			double slippage = 0.005) {
+
+			Asset assetIn;
+			ulong inputSupply;
+			ulong outputSupply;
+
+			if (amountOut.Asset == Asset1) {
+				assetIn = Asset2;
+				inputSupply = Asset2Reserves;
+				outputSupply = Asset1Reserves;
+			} else {
+				assetIn = Asset1;
+				inputSupply = Asset1Reserves;
+				outputSupply = Asset2Reserves;
+			}
+
+			if (inputSupply == 0 || outputSupply == 0) {
+				throw new Exception("Pool has no liquidity!");
+			}
+
+			if (outputSupply <= amountOut.Amount) {
+				throw new Exception("Insufficient reserves");
+			}
+
+			if (!TryCalculateSwapAmountOfFixedOutputSwap(inputSupply, outputSupply, amountOut.Amount, out var swapAmount)) {
+				throw new Exception("Invalid reserves");
+			}
+
+			var totalFeeAmount = CalculateFixedOutputFeeAmount(swapAmount);
+			var assetInAmount = swapAmount + totalFeeAmount;
+			var priceImpact = CalculatePriceImpact(inputSupply, outputSupply, assetInAmount, amountOut.Amount);
+			var amountIn = new AssetAmount(assetIn, assetInAmount);
+			var swapFees = new AssetAmount(amountIn.Asset, totalFeeAmount);
+
+			var result = new SwapQuote() {
+				SwapType = SwapType.FixedOutput,
+				AmountIn = amountIn,
+				AmountOut = amountOut,
+				SwapFees = swapFees,
+				Slippage = slippage,
+				PriceImpact = priceImpact,
+				LiquidityAsset = LiquidityAsset
+			};
+
+			return result;
+		}
+
 		protected virtual bool TryCalculateOutputAmountOfFixedInputSwap(
 			ulong inputSupply, ulong outputSupply, ulong swapAmount, out ulong swapOutputAmount) {
 
@@ -101,6 +150,27 @@ namespace Tinyman.V2 {
 
 			swapOutputAmount = outputSupply - inputSide;
 
+			return true;
+		}
+
+		protected virtual bool TryCalculateSwapAmountOfFixedOutputSwap(
+			ulong inputSupply, ulong outputSupply, ulong outputAmount, out ulong swapAmount) {
+
+			var k = BigInteger.Multiply(inputSupply, outputSupply);
+
+			if (outputSupply <= outputAmount) {
+				swapAmount = 0;
+				return false;
+			}
+
+			var outputSide = k / (outputSupply - outputAmount);
+
+			if (outputSide <= inputSupply) {
+				swapAmount = 0;
+				return false;
+			}
+
+			swapAmount = (ulong)outputSide - inputSupply + 1;
 			return true;
 		}
 

@@ -16,6 +16,9 @@ namespace Tinyman.V2 {
 	/// </summary>
 	public class TinymanV2Client : TinymanClient {
 
+		/// <inheritdoc />
+		public override string Version => "v2";
+
 		/// <summary>
 		/// Construct a new instance.
 		/// </summary>
@@ -93,7 +96,8 @@ namespace Tinyman.V2 {
 				quote.AmountsOutWithSlippage.Item2,
 				quote.LiquidityAssetAmount,
 				sender,
-				txParams);
+				txParams, 
+				appCallNote: CreateAppCallNote());
 
 			return result;
 		}
@@ -110,7 +114,8 @@ namespace Tinyman.V2 {
 				quote.AmountsIn.Item2,
 				quote.LiquidityAssetAmountWithSlippage,
 				sender,
-				txParams);
+				txParams,
+				appCallNote: CreateAppCallNote());
 
 			return result;
 		}
@@ -138,7 +143,8 @@ namespace Tinyman.V2 {
 				amountOut,
 				quote.SwapType,
 				sender,
-				txParams);
+				txParams,
+				appCallNote: CreateAppCallNote());
 
 			return result;
 		}

@@ -17,6 +17,9 @@ namespace Tinyman {
 	/// </summary>
 	public abstract class TinymanClient {
 
+		protected const string AppCallNoteTemplate = "tinyman/{0}:j{{\"origin\":\"{1}\"}}";
+		protected const string DefaultOrigin = "dotnet-tinyman-sdk";
+
 		protected readonly IDefaultApi mDefaultApi;
 		protected readonly HttpClient mHttpClient;
 		protected readonly ulong mValidatorAppId;
@@ -31,6 +34,11 @@ namespace Tinyman {
 		/// Validator application ID
 		/// </summary>
 		public virtual ulong ValidatorAppId { get => mValidatorAppId; }
+
+		/// <summary>
+		/// Dapp version
+		/// </summary>
+		public abstract string Version { get; }
 
 		/// <summary>
 		/// Construct a new instance
@@ -336,6 +344,11 @@ namespace Tinyman {
 			TransactionParametersResponse txParams,
 			SwapQuote quote);
 
+		/// <summary>
+		/// Get asset information fron the network
+		/// </summary>
+		/// <param name="id">Asset ID</param>
+		/// <returns>Asset</returns>
 		protected virtual async Task<Asset> FetchAssetFromApiAsync(ulong id) {
 
 			if (id == 0) {
@@ -355,6 +368,17 @@ namespace Tinyman {
 				UnitName = asset.Params.UnitName,
 				Decimals = (int)asset.Params.Decimals
 			};
+		}
+
+		/// <summary>
+		/// Create a note for the application call transaction.
+		/// <br /><br />
+		/// More info: <see href="https://github.com/algorandfoundation/ARCs/blob/main/ARCs/arc-0002.md"/>
+		/// </summary>
+		/// <returns>Application call transaction note</returns>
+		protected virtual string CreateAppCallNote() {
+
+			return String.Format(AppCallNoteTemplate, Version, DefaultOrigin);
 		}
 
 	}
