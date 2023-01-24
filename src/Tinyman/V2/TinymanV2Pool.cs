@@ -155,10 +155,10 @@ namespace Tinyman.V2 {
 			ulong asset2Amount;
 
 			if (IssuedLiquidity > (amountIn.Amount + TinymanV2Constant.LockedPoolTokens)) {
-				asset1Amount = (ulong)BigInteger.Divide(
-					BigInteger.Multiply(amountIn.Amount, Asset1Reserves), IssuedLiquidity);
-				asset2Amount = (ulong)BigInteger.Divide(
-					BigInteger.Multiply(amountIn.Amount, Asset2Reserves), IssuedLiquidity);
+				asset1Amount = (ulong)Math.Round((double)BigInteger.Multiply(
+					amountIn.Amount, Asset1Reserves) / (double)IssuedLiquidity, MidpointRounding.AwayFromZero);
+				asset2Amount = (ulong)Math.Round((double)BigInteger.Multiply(
+					amountIn.Amount, Asset2Reserves) / (double)IssuedLiquidity, MidpointRounding.AwayFromZero);
 			} else {
 				asset1Amount = Asset1Reserves;
 				asset2Amount = Asset2Reserves;
