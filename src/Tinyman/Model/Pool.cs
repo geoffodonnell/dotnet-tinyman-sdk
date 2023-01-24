@@ -1,4 +1,6 @@
-﻿namespace Tinyman.Model {
+﻿using System;
+
+namespace Tinyman.Model {
 
 	/// <summary>
 	/// Common properties and methods of Tinyman asset pools
@@ -27,18 +29,18 @@
 
 		public virtual ulong Round { get; set; }
 
-		public virtual decimal Asset1Price { get => (decimal)Asset2Reserves / (decimal)Asset1Reserves; }
+		public virtual double Asset1Price { get => (double)Asset2Reserves / (double)Asset1Reserves; }
 
-		public virtual decimal Asset2Price { get => (decimal)Asset1Reserves / (decimal)Asset2Reserves; }
+		public virtual double Asset2Price { get => (double)Asset1Reserves / (double)Asset2Reserves; }
 
 		public virtual AssetAmount Convert(AssetAmount amount) {
 
 			if (amount.Asset == Asset1) {
-				return new AssetAmount(Asset2, (ulong)(amount.Amount * Asset1Price));
+				return new AssetAmount(Asset2, (ulong)((double)amount.Amount * Asset1Price));
 			}
 
 			if (amount.Asset == Asset2) {
-				return new AssetAmount(Asset1, (ulong)(amount.Amount * Asset2Price));
+				return new AssetAmount(Asset1, (ulong)((double)amount.Amount * Asset2Price));
 			}
 
 			return null;

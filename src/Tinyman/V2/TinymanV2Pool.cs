@@ -32,6 +32,21 @@ namespace Tinyman.V2 {
 			Exists = false;
 		}
 
+		public override AssetAmount Convert(AssetAmount amount) {
+
+			if (amount.Asset == Asset1) {
+				return new AssetAmount(
+					Asset2, (ulong)Math.Round((double)amount.Amount * Asset1Price, MidpointRounding.AwayFromZero));
+			}
+
+			if (amount.Asset == Asset2) {
+				return new AssetAmount(
+					Asset1, (ulong)Math.Round((double)amount.Amount * Asset2Price, MidpointRounding.AwayFromZero));
+			}
+
+			return null;
+		}
+
 		public virtual SwapQuote CalculateFixedInputSwapQuote(
 			AssetAmount amountIn,
 			double slippage = 0.005) {
@@ -172,6 +187,10 @@ namespace Tinyman.V2 {
 			Tuple<AssetAmount, AssetAmount> amounts,
 			double slippage = 0.005) {
 
+			if (!Exists) {
+				throw new Exception("Pool has not been bootstrapped yet!");
+			}
+
 			var amount1 = default(AssetAmount);
 			var amount2 = default(AssetAmount);
 
@@ -185,24 +204,19 @@ namespace Tinyman.V2 {
 
 			var liquidityAssetAmount = 0ul;
 
-			if (!Exists) {
-				throw new Exception("Pool has not been bootstrapped yet!");
-			}
-
 			// Pool exists and contains assets
 			if (IssuedLiquidity > 0) {
 
-				if (amount1 == null) {
+				if (amount1 != null && amount2 != null) {
+					throw new ArgumentException(
+						$"Initial liquidity has been provided. Use {nameof(CalculateFlexibleMintQuote)} instead.");
+				} else if (amount1 == null) {
 					amount1 = Convert(amount2);
-				}
-
-				if (amount2 == null) {
+				} else if (amount2 == null) {
 					amount2 = Convert(amount1);
 				}
 
-				liquidityAssetAmount = Math.Min(
-					(ulong)BigInteger.Divide(BigInteger.Multiply(amount1.Amount, IssuedLiquidity), Asset1Reserves),
-					(ulong)BigInteger.Divide(BigInteger.Multiply(amount2.Amount, IssuedLiquidity), Asset2Reserves));
+				liquidityAssetAmount = CalculateLiquidityAssetAmount(amount1.Amount, amount2.Amount);
 
 				// Pool exists does not contain assets
 			} else {
@@ -212,17 +226,69 @@ namespace Tinyman.V2 {
 				}
 
 				liquidityAssetAmount = System.Convert.ToUInt64(
-					Math.Sqrt((double)BigInteger.Multiply(amount1.Amount, amount2.Amount)) - 1000);
+					Math.Sqrt((double)BigInteger.Multiply(amount1.Amount, amount2.Amount)) - TinymanV2Constant.LockedPoolTokens);
 				slippage = 0;
 			}
 
 			var result = new MintQuote {
 				AmountsIn = new Tuple<AssetAmount, AssetAmount>(amount1, amount2),
 				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
-				Slippage = slippage
+				Slippage = slippage,
+				PriceImpact = 0.0d
 			};
 
 			return result;
+		}
+
+		public virtual MintQuote CalculateSingleAssetMintQuote(
+			AssetAmount amount,
+			double slippage = 0.005) {
+
+			throw new NotImplementedException();
+		}
+
+		public virtual MintQuote CalculateFlexibleMintQuote(
+			Tuple<AssetAmount, AssetAmount> amounts,
+			double slippage = 0.005) {
+
+			if (!Exists) {
+				throw new Exception("Pool has not been bootstrapped yet!");
+			}
+
+			if (IssuedLiquidity == 0) {
+				throw new ArgumentException(
+					$"Initial liquidity has not been provided. Use {nameof(CalculateMintQuote)} instead.");
+			}
+
+			var amount1 = default(AssetAmount);
+			var amount2 = default(AssetAmount);
+
+			if (amounts.Item1?.Asset == Asset1) {
+				amount1 = amounts.Item1;
+				amount2 = amounts.Item2;
+			} else {
+				amount1 = amounts.Item2;
+				amount2 = amounts.Item1;
+			}
+
+			var liquidityAssetAmount = 0ul;
+
+			var oldK = BigInteger.Multiply(Asset1Reserves, Asset2Reserves);
+			var newAsset1Reserves = Asset1Reserves + amount1.Amount;
+			var newAsset2Reserves = Asset2Reserves + amount2.Amount;
+			var newK = BigInteger.Multiply(newAsset1Reserves, newAsset2Reserves);
+			var newIssuedLiquidity = (ulong)BigInteger.Divide(
+				BigInteger.Multiply(newK, BigInteger.Pow(IssuedLiquidity, 2)), oldK);
+
+			liquidityAssetAmount = newIssuedLiquidity - IssuedLiquidity;
+
+			var calculatedAsset1Amount = (ulong)BigInteger.Divide(
+				BigInteger.Multiply(liquidityAssetAmount, newAsset1Reserves), newIssuedLiquidity);
+
+			var calculatedAsset2Amount = (ulong)BigInteger.Divide(
+				BigInteger.Multiply(liquidityAssetAmount, newAsset2Reserves), newIssuedLiquidity);
+
+			throw new NotImplementedException();
 		}
 
 		protected virtual bool TryCalculateOutputAmountOfFixedInputSwap(
@@ -276,14 +342,17 @@ namespace Tinyman.V2 {
 			return inputAmount - swapAmount;
 		}
 
+		protected virtual ulong CalculateLiquidityAssetAmount(ulong amount1, ulong amount2) {
 
+			var oldK = BigInteger.Multiply(Asset1Reserves, Asset2Reserves);
+			var newAsset1Reserves = Asset1Reserves + amount1;
+			var newAsset2Reserves = Asset2Reserves + amount2;
+			var newK = BigInteger.Multiply(newAsset1Reserves, newAsset2Reserves);
+			var newIssuedLiquidity = (ulong)Math.Sqrt((double)BigInteger.Divide(
+				BigInteger.Multiply(newK, BigInteger.Pow(IssuedLiquidity, 2)), oldK));
 
-
-
-
-
-
-
+			return newIssuedLiquidity - IssuedLiquidity;
+		}
 
 		protected virtual ulong CalculateProtocolFeeAmount(ulong totalFeeAmount) {
 			return totalFeeAmount / ProtocolFeeRatio;

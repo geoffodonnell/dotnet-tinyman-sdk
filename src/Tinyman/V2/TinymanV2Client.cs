@@ -178,7 +178,8 @@ namespace Tinyman.V2 {
 				return new TinymanV2Pool(asset1, asset2) {
 					Exists = false,
 					Address = poolAddress,
-					Round = accountInfo.Round
+					Round = accountInfo.Round,
+					ValidatorAppId = mValidatorAppId
 				};
 			}
 

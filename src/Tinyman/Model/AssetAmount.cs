@@ -68,15 +68,27 @@ namespace Tinyman.Model {
 		}
 
 		public static bool operator !=(AssetAmount a, AssetAmount b) {
+			if (a is null && b is null) {
+				return false;
+			}
+
+			if (a is null || b is null) {
+				return true;
+			}
+
+			if (a.Asset == null && b.Asset == null) {
+				return a.Amount != b.Amount;
+			}
+
 			if (a.Asset.Id != b.Asset.Id) {
 				throw new ArgumentException(AssetMismatchMessage);
 			}
 
-			return a.Amount != b.Amount;
+			return a?.Amount != b?.Amount;
 		}
 
 		public static bool operator !=(AssetAmount a, ulong b) {
-			return a.Amount != b;
+			return a?.Amount != b;
 		}
 
 		public static AssetAmount operator +(AssetAmount a, AssetAmount b) {
