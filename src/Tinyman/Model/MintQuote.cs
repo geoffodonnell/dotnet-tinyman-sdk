@@ -2,7 +2,7 @@
 
 namespace Tinyman.Model {
 
-	public class MintQuote {
+	public class MintQuote : IQuote {
 
 		public virtual Tuple<AssetAmount, AssetAmount> AmountsIn { get; internal set; }
 
@@ -17,6 +17,8 @@ namespace Tinyman.Model {
 				return LiquidityAssetAmount - LiquidityAssetAmount * Slippage;
 			}
 		}
+
+		public virtual ulong ValidatorApplicationId { get; internal set; }
 
 		public MintQuote() { }
 

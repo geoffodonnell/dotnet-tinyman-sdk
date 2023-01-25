@@ -2,7 +2,7 @@
 
 namespace Tinyman.Model {
 
-	public class BurnQuote {
+	public class BurnQuote : IQuote {
 
 		public virtual Tuple<AssetAmount, AssetAmount> AmountsOut { get; internal set; }
 
@@ -15,6 +15,8 @@ namespace Tinyman.Model {
 				return AmountsOut.Select(s => s - s * Slippage);
 			}
 		}
+
+		public virtual ulong ValidatorApplicationId { get; internal set; }
 
 		public BurnQuote() { }
 

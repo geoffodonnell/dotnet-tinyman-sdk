@@ -2,7 +2,7 @@
 
 namespace Tinyman.Model {
 
-	public class RedeemQuote {
+	public class RedeemQuote : IQuote {
 
 		public virtual AssetAmount Amount { get; internal set; }
 
@@ -13,6 +13,8 @@ namespace Tinyman.Model {
 		public virtual Asset Asset2 { get; internal set; }
 
 		public virtual Asset LiquidityAsset { get; internal set; }
+
+		public virtual ulong ValidatorApplicationId { get; internal set; }
 
 		public RedeemQuote() { }
 

@@ -9,16 +9,30 @@ namespace Tinyman.V2 {
 	/// </summary>
 	public class TinymanV2Pool : Pool {
 
+		/// <summary>
+		/// Protocol fees of first pool asset
+		/// </summary>
 		public virtual ulong Asset1ProtocolFees { get; set; }
 
+		/// <summary>
+		/// Protocol fees of second pool asset
+		/// </summary>
 		public virtual ulong Asset2ProtocolFees { get; set; }
 
+		/// <summary>
+		/// Total fee share
+		/// </summary>
 		public virtual ulong TotalFeeShare { get; set; }
 
+		/// <summary>
+		/// Protocol fee ratio
+		/// </summary>
 		public virtual ulong ProtocolFeeRatio { get; set; }
 
+		/// <inheritdoc/>
 		public TinymanV2Pool() { }
 
+		/// <inheritdoc/>
 		internal TinymanV2Pool(Asset asset1, Asset asset2) {
 
 			if (asset1.Id > asset2.Id) {
@@ -32,6 +46,7 @@ namespace Tinyman.V2 {
 			Exists = false;
 		}
 
+		/// <inheritdoc/>
 		public override AssetAmount Convert(AssetAmount amount) {
 
 			if (amount.Asset == Asset1) {
@@ -47,7 +62,8 @@ namespace Tinyman.V2 {
 			return null;
 		}
 
-		public virtual SwapQuote CalculateFixedInputSwapQuote(
+		/// <inheritdoc/>
+		public override SwapQuote CalculateFixedInputSwapQuote(
 			AssetAmount amountIn,
 			double slippage = 0.005) {
 
@@ -93,7 +109,8 @@ namespace Tinyman.V2 {
 			return result;
 		}
 
-		public virtual SwapQuote CalculateFixedOutputSwapQuote(
+		/// <inheritdoc/>
+		public override SwapQuote CalculateFixedOutputSwapQuote(
 			AssetAmount amountOut,
 			double slippage = 0.005) {
 
@@ -142,7 +159,8 @@ namespace Tinyman.V2 {
 			return result;
 		}
 
-		public virtual BurnQuote CalculateBurnQuote(
+		/// <inheritdoc/>
+		public override BurnQuote CalculateBurnQuote(
 			AssetAmount amountIn,
 			double slippage = 0.005) {
 
@@ -175,7 +193,8 @@ namespace Tinyman.V2 {
 			return result;
 		}
 
-		public virtual MintQuote CalculateMintQuote(
+		/// <inheritdoc/>
+		public override MintQuote CalculateMintQuote(
 			AssetAmount amount,
 			double slippage = 0.005) {
 
@@ -183,7 +202,8 @@ namespace Tinyman.V2 {
 				new Tuple<AssetAmount, AssetAmount>(amount, null), slippage);
 		}
 
-		public virtual MintQuote CalculateMintQuote(
+		/// <inheritdoc/>
+		public override MintQuote CalculateMintQuote(
 			Tuple<AssetAmount, AssetAmount> amounts,
 			double slippage = 0.005) {
 

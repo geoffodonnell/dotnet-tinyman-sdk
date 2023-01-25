@@ -109,23 +109,6 @@ namespace Tinyman {
 		}
 
 		/// <summary>
-		/// Swap the assets in the provided quote.
-		/// </summary>
-		/// <param name="account">Account to perform the action</param>
-		/// <param name="quote">Swap quote</param>
-		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
-		/// <returns>Response from node</returns>
-		public virtual async Task<PostTransactionsResponse> SwapAsync(
-			Account account,
-			SwapQuote quote,
-			bool wait = true) {
-
-			var txParams = await mDefaultApi.TransactionParamsAsync();
-
-			return await SwapAsync(account, quote, txParams, wait);
-		}
-
-		/// <summary>
 		/// Burn the liquidity pool asset amount in exchange for pool assets.
 		/// </summary>
 		/// <param name="account">Account to perform the action</param>
@@ -136,6 +119,8 @@ namespace Tinyman {
 			Account account,
 			BurnQuote quote,
 			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
@@ -155,6 +140,8 @@ namespace Tinyman {
 			BurnQuote quote,
 			TransactionParametersResponse txParams,
 			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
 
 			var txs = PrepareBurnTransactions(
 				account.Address, txParams, quote);
@@ -176,6 +163,8 @@ namespace Tinyman {
 			MintQuote quote,
 			bool wait = true) {
 
+			ValidQuoteOrThrow(quote);
+
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
 			return await MintAsync(account, quote, txParams, wait);
@@ -195,12 +184,34 @@ namespace Tinyman {
 			TransactionParametersResponse txParams,
 			bool wait = true) {
 
+			ValidQuoteOrThrow(quote);
+
 			var txs = PrepareMintTransactions(
 				account.Address, txParams, quote);
 
 			txs.Sign(account);
 
 			return await SubmitAsync(txs, wait);
+		}
+
+
+		/// <summary>
+		/// Swap the assets in the provided quote.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Swap quote</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> SwapAsync(
+			Account account,
+			SwapQuote quote,
+			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await SwapAsync(account, quote, txParams, wait);
 		}
 
 		/// <summary>
@@ -216,6 +227,8 @@ namespace Tinyman {
 			SwapQuote quote,
 			TransactionParametersResponse txParams,
 			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
 
 			var txs = PrepareSwapTransactions(
 				account.Address, txParams, quote);
@@ -379,6 +392,18 @@ namespace Tinyman {
 		protected virtual string CreateAppCallNote() {
 
 			return String.Format(AppCallNoteTemplate, Version, DefaultOrigin);
+		}
+
+		/// <summary>
+		/// Throws if the quote is not valid for this client.
+		/// </summary>
+		/// <param name="quote">The operation quote</param>
+		/// <exception cref="Exception"></exception>
+		protected virtual void ValidQuoteOrThrow(IQuote quote) {
+
+			if (quote?.ValidatorApplicationId != mValidatorAppId) {
+				throw new Exception("Quote is not valid for this client.");
+			}
 		}
 
 	}

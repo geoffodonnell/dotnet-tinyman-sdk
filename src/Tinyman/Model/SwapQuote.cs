@@ -2,7 +2,7 @@
 
 namespace Tinyman.Model {
 
-	public class SwapQuote {
+	public class SwapQuote : IQuote {
 
 		public virtual SwapType SwapType { get; internal set; }
 
@@ -53,6 +53,8 @@ namespace Tinyman.Model {
 		public virtual double PriceWithSlippage {
 			get => AmountOutWithSlippage.Amount / (double)AmountInWithSlippage.Amount;
 		}
+
+		public virtual ulong ValidatorApplicationId { get; internal set; }
 
 		public SwapQuote() { }
 

@@ -9,16 +9,36 @@ namespace Tinyman.V1 {
 	/// </summary>
 	public class TinymanV1Pool : Pool {
 
+		/// <summary>
+		/// Unclaimed protocol fees
+		/// </summary>
 		public virtual ulong UnclaimedProtocolFees { get; set; }
 
+		/// <summary>
+		/// Outstanding amount of first pool asset
+		/// </summary>
 		public virtual ulong OutstandingAsset1Amount { get; set; }
 
+		/// <summary>
+		/// Outstanding amount of second pool asset
+		/// </summary>
 		public virtual ulong OutstandingAsset2Amount { get; set; }
 
+		/// <summary>
+		/// Outstanding amount of liquidity asset
+		/// </summary>
 		public virtual ulong OutstandingLiquidityAssetAmount { get; set; }
 
+		/// <summary>
+		/// Construct a new instance.
+		/// </summary>
 		public TinymanV1Pool() { }
 
+		/// <summary>
+		/// Construct a new instance.
+		/// </summary>
+		/// <param name="asset1">Pool asset</param>
+		/// <param name="asset2">Pool asset</param>
 		internal TinymanV1Pool(Asset asset1, Asset asset2) {
 
 			if (asset1.Id > asset2.Id) {
@@ -32,7 +52,8 @@ namespace Tinyman.V1 {
 			Exists = false;
 		}
 
-		public virtual SwapQuote CalculateFixedInputSwapQuote(
+		/// <inheritdoc />
+		public override SwapQuote CalculateFixedInputSwapQuote(
 			AssetAmount amountIn,
 			double slippage = 0.005) {
 
@@ -76,13 +97,15 @@ namespace Tinyman.V1 {
 					Amount = swapFees
 				},
 				Slippage = slippage,
-				LiquidityAsset = LiquidityAsset
+				LiquidityAsset = LiquidityAsset,
+				ValidatorApplicationId = ValidatorAppId
 			};
 
 			return result;
 		}
 
-		public virtual SwapQuote CalculateFixedOutputSwapQuote(
+		/// <inheritdoc />
+		public override SwapQuote CalculateFixedOutputSwapQuote(
 			AssetAmount amountOut,
 			double slippage = 0.005) {
 
@@ -126,13 +149,15 @@ namespace Tinyman.V1 {
 					Amount = System.Convert.ToUInt64(swapFees)
 				},
 				Slippage = slippage,
-				LiquidityAsset = LiquidityAsset
+				LiquidityAsset = LiquidityAsset,
+				ValidatorApplicationId = ValidatorAppId
 			};
 
 			return result;
 		}
 
-		public virtual BurnQuote CalculateBurnQuote(
+		/// <inheritdoc />
+		public override BurnQuote CalculateBurnQuote(
 			AssetAmount amountIn,
 			double slippage = 0.005) {
 
@@ -151,13 +176,15 @@ namespace Tinyman.V1 {
 					new AssetAmount(Asset1, (ulong)asset1Amount),
 					new AssetAmount(Asset2, (ulong)asset2Amount)),
 				LiquidityAssetAmount = amountIn,
-				Slippage = slippage
+				Slippage = slippage,
+				ValidatorApplicationId = ValidatorAppId
 			};
 
 			return result;
 		}
 
-		public virtual MintQuote CalculateMintQuote(
+		/// <inheritdoc />
+		public override MintQuote CalculateMintQuote(
 			AssetAmount amount,
 			double slippage = 0.005) {
 
@@ -165,7 +192,8 @@ namespace Tinyman.V1 {
 				new Tuple<AssetAmount, AssetAmount>(amount, null), slippage);
 		}
 
-		public virtual MintQuote CalculateMintQuote(
+		/// <inheritdoc />
+		public override MintQuote CalculateMintQuote(
 			Tuple<AssetAmount, AssetAmount> amounts,
 			double slippage = 0.005) {
 
@@ -216,7 +244,8 @@ namespace Tinyman.V1 {
 			var result = new MintQuote {
 				AmountsIn = new Tuple<AssetAmount, AssetAmount>(amount1, amount2),
 				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
-				Slippage = slippage
+				Slippage = slippage,
+				ValidatorApplicationId = ValidatorAppId
 			};
 
 			return result;
