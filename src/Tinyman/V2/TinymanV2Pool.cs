@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using Tinyman.Model;
+using Tinyman.V2.Model;
 
 namespace Tinyman.V2 {
 
@@ -103,7 +104,8 @@ namespace Tinyman.V2 {
 				SwapFees = swapFees,
 				Slippage = slippage,
 				PriceImpact = priceImpact,
-				LiquidityAsset = LiquidityAsset
+				LiquidityAsset = LiquidityAsset,
+				ValidatorApplicationId = ValidatorAppId
 			};
 
 			return result;
@@ -153,7 +155,8 @@ namespace Tinyman.V2 {
 				SwapFees = swapFees,
 				Slippage = slippage,
 				PriceImpact = priceImpact,
-				LiquidityAsset = LiquidityAsset
+				LiquidityAsset = LiquidityAsset,
+				ValidatorApplicationId = ValidatorAppId
 			};
 
 			return result;
@@ -187,10 +190,76 @@ namespace Tinyman.V2 {
 					new AssetAmount(Asset1, asset1Amount),
 					new AssetAmount(Asset2, asset2Amount)),
 				LiquidityAssetAmount = amountIn,
-				Slippage = slippage
+				Slippage = slippage,
+				ValidatorApplicationId = ValidatorAppId
 			};
 
 			return result;
+		}
+
+		/// <summary>
+		/// Calculate a single asset burn quote given a liquidity asset amount
+		/// </summary>
+		/// <param name="amountIn">Liquidity asset amount</param>
+		/// <param name="assetOut">Desired asset out</param>
+		/// <param name="slippage">Slippage</param>
+		/// <returns>Burn quote</returns>
+		/// <exception cref="ArgumentException"></exception>
+		public virtual SingleAssetBurnQuote CalculateSingleAssetBurnQuote(
+			AssetAmount amountIn,
+			Asset assetOut,
+			double slippage = 0.005) {
+
+			if (LiquidityAsset.Id != amountIn.Asset.Id) {
+				throw new ArgumentException(
+					$"Expected '{nameof(amountIn)}' to be liquidity pool asset amount.");
+			}
+
+			// Step 1 - Calculate a proportional burn quote
+			var burnQuote = CalculateBurnQuote(amountIn, slippage);
+
+			// Step 2 - Calculate a fixed input swap quote adjusting the reserves for the proportional burn
+			ulong inputSupply;
+			ulong outputSupply;
+
+			if (assetOut == Asset1) {
+				inputSupply = Asset2Reserves - burnQuote.AmountsOut.ForAsset(Asset2).Amount;
+				outputSupply = Asset1Reserves - burnQuote.AmountsOut.ForAsset(Asset1).Amount;
+			} else {
+				inputSupply = Asset1Reserves - burnQuote.AmountsOut.ForAsset(Asset1).Amount;
+				outputSupply = Asset2Reserves - burnQuote.AmountsOut.ForAsset(Asset2).Amount;
+			}
+
+			var swapIn = burnQuote.AmountsOut.ForOtherAsset(assetOut);
+			var totalFeeAmount = CalculateFixedInputFeeAmount(swapIn.Amount);
+			var swapAmount = swapIn.Amount - totalFeeAmount;
+
+			if (!TryCalculateOutputAmountOfFixedInputSwap(inputSupply, outputSupply, swapAmount, out var assetOutAmount)) {
+				throw new Exception("Insufficient reserves");
+			}
+
+			var priceImpact = CalculatePriceImpact(inputSupply, outputSupply, swapIn.Amount, assetOutAmount);
+			var amountOut = new AssetAmount(assetOut, assetOutAmount);
+			var swapFees = new AssetAmount(swapIn.Asset, totalFeeAmount);
+
+			var swapQuote = new SwapQuote {
+				SwapType = SwapType.FixedInput,
+				AmountIn = swapIn,
+				AmountOut = amountOut,
+				SwapFees = swapFees,
+				Slippage = slippage,
+				PriceImpact = priceImpact,
+				LiquidityAsset = LiquidityAsset,
+				ValidatorApplicationId = ValidatorAppId
+			};
+
+			return new SingleAssetBurnQuote {
+				AmountOut = burnQuote.AmountsOut.ForAsset(assetOut) + swapQuote.AmountOut,
+				LiquidityAssetAmount = amountIn,
+				Slippage = slippage,
+				ValidatorApplicationId = ValidatorAppId,
+				SwapQuote = swapQuote
+			};
 		}
 
 		/// <inheritdoc/>
@@ -254,20 +323,21 @@ namespace Tinyman.V2 {
 				AmountsIn = new Tuple<AssetAmount, AssetAmount>(amount1, amount2),
 				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
 				Slippage = slippage,
-				PriceImpact = 0.0d
+				PriceImpact = 0.0d,
+				ValidatorApplicationId = ValidatorAppId
 			};
 
 			return result;
 		}
 
-		public virtual MintQuote CalculateSingleAssetMintQuote(
+		public virtual SingleAssetMintQuote CalculateSingleAssetMintQuote(
 			AssetAmount amount,
 			double slippage = 0.005) {
 
 			throw new NotImplementedException();
 		}
 
-		public virtual MintQuote CalculateFlexibleMintQuote(
+		public virtual FlexibleMintQuote CalculateFlexibleMintQuote(
 			Tuple<AssetAmount, AssetAmount> amounts,
 			double slippage = 0.005) {
 

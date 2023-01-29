@@ -83,7 +83,7 @@ namespace Tinyman.V2 {
 		/// pool asset amount in exchange for pool assets.
 		/// </summary>
 		/// <param name="validatorAppId">Tinyman V2 application ID</param>
-		/// <param name="assetAmount1Minimum"> Minimum asset 1 amount</param>
+		/// <param name="assetAmount1Minimum">Minimum asset 1 amount</param>
 		/// <param name="assetAmount2Minimum">Minimum asset 2 amount</param>
 		/// <param name="assetAmountLiquidity">Liquidity asset amount</param>
 		/// <param name="sender">Account address</param>
@@ -100,10 +100,22 @@ namespace Tinyman.V2 {
 			string appCallNote = null) {
 
 			var transactions = new List<Transaction>();
+			var amounts = Util.EnsureOrder(assetAmount1Minimum, assetAmount2Minimum);
 			var poolAddress = TinymanV2Contract.GetPoolAddress(
-				validatorAppId, assetAmount1Minimum.Asset.Id, assetAmount2Minimum.Asset.Id);
+				validatorAppId, amounts.Item1.Asset.Id, amounts.Item2.Asset.Id);
 			var minFee = Math.Max(TinymanV2Constant.DefaultMinFee, txParams.MinFee);
 			var appCallFee = minFee * 3; // App call contains 2 inner transactions
+
+			ulong[] foreignAssets;
+
+			// Handling for single asset burns
+			if (amounts.Item1.Amount == 0) {
+				foreignAssets = new[] { amounts.Item2.Asset.Id };
+			} else if (amounts.Item2.Amount == 0) {
+				foreignAssets = new[] { amounts.Item1.Asset.Id };
+			} else {
+				foreignAssets = new[] { amounts.Item1.Asset.Id, amounts.Item2.Asset.Id };
+			}
 
 			// Asset Transfer Txn
 			transactions.Add(TxnFactory.Pay(
@@ -120,13 +132,10 @@ namespace Tinyman.V2 {
 				txParams,
 				applicationArgs: new byte[][] {
 					TinymanV2Constant.RemoveLiquidityAppArgument,
-					ApplicationArgument.Number(assetAmount1Minimum.Amount),
-					ApplicationArgument.Number(assetAmount2Minimum.Amount)
+					ApplicationArgument.Number(amounts.Item1.Amount),
+					ApplicationArgument.Number(amounts.Item2.Amount)
 				},
-				foreignAssets: new[] {
-					assetAmount1Minimum.Asset.Id,
-					assetAmount2Minimum.Asset.Id
-				},
+				foreignAssets: foreignAssets,
 				accounts: new[] {
 					poolAddress
 				},

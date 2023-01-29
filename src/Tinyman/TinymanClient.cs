@@ -194,7 +194,6 @@ namespace Tinyman {
 			return await SubmitAsync(txs, wait);
 		}
 
-
 		/// <summary>
 		/// Swap the assets in the provided quote.
 		/// </summary>

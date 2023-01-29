@@ -121,6 +121,7 @@ namespace Tinyman.Model {
 		/// Calculate a mint quote given an amount in. Use this method on bootstrapped pools to
 		/// provide additional liquidity.
 		/// </summary>
+		/// <remarks>The resulting quote will indicate the required amount of the corresponding pool asset and resulting liquidity asset.</remarks>
 		/// <param name="amount">Amount in</param>
 		/// <param name="slippage">Slippage</param>
 		/// <returns>Mint quote</returns>
@@ -130,6 +131,7 @@ namespace Tinyman.Model {
 		/// Calculate a mint quote given an amount in. Use this method on bootstrapped pools to
 		/// provide initial liquidity.
 		/// </summary>
+		/// <remarks>The resulting quote will indicate the resulting liquidity asset.</remarks>
 		/// <param name="amounts">Amounts in</param>
 		/// <param name="slippage">Slippage</param>
 		/// <returns>Mint quote</returns>

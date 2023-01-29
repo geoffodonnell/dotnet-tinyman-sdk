@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Tinyman.Model;
+using Tinyman.V2.Model;
 using Asset = Tinyman.Model.Asset;
 
 namespace Tinyman.V2 {
@@ -84,6 +85,135 @@ namespace Tinyman.V2 {
 			return await CreatePoolFromAccountInfoAsync(accountInfo);
 		}
 
+		/// <summary>
+		/// Burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Burn quote</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> BurnAsync(
+			Account account,
+			SingleAssetBurnQuote quote,
+			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await BurnAsync(account, quote, txParams, wait);
+		}
+
+		/// <summary>
+		/// Burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Burn quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> BurnAsync(
+			Account account,
+			SingleAssetBurnQuote quote,
+			TransactionParametersResponse txParams,
+			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txs = PrepareBurnTransactions(
+				account.Address, txParams, quote);
+
+			txs.Sign(account);
+
+			return await SubmitAsync(txs, wait);
+		}
+
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			FlexibleMintQuote quote,
+			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await MintAsync(account, quote, txParams, wait);
+		}
+
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			FlexibleMintQuote quote,
+			TransactionParametersResponse txParams,
+			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txs = PrepareMintTransactions(
+				account.Address, txParams, quote);
+
+			txs.Sign(account);
+
+			return await SubmitAsync(txs, wait);
+		}
+
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			SingleAssetMintQuote quote,
+			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await MintAsync(account, quote, txParams, wait);
+		}
+
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			SingleAssetMintQuote quote,
+			TransactionParametersResponse txParams,
+			bool wait = true) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txs = PrepareMintTransactions(
+				account.Address, txParams, quote);
+
+			txs.Sign(account);
+
+			return await SubmitAsync(txs, wait);
+		}
+
 		/// <inheritdoc />
 		public override TransactionGroup PrepareBurnTransactions(
 			Address sender,
@@ -97,6 +227,47 @@ namespace Tinyman.V2 {
 				quote.LiquidityAssetAmount,
 				sender,
 				txParams, 
+				appCallNote: CreateAppCallNote());
+
+			return result;
+		}
+
+		/// <summary>
+		/// Prepare a transaction group to burn the liquidity pool asset amount in exchange for a single pool asset.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="quote">Burn quote</param>
+		/// <returns>Transaction group to execute action</returns>
+		public virtual async Task<TransactionGroup> PrepareBurnTransactionsAsync(
+			Address sender,
+			SingleAssetBurnQuote quote) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return PrepareBurnTransactions(sender, txParams, quote);
+		}
+
+		/// <summary>
+		/// Prepare a transaction group to burn the liquidity pool asset amount in exchange for a single pool asset.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="quote">Burn quote</param>
+		/// <returns>Transaction group to execute action</returns>
+		public virtual TransactionGroup PrepareBurnTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			SingleAssetBurnQuote quote) {
+
+			var otherAsset = quote.SwapQuote.AmountIn.Asset;
+
+			var result = TinymanV2Transaction.PrepareBurnTransactions(
+				mValidatorAppId,
+				quote.AmountOutWithSlippage,
+				new AssetAmount(otherAsset, 0),
+				quote.LiquidityAssetAmount,
+				sender,
+				txParams,
 				appCallNote: CreateAppCallNote());
 
 			return result;
@@ -118,6 +289,66 @@ namespace Tinyman.V2 {
 				appCallNote: CreateAppCallNote());
 
 			return result;
+		}
+
+		/// <summary>
+		/// Prepare a transaction group to mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="quote">Mint quote</param>
+		/// <returns>Transaction group to execute action</returns>
+		public virtual async Task<TransactionGroup> PrepareMintTransactionsAsync(
+			Address sender,
+			FlexibleMintQuote quote) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return PrepareMintTransactions(sender, txParams, quote);
+		}
+
+		/// <summary>
+		/// Prepare a transaction group to mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="quote">Mint quote</param>
+		/// <returns>Transaction group to execute action</returns>
+		public virtual TransactionGroup PrepareMintTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			FlexibleMintQuote quote) {
+
+			throw new NotImplementedException();
+		}
+
+		/// <summary>
+		/// Prepare a transaction group to mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="quote">Mint quote</param>
+		/// <returns>Transaction group to execute action</returns>
+		public virtual async Task<TransactionGroup> PrepareMintTransactionsAsync(
+			Address sender,
+			SingleAssetMintQuote quote) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return PrepareMintTransactions(sender, txParams, quote);
+		}
+
+		/// <summary>
+		/// Prepare a transaction group to mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="quote">Mint quote</param>
+		/// <returns>Transaction group to execute action</returns>
+		public virtual TransactionGroup PrepareMintTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			SingleAssetMintQuote quote) {
+
+			throw new NotImplementedException();
 		}
 
 		/// <inheritdoc />
