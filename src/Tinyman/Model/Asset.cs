@@ -2,18 +2,35 @@
 
 namespace Tinyman.Model {
 
+	/// <summary>
+	/// An Algorand asset.
+	/// </summary>
 	public class Asset {
 
+		/// <summary>
+		/// Asset identifer (0 for $ALGO).
+		/// </summary>
 		public virtual ulong Id { get; set; }
 
+		/// <summary>
+		/// Asset name.
+		/// </summary>
 		public virtual string Name { get; set; }
 
+		/// <summary>
+		/// Asset unit name.
+		/// </summary>
 		public virtual string UnitName { get; set; }
 
+		/// <summary>
+		/// Asset decimals.
+		/// </summary>
 		public virtual int Decimals { get; set; }
 
-		public Asset() {
-		}
+		/// <summary>
+		/// Construct a new instance.
+		/// </summary>
+		public Asset() { }
 
 		public override string ToString() {
 			return $"{Name} ({Id})";

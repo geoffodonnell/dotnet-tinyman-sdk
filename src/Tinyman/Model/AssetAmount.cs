@@ -3,17 +3,34 @@ using System.Collections.Generic;
 
 namespace Tinyman.Model {
 
+	/// <summary>
+	/// Represents an amount of a specific asset.
+	/// </summary>
 	public class AssetAmount {
 
 		private static string AssetMismatchMessage =
 			"AssetAmount arithmetic operators are only valid for matching Assets.";
 
+		/// <summary>
+		/// The asset.
+		/// </summary>
 		public virtual Asset Asset { get; set; }
 
+		/// <summary>
+		/// The amount.
+		/// </summary>
 		public virtual ulong Amount { get; set; }
 
+		/// <summary>
+		/// Construct a new instance.
+		/// </summary>
 		public AssetAmount() { }
 
+		/// <summary>
+		/// Construct a new instance.
+		/// </summary>
+		/// <param name="asset">The asset</param>
+		/// <param name="amount">The amount</param>
 		public AssetAmount(Asset asset, ulong amount) {
 			Asset = asset;
 			Amount = amount;

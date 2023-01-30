@@ -43,7 +43,7 @@ namespace Tinyman.Model {
 		public virtual ulong Asset2Reserves { get; set; }
 
 		/// <summary>
-		/// Total issied liquidity asset amount
+		/// Total issued liquidity asset amount
 		/// </summary>
 		public virtual ulong IssuedLiquidity { get; set; }
 
