@@ -19,4 +19,8 @@
     <ProjectReference Include="..\..\src\Tinyman\Tinyman.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="V2\" />
+  </ItemGroup>
+
 </Project>
