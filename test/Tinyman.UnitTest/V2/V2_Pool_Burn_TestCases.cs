@@ -60,8 +60,8 @@ namespace Tinyman.UnitTest.V2 {
 			var asset2Amount = result.AmountsOut.Item1.Asset == Asset2
 				? result.AmountsOut.Item1 : result.AmountsOut.Item2;
 
-			Assert.AreEqual(509ul, asset1Amount.Amount); // 0.00509
-			Assert.AreEqual(747_768ul, asset2Amount.Amount); // 0.747768
+			Assert.AreEqual(508ul, asset1Amount.Amount); // 0.00509
+			Assert.AreEqual(747_806ul, asset2Amount.Amount); // 0.747768
 		}
 
 		[TestMethod]
@@ -76,8 +76,8 @@ namespace Tinyman.UnitTest.V2 {
 			var asset2Amount = result.AmountsOut.Item1.Asset == Asset2
 				? result.AmountsOut.Item1 : result.AmountsOut.Item2;
 
-			Assert.AreEqual(526ul, asset1Amount.Amount); // 0.00526
-			Assert.AreEqual(772_692ul, asset2Amount.Amount); // 0.772692
+			Assert.AreEqual(525ul, asset1Amount.Amount); // 0.00526
+			Assert.AreEqual(772_730ul, asset2Amount.Amount); // 0.772692
 		}
 
 		[TestMethod]
@@ -92,8 +92,8 @@ namespace Tinyman.UnitTest.V2 {
 			var asset2Amount = result.AmountsOut.Item1.Asset == Asset2
 				? result.AmountsOut.Item1 : result.AmountsOut.Item2;
 
-			Assert.AreEqual(543ul, asset1Amount.Amount); // 0.00543
-			Assert.AreEqual(797_616ul, asset2Amount.Amount); // 0.797616
+			Assert.AreEqual(542ul, asset1Amount.Amount); // 0.00543
+			Assert.AreEqual(797_654ul, asset2Amount.Amount); // 0.797616
 		}
 
 		[TestMethod]
@@ -108,8 +108,8 @@ namespace Tinyman.UnitTest.V2 {
 			var asset2Amount = result.AmountsOut.Item1.Asset == Asset2
 				? result.AmountsOut.Item1 : result.AmountsOut.Item2;
 
-			Assert.AreEqual(560ul, asset1Amount.Amount); // 0.00560
-			Assert.AreEqual(822_541ul, asset2Amount.Amount); // 0.822541
+			Assert.AreEqual(559ul, asset1Amount.Amount); // 0.00560
+			Assert.AreEqual(822_579ul, asset2Amount.Amount); // 0.822541
 		}
 
 		[TestMethod]
@@ -124,7 +124,7 @@ namespace Tinyman.UnitTest.V2 {
 			var asset2Amount = result.AmountsOut.Item1.Asset == Asset2
 				? result.AmountsOut.Item1 : result.AmountsOut.Item2;
 
-			Assert.AreEqual(577ul, asset1Amount.Amount); // 0.00577
+			Assert.AreEqual(576ul, asset1Amount.Amount); // 0.00577
 			Assert.AreEqual(847_503ul, asset2Amount.Amount); // 0.847503
 		}
 
@@ -140,8 +140,8 @@ namespace Tinyman.UnitTest.V2 {
 			var asset2Amount = result.AmountsOut.Item1.Asset == Asset2
 				? result.AmountsOut.Item1 : result.AmountsOut.Item2;
 
-			Assert.AreEqual(594ul, asset1Amount.Amount); // 0.00594
-			Assert.AreEqual(872_428ul, asset2Amount.Amount); // 0.872428
+			Assert.AreEqual(593ul, asset1Amount.Amount); // 0.00594
+			Assert.AreEqual(872_427ul, asset2Amount.Amount); // 0.872428
 		}
 
 		[TestMethod]
@@ -152,7 +152,7 @@ namespace Tinyman.UnitTest.V2 {
 
 			var asset2Amount = result.AmountOut;
 
-			Assert.AreEqual(1_488_968ul, asset2Amount.Amount); // 1.488968
+			Assert.AreEqual(1_489_007ul, asset2Amount.Amount); // 1.488968
 			Assert.AreEqual(0ul, asset2Amount.Asset.Id);
 		}
 
@@ -176,7 +176,7 @@ namespace Tinyman.UnitTest.V2 {
 
 			var asset2Amount = result.AmountOut;
 
-			Assert.AreEqual(3_019_870ul, asset2Amount.Amount); // 3.01987
+			Assert.AreEqual(3_019_907ul, asset2Amount.Amount); // 3.01987
 			Assert.AreEqual(0ul, asset2Amount.Asset.Id);
 		}
 
@@ -200,7 +200,7 @@ namespace Tinyman.UnitTest.V2 {
 
 			var asset2Amount = result.AmountOut;
 
-			Assert.AreEqual(4_103_064ul, asset2Amount.Amount); // 4.103064
+			Assert.AreEqual(4_103_102ul, asset2Amount.Amount); // 4.103064
 			Assert.AreEqual(0ul, asset2Amount.Asset.Id);
 		}
 
