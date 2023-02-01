@@ -48,22 +48,6 @@ namespace Tinyman.V2 {
 		}
 
 		/// <inheritdoc/>
-		public override AssetAmount Convert(AssetAmount amount) {
-
-			if (amount.Asset == Asset1) {
-				return new AssetAmount(
-					Asset2, (ulong)Math.Round((double)amount.Amount * Asset1Price, MidpointRounding.AwayFromZero));
-			}
-
-			if (amount.Asset == Asset2) {
-				return new AssetAmount(
-					Asset1, (ulong)Math.Round((double)amount.Amount * Asset2Price, MidpointRounding.AwayFromZero));
-			}
-
-			return null;
-		}
-
-		/// <inheritdoc/>
 		public override SwapQuote CalculateFixedInputSwapQuote(
 			AssetAmount amountIn,
 			double slippage = 0.005) {
