@@ -314,11 +314,30 @@ namespace Tinyman.V2 {
 			return result;
 		}
 
+		/// <summary>
+		/// Calculate a single asset mint quote given a pool asset amount
+		/// </summary>
+		/// <param name="amount">Pool asset amount</param>
+		/// <param name="slippage">Slippage</param>
+		/// <returns>Mint quote</returns>
 		public virtual SingleAssetMintQuote CalculateSingleAssetMintQuote(
 			AssetAmount amount,
 			double slippage = 0.005) {
 
-			throw new NotImplementedException();
+			var otherAsset = Asset1 == amount.Asset ? Asset2 : Asset1;
+			var otherAmount = new AssetAmount(otherAsset, 0);
+
+			var flexibleQuote = CalculateFlexibleMintQuote(
+				new Tuple<AssetAmount, AssetAmount>(amount, otherAmount), slippage);
+
+			return new SingleAssetMintQuote {
+				AmountIn = amount,
+				Slippage = slippage,
+				LiquidityAssetAmount = flexibleQuote.LiquidityAssetAmount,
+				PriceImpact = flexibleQuote.PriceImpact,
+				SwapQuote = flexibleQuote.SwapQuote,
+				ValidatorApplicationId = ValidatorAppId
+			};
 		}
 
 		public virtual FlexibleMintQuote CalculateFlexibleMintQuote(
@@ -351,18 +370,90 @@ namespace Tinyman.V2 {
 			var newAsset1Reserves = Asset1Reserves + amount1.Amount;
 			var newAsset2Reserves = Asset2Reserves + amount2.Amount;
 			var newK = BigInteger.Multiply(newAsset1Reserves, newAsset2Reserves);
-			var newIssuedLiquidity = (ulong)BigInteger.Divide(
-				BigInteger.Multiply(newK, BigInteger.Pow(IssuedLiquidity, 2)), oldK);
+			var newIssuedLiquidity = (ulong)
+				Math.Sqrt(
+					(double)BigInteger.Divide(
+						BigInteger.Multiply(newK, BigInteger.Pow(IssuedLiquidity, 2)),
+						oldK));
 
 			liquidityAssetAmount = newIssuedLiquidity - IssuedLiquidity;
 
-			var calculatedAsset1Amount = (ulong)BigInteger.Divide(
+			var calculatedAsset1Amount = (long)BigInteger.Divide(
 				BigInteger.Multiply(liquidityAssetAmount, newAsset1Reserves), newIssuedLiquidity);
 
-			var calculatedAsset2Amount = (ulong)BigInteger.Divide(
+			var calculatedAsset2Amount = (long)BigInteger.Divide(
 				BigInteger.Multiply(liquidityAssetAmount, newAsset2Reserves), newIssuedLiquidity);
 
-			throw new NotImplementedException();
+			var asset1SwapAmount = (long)amount1.Amount - calculatedAsset1Amount;
+			var asset2SwapAmount = (long)amount2.Amount - calculatedAsset2Amount;
+
+			/* Swap not required */
+			if (asset1SwapAmount >= 0 && asset2SwapAmount >= 0) {
+				return new FlexibleMintQuote {
+					AmountsIn = new Tuple<AssetAmount, AssetAmount>(
+						new AssetAmount(Asset1, amount1.Amount),
+						new AssetAmount(Asset2, amount2.Amount)),
+					LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
+					Slippage = slippage,
+					PriceImpact = 0.0,
+					SwapQuote = null,
+					ValidatorApplicationId = ValidatorAppId
+				};
+			}
+
+			var swapFromAsset1ToAsset2 = false;
+			var swapInAmountWithoutFee = 0ul;
+			var swapInAmount = 0ul;
+			var swapOutAmount = 0ul;
+			var swapTotalFeeAmount = 0ul;
+			var feeAsPoolTokens = 0ul;
+
+			if (asset1SwapAmount > asset2SwapAmount) {
+				swapFromAsset1ToAsset2 = true;
+				swapInAmountWithoutFee = (ulong)asset1SwapAmount;
+				swapOutAmount = (ulong)Math.Abs(Math.Min(asset2SwapAmount, 0));
+				swapTotalFeeAmount = CalculateInternalSwapFeeAmount(swapInAmountWithoutFee);
+				feeAsPoolTokens = (ulong)BigInteger.Divide(
+					BigInteger.Multiply(swapTotalFeeAmount, newIssuedLiquidity),
+					BigInteger.Multiply(newAsset1Reserves, 2));
+				swapInAmount = swapInAmountWithoutFee + swapTotalFeeAmount;
+				liquidityAssetAmount = liquidityAssetAmount - feeAsPoolTokens;
+			} else {
+				swapInAmountWithoutFee = (ulong)asset2SwapAmount;
+				swapOutAmount = (ulong)Math.Abs(Math.Min(asset1SwapAmount, 0));
+				swapTotalFeeAmount = CalculateInternalSwapFeeAmount(swapInAmountWithoutFee);
+				feeAsPoolTokens = (ulong)BigInteger.Divide(
+					BigInteger.Multiply(swapTotalFeeAmount, newIssuedLiquidity),
+					BigInteger.Multiply(newAsset2Reserves, 2));
+				swapInAmount = swapInAmountWithoutFee + swapTotalFeeAmount;
+				liquidityAssetAmount = liquidityAssetAmount - feeAsPoolTokens;
+			}
+
+			var inputSupply = swapFromAsset1ToAsset2 ? Asset1Reserves : Asset2Reserves;
+			var outputSupply = swapFromAsset1ToAsset2 ? Asset2Reserves : Asset1Reserves;
+			var priceImpact = CalculatePriceImpact(inputSupply, outputSupply, swapInAmount, swapOutAmount);
+			var swapInAsset = swapFromAsset1ToAsset2 ? Asset1 : Asset2;
+			var swapOutAsset = swapFromAsset1ToAsset2 ? Asset2 : Asset1;
+
+			return new FlexibleMintQuote {
+				AmountsIn = new Tuple<AssetAmount, AssetAmount>(
+						new AssetAmount(Asset1, amount1.Amount),
+						new AssetAmount(Asset2, amount2.Amount)),
+				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
+				Slippage = slippage,
+				PriceImpact = priceImpact,
+				SwapQuote = new SwapQuote {
+					SwapType = SwapType.FixedInput,
+					AmountIn = new AssetAmount(swapInAsset, swapInAmount),
+					AmountOut = new AssetAmount(swapOutAsset, swapOutAmount),
+					SwapFees = new AssetAmount(swapInAsset, swapTotalFeeAmount),
+					Slippage = slippage,
+					PriceImpact = priceImpact,
+					LiquidityAsset = LiquidityAsset,
+					ValidatorApplicationId = ValidatorAppId
+				},
+				ValidatorApplicationId = ValidatorAppId
+			};
 		}
 
 		protected virtual bool TryCalculateOutputAmountOfFixedInputSwap(
@@ -414,6 +505,12 @@ namespace Tinyman.V2 {
 				BigInteger.Subtract(10_000, TotalFeeShare));
 
 			return inputAmount - swapAmount;
+		}
+
+		protected virtual ulong CalculateInternalSwapFeeAmount(ulong swapAmount) {
+			return (ulong)BigInteger.Divide(
+				BigInteger.Multiply(swapAmount, TotalFeeShare), 
+				BigInteger.Subtract(10_000, TotalFeeShare));
 		}
 
 		protected virtual ulong CalculateLiquidityAssetAmount(ulong amount1, ulong amount2) {

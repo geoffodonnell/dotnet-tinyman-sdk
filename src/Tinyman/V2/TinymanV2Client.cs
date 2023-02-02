@@ -318,6 +318,17 @@ namespace Tinyman.V2 {
 			TransactionParametersResponse txParams,
 			FlexibleMintQuote quote) {
 
+			if (quote.SwapQuote == null) {
+				return TinymanV2Transaction.PrepareMintTransactions(
+					mValidatorAppId,
+					quote.AmountsIn.Item1,
+					quote.AmountsIn.Item2,
+					quote.LiquidityAssetAmountWithSlippage,
+					sender,
+					txParams,
+					appCallNote: CreateAppCallNote());
+			}
+
 			throw new NotImplementedException();
 		}
 
@@ -346,7 +357,7 @@ namespace Tinyman.V2 {
 		public virtual TransactionGroup PrepareMintTransactions(
 			Address sender,
 			TransactionParametersResponse txParams,
-			SingleAssetMintQuote quote) {
+			SingleAssetMintQuote quote) {			
 
 			throw new NotImplementedException();
 		}
