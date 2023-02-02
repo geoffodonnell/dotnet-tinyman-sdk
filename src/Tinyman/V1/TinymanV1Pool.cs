@@ -7,7 +7,7 @@ namespace Tinyman.V1 {
 	/// <summary>
 	/// Represents an asset pool within the Tinyman V1 AMM
 	/// </summary>
-	public class TinymanV1Pool : Pool {
+	public class TinymanV1Pool : TinymanPool {
 
 		/// <summary>
 		/// Unclaimed protocol fees

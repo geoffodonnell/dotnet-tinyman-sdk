@@ -8,7 +8,7 @@ namespace Tinyman.V2 {
 	/// <summary>
 	/// Represents an asset pool within the Tinyman V2 AMM
 	/// </summary>
-	public class TinymanV2Pool : Pool {
+	public class TinymanV2Pool : TinymanPool {
 
 		/// <summary>
 		/// Protocol fees of first pool asset
@@ -72,7 +72,7 @@ namespace Tinyman.V2 {
 
 			var totalFeeAmount = CalculateFixedInputFeeAmount(amountIn.Amount);
 			var swapAmount = amountIn.Amount - totalFeeAmount;
-			
+
 			if (!TryCalculateOutputAmountOfFixedInputSwap(inputSupply, outputSupply, swapAmount, out var assetOutAmount)) {
 				throw new Exception("Insufficient reserves");
 			}
@@ -509,7 +509,7 @@ namespace Tinyman.V2 {
 
 		protected virtual ulong CalculateInternalSwapFeeAmount(ulong swapAmount) {
 			return (ulong)BigInteger.Divide(
-				BigInteger.Multiply(swapAmount, TotalFeeShare), 
+				BigInteger.Multiply(swapAmount, TotalFeeShare),
 				BigInteger.Subtract(10_000, TotalFeeShare));
 		}
 

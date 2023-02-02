@@ -1,11 +1,12 @@
 ﻿using System;
+using Tinyman.Model;
 
-namespace Tinyman.Model {
+namespace Tinyman {
 
 	/// <summary>
 	/// Common properties and methods of Tinyman asset pools
 	/// </summary>
-	public abstract class Pool {
+	public abstract class TinymanPool {
 
 		/// <summary>
 		/// Whether or not the pool exists
@@ -65,12 +66,12 @@ namespace Tinyman.Model {
 		/// <summary>
 		/// Price of first pool asset
 		/// </summary>
-		public virtual double Asset1Price { get => (double)Asset2Reserves / (double)Asset1Reserves; }
+		public virtual double Asset1Price { get => Asset2Reserves / (double)Asset1Reserves; }
 
 		/// <summary>
 		/// Price of second pool asset
 		/// </summary>
-		public virtual double Asset2Price { get => (double)Asset1Reserves / (double)Asset2Reserves; }
+		public virtual double Asset2Price { get => Asset1Reserves / (double)Asset2Reserves; }
 
 		/// <summary>
 		/// Convert one pool asset into another
@@ -80,11 +81,11 @@ namespace Tinyman.Model {
 		public virtual AssetAmount Convert(AssetAmount amount) {
 
 			if (amount.Asset == Asset1) {
-				return new AssetAmount(Asset2, (ulong)((double)amount.Amount * Asset1Price));
+				return new AssetAmount(Asset2, (ulong)(amount.Amount * Asset1Price));
 			}
 
 			if (amount.Asset == Asset2) {
-				return new AssetAmount(Asset1, (ulong)((double)amount.Amount * Asset2Price));
+				return new AssetAmount(Asset1, (ulong)(amount.Amount * Asset2Price));
 			}
 
 			return null;
