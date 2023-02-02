@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Algorand.Utils;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using Tinyman.Model;
 using Tinyman.V2;
 
@@ -47,6 +49,64 @@ namespace Tinyman.UnitTest.V2 {
 			TotalFeeShare = 30,
 			ValidatorAppId = AppId
 		};
+
+		/// <summary>
+		/// Flexible mint quote test with exact amounts in
+		/// </summary>
+		[TestMethod]
+		public void Flexible_Mint_TC01() {
+
+			var input = new AssetAmount(Asset2, 510_000); // 0.51
+			var proportionalMintQuote = Pool.CalculateMintQuote(input, 0.005);
+			var result = Pool.CalculateFlexibleMintQuote(proportionalMintQuote.AmountsIn, 0.005);
+
+			Assert.IsNull(result.SwapQuote);
+			Assert.IsNull(result.PriceImpact);
+			Assert.AreEqual(proportionalMintQuote.AmountsIn.Item1.Asset, result.AmountsIn.Item1.Asset);
+			Assert.AreEqual(proportionalMintQuote.AmountsIn.Item1.Amount, result.AmountsIn.Item1.Amount);
+			Assert.AreEqual(proportionalMintQuote.AmountsIn.Item2.Asset, result.AmountsIn.Item2.Asset);
+			Assert.AreEqual(proportionalMintQuote.AmountsIn.Item2.Amount, result.AmountsIn.Item2.Amount);
+			Assert.AreEqual(proportionalMintQuote.LiquidityAssetAmount.Asset, result.LiquidityAssetAmount.Asset);
+			Assert.AreEqual(proportionalMintQuote.LiquidityAssetAmount.Amount, result.LiquidityAssetAmount.Amount);
+			Assert.AreEqual(proportionalMintQuote.LiquidityAssetAmountWithSlippage.Asset, result.LiquidityAssetAmountWithSlippage.Asset);
+			Assert.AreEqual(proportionalMintQuote.LiquidityAssetAmountWithSlippage.Amount, result.LiquidityAssetAmountWithSlippage.Amount);
+		}
+
+		[TestMethod]
+		public void Flexible_Mint_TC02() {
+
+			var input1 = new AssetAmount(Asset1, 500); // 0.005
+			var input2 = new AssetAmount(Asset2, 500_000); // 0.5
+			var result = Pool.CalculateFlexibleMintQuote(
+				new Tuple<AssetAmount, AssetAmount>(input1, input2), 0.005);
+
+			Assert.IsNotNull(result.SwapQuote);
+
+			Assert.AreEqual(Asset1, result.AmountsIn.Item1.Asset);
+			Assert.AreEqual(500ul, result.AmountsIn.Item1.Amount);
+			Assert.AreEqual(Asset2, result.AmountsIn.Item2.Asset);
+			Assert.AreEqual(500_000ul, result.AmountsIn.Item2.Amount);
+			Assert.AreEqual(AssetLiquidity, result.LiquidityAssetAmount.Asset);
+			Assert.AreEqual(16_073ul, result.LiquidityAssetAmount.Amount);
+		}
+
+		[TestMethod]
+		public void Flexible_Mint_TC03() {
+
+			var input1 = new AssetAmount(Asset1, 500); // 0.005
+			var input2 = new AssetAmount(Asset2, 4_000_000); // 4.0
+			var result = Pool.CalculateFlexibleMintQuote(
+				new Tuple<AssetAmount, AssetAmount>(input1, input2), 0.005);
+
+			Assert.IsNotNull(result.SwapQuote);
+
+			Assert.AreEqual(Asset1, result.AmountsIn.Item1.Asset);
+			Assert.AreEqual(500ul, result.AmountsIn.Item1.Amount);
+			Assert.AreEqual(Asset2, result.AmountsIn.Item2.Asset);
+			Assert.AreEqual(4_000_000ul, result.AmountsIn.Item2.Amount);
+			Assert.AreEqual(AssetLiquidity, result.LiquidityAssetAmount.Asset);
+			Assert.AreEqual(61_349ul, result.LiquidityAssetAmount.Amount);
+		}
 
 		[TestMethod]
 		public void Proportional_Mint_TC01() {
@@ -131,6 +191,22 @@ namespace Tinyman.UnitTest.V2 {
 			Assert.AreEqual(347ul, asset1Amount.Amount); // 0.00347
 			Assert.AreEqual(510_000ul, asset2Amount.Amount); // 0.51
 			Assert.AreEqual(13_278ul, result.LiquidityAssetAmount.Amount); // 0.13278
+		}
+
+		[TestMethod]
+		public void Single_Asset_Mint_TC01() {
+
+			var input = new AssetAmount(Asset2, 1_234_567); // 1.234567
+			var result = Pool.CalculateSingleAssetMintQuote(input, 0.005);
+
+			Assert.AreEqual(Asset2, result.AmountIn.Asset);
+			Assert.AreEqual(1_234_567ul, result.AmountIn.Amount);
+			Assert.AreEqual(AssetLiquidity, result.LiquidityAssetAmount.Asset);
+			Assert.AreEqual(16_015ul, result.LiquidityAssetAmount.Amount);
+			Assert.AreEqual(Asset2, result.SwapQuote.AmountIn.Asset);
+			Assert.AreEqual(617_891ul, result.SwapQuote.AmountIn.Amount);
+			Assert.AreEqual(Asset1, result.SwapQuote.AmountOut.Asset);
+			Assert.AreEqual(417ul, result.SwapQuote.AmountOut.Amount);
 		}
 
 	}
