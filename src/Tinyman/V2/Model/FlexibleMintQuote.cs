@@ -3,6 +3,9 @@ using Tinyman.Model;
 
 namespace Tinyman.V2.Model {
 
+	/// <summary>
+	/// Tinyman flexible mint quote
+	/// </summary>
 	public class FlexibleMintQuote : IQuote {
 
 		/// <summary>
@@ -23,7 +26,7 @@ namespace Tinyman.V2.Model {
 		/// <summary>
 		/// Price impact as a decimal fraction, e.g. 1% slippage would be expressed as 0.01.
 		/// </summary>
-		public virtual double? PriceImpact { get; internal set; }
+		public virtual double? PriceImpact { get => SwapQuote?.PriceImpact; }
 
 		/// <summary>
 		/// Swap quote

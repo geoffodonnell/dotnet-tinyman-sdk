@@ -334,7 +334,6 @@ namespace Tinyman.V2 {
 				AmountIn = amount,
 				Slippage = slippage,
 				LiquidityAssetAmount = flexibleQuote.LiquidityAssetAmount,
-				PriceImpact = flexibleQuote.PriceImpact,
 				SwapQuote = flexibleQuote.SwapQuote,
 				ValidatorApplicationId = ValidatorAppId
 			};
@@ -395,7 +394,6 @@ namespace Tinyman.V2 {
 						new AssetAmount(Asset2, amount2.Amount)),
 					LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
 					Slippage = slippage,
-					PriceImpact = 0.0,
 					SwapQuote = null,
 					ValidatorApplicationId = ValidatorAppId
 				};
@@ -441,7 +439,6 @@ namespace Tinyman.V2 {
 						new AssetAmount(Asset2, amount2.Amount)),
 				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
 				Slippage = slippage,
-				PriceImpact = priceImpact,
 				SwapQuote = new SwapQuote {
 					SwapType = SwapType.FixedInput,
 					AmountIn = new AssetAmount(swapInAsset, swapInAmount),
