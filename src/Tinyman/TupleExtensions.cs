@@ -2,7 +2,7 @@
 
 namespace Tinyman {
 
-	public static class TupleExtensions {
+	internal static class TupleExtensions {
 
 		public static Tuple<T, T> Select<T>(
 			this Tuple<T, T> tuple, Func<T, T> selector) {
