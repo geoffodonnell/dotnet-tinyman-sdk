@@ -40,6 +40,11 @@ namespace Tinyman.Model {
 		public virtual ulong ValidatorApplicationId { get; internal set; }
 
 		/// <summary>
+		/// Whether or not the quote represents the first addition of liquidity to the pool.
+		/// </summary>
+		public virtual bool IsInitialLiquidity { get; internal set; }
+
+		/// <summary>
 		/// Construct a new instance.
 		/// </summary>
 		public MintQuote() { }

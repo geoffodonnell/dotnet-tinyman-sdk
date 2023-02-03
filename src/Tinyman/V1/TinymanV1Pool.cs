@@ -208,6 +208,7 @@ namespace Tinyman.V1 {
 				amount2 = amounts.Item1;
 			}
 
+			var hasExistingLiquidity = IssuedLiquidity > 0;
 			var liquidityAssetAmount = 0ul;
 
 			if (!Exists) {
@@ -215,7 +216,7 @@ namespace Tinyman.V1 {
 			}
 
 			// Pool exists and contains assets
-			if (IssuedLiquidity > 0) {
+			if (hasExistingLiquidity) {
 
 				if (amount1 == null) {
 					amount1 = Convert(amount2);
@@ -245,7 +246,8 @@ namespace Tinyman.V1 {
 				AmountsIn = new Tuple<AssetAmount, AssetAmount>(amount1, amount2),
 				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
 				Slippage = slippage,
-				ValidatorApplicationId = ValidatorAppId
+				ValidatorApplicationId = ValidatorAppId,
+				IsInitialLiquidity = !hasExistingLiquidity
 			};
 
 			return result;

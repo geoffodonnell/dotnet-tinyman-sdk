@@ -286,6 +286,7 @@ namespace Tinyman.V2 {
 				quote.LiquidityAssetAmountWithSlippage,
 				sender,
 				txParams,
+				isInitialLiquidity: quote.IsInitialLiquidity,
 				appCallNote: CreateAppCallNote());
 
 			return result;
@@ -318,18 +319,15 @@ namespace Tinyman.V2 {
 			TransactionParametersResponse txParams,
 			FlexibleMintQuote quote) {
 
-			if (quote.SwapQuote == null) {
-				return TinymanV2Transaction.PrepareMintTransactions(
-					mValidatorAppId,
-					quote.AmountsIn.Item1,
-					quote.AmountsIn.Item2,
-					quote.LiquidityAssetAmountWithSlippage,
-					sender,
-					txParams,
-					appCallNote: CreateAppCallNote());
-			}
-
-			throw new NotImplementedException();
+			return TinymanV2Transaction.PrepareMintTransactions(
+				mValidatorAppId,
+				quote.AmountsIn.Item1,
+				quote.AmountsIn.Item2,
+				quote.LiquidityAssetAmountWithSlippage,
+				sender,
+				txParams,
+				isInitialLiquidity: false,
+				appCallNote: CreateAppCallNote());
 		}
 
 		/// <summary>
@@ -357,9 +355,18 @@ namespace Tinyman.V2 {
 		public virtual TransactionGroup PrepareMintTransactions(
 			Address sender,
 			TransactionParametersResponse txParams,
-			SingleAssetMintQuote quote) {			
+			SingleAssetMintQuote quote) {
 
-			throw new NotImplementedException();
+			var otherAsset = quote.SwapQuote.AmountOut.Asset;
+
+			return TinymanV2Transaction.PrepareSingleAssetMintTransactions(
+				mValidatorAppId,
+				quote.AmountIn,
+				otherAsset,
+				quote.LiquidityAssetAmountWithSlippage,
+				sender,
+				txParams,
+				appCallNote: CreateAppCallNote());
 		}
 
 		/// <inheritdoc />

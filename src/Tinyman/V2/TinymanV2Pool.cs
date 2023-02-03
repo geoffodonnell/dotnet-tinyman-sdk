@@ -275,10 +275,11 @@ namespace Tinyman.V2 {
 				amount2 = amounts.Item1;
 			}
 
+			var hasExistingLiquidity = IssuedLiquidity > 0;
 			var liquidityAssetAmount = 0ul;
 
 			// Pool exists and contains assets
-			if (IssuedLiquidity > 0) {
+			if (hasExistingLiquidity) {
 
 				if (amount1 != null && amount2 != null) {
 					throw new ArgumentException(
@@ -308,7 +309,8 @@ namespace Tinyman.V2 {
 				LiquidityAssetAmount = new AssetAmount(LiquidityAsset, liquidityAssetAmount),
 				Slippage = slippage,
 				PriceImpact = 0.0d,
-				ValidatorApplicationId = ValidatorAppId
+				ValidatorApplicationId = ValidatorAppId,
+				IsInitialLiquidity = !hasExistingLiquidity
 			};
 
 			return result;
