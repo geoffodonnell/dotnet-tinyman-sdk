@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Tinyman.IntegrationTestConsole": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ALGORAND_INTEGRATION_TESTNET_ACCOUNT": ""
+      }
+    }
+  }
+}
