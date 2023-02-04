@@ -25,7 +25,7 @@ namespace Tinyman.V2 {
 		/// <param name="txParams">Network parameters</param>
 		/// <param name="requiredAlgo">Fund the required minimum balance</param>
 		/// <param name="appCallNote">Note for application call transaction</param>	
-		/// <returns></returns>
+		/// <returns>Transaction group to execute action</returns>
 		public static TransactionGroup PrepareBootstrapTransactions(
 			ulong validatorAppId,
 			Asset asset1,

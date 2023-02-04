@@ -109,6 +109,88 @@ namespace Tinyman {
 		}
 
 		/// <summary>
+		/// Opt-in to asset.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="asset">Asset</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> OptInToAssetAsync(
+			Account account,
+			Asset asset,
+			bool wait = true) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await OptInToAssetAsync(account, asset, txParams, wait);
+		}
+
+		/// <summary>
+		/// Opt-in to asset.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="asset">Asset</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> OptInToAssetAsync(
+			Account account,
+			Asset asset,
+			TransactionParametersResponse txParams,
+			bool wait = true) {
+
+			var txn = TxnFactory.AssetOptIn(account.Address, asset.Id, txParams);
+			var txs = new TransactionGroup(new[] { txn });
+			
+			txs.Sign(account);
+
+			return await SubmitAsync(txs, wait);
+		}
+
+		/// <summary>
+		/// Bootstrap a new pool.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="asset1">Pool asset</param>
+		/// <param name="asset2">Pool asset</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> BootstrapAsync(
+			Account account,
+			Asset asset1,
+			Asset asset2,
+			bool wait = true) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await BootstrapAsync(account, asset1, asset2, txParams, wait);
+		}
+
+		/// <summary>
+		/// Bootstrap a new pool.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="asset1">Pool asset</param>
+		/// <param name="asset2">Pool asset</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> BootstrapAsync(
+			Account account,
+			Asset asset1,
+			Asset asset2,
+			TransactionParametersResponse txParams,
+			bool wait = true) {
+
+			var txs = PrepareBootstrapTransactions(
+				account.Address, txParams, asset1, asset2);
+
+			txs.Sign(account);
+
+			return await SubmitAsync(txs, wait);
+		}
+
+		/// <summary>
 		/// Burn the liquidity pool asset amount in exchange for pool assets.
 		/// </summary>
 		/// <param name="account">Account to perform the action</param>
@@ -274,6 +356,37 @@ namespace Tinyman {
 
 			return new AssetAmount(asset, amt);
 		}
+
+		/// <summary>
+		/// Prepare a transactions group to bootstrap a new pool.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="asset1">Pool asset</param>
+		/// <param name="asset2">Pool asset</param>
+		/// <returns>Transaction group to execute action</returns>
+		public virtual async Task<TransactionGroup> PrepareBootstrapTransactionsAsync(
+			Address sender,
+			Asset asset1,
+			Asset asset2) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return PrepareBootstrapTransactions(sender, txParams, asset1, asset2);
+		}
+
+		/// <summary>
+		/// Prepare a transactions group to bootstrap a new pool.
+		/// </summary>
+		/// <param name="sender">Account address</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="asset1">Pool asset</param>
+		/// <param name="asset2">Pool asset</param>
+		/// <returns>Transaction group to execute action</returns>
+		public abstract TransactionGroup PrepareBootstrapTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			Asset asset1,
+			Asset asset2);
 
 		/// <summary>
 		/// Prepare a transaction group to burn the liquidity pool asset amount in exchange for pool assets.

@@ -215,6 +215,43 @@ namespace Tinyman.V2 {
 		}
 
 		/// <inheritdoc />
+		public override TransactionGroup PrepareBootstrapTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			Asset asset1,
+			Asset asset2) {
+
+			var assets = Util.EnsureOrder(asset1, asset2);
+			var minFee = Math.Max(TinymanV2Constant.DefaultMinFee, txParams.MinFee);
+
+			var poolMinimumBalance = 0ul;
+			var innerTxCount = 0ul;
+
+			if (assets.Item2.Id == 0) {
+				poolMinimumBalance = TinymanV2Constant.MinPoolBalanceAsaAlgoPair;
+				innerTxCount = 5;
+			} else {
+				poolMinimumBalance = TinymanV2Constant.MinPoolBalanceAsaAsaPair;
+				innerTxCount = 6;
+			}
+
+			var appCallFee = (innerTxCount + 1) * minFee;
+			var requiredAlgo = poolMinimumBalance + appCallFee + 100_000;
+
+			var result = TinymanV2Transaction.PrepareBootstrapTransactions(
+				mValidatorAppId,
+				asset1,
+				asset2,
+				sender,
+				appCallFee,
+				txParams,
+				requiredAlgo: requiredAlgo,
+				appCallNote: CreateAppCallNote());
+
+			return result;
+		}
+
+		/// <inheritdoc />
 		public override TransactionGroup PrepareBurnTransactions(
 			Address sender,
 			TransactionParametersResponse txParams,

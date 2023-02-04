@@ -1,8 +1,15 @@
-﻿using Algorand.Algod.Model;
+﻿using Algorand;
+using Algorand.Algod.Model;
+using Algorand.Algod.Model.Transactions;
+using Algorand.Common;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Tinyman.Model;
 using Tinyman.V2;
+using Account = Algorand.Algod.Model.Account;
+using AssetParams = Algorand.Algod.Model.AssetParams;
 
 namespace Tinyman.IntegrationTestConsole {
 
@@ -17,44 +24,64 @@ namespace Tinyman.IntegrationTestConsole {
 
 			// Initialize the client
 			var client = new TinymanV2TestnetClient();
+			var txParams = await client.FetchTransactionParamsAsync();
+			
+			// Create assets for testing
+			var asset1Name = Guid.NewGuid().ToString().Replace("-", "");
+			var asset2Name = Guid.NewGuid().ToString().Replace("-", "");
 
-			// Assets
-			var kollektor = await client.FetchAssetAsync(151333215);
-			var algo = await client.FetchAssetAsync(0);
-			var lit = await client.FetchAssetAsync(153296445);
-			var usdc = await client.FetchAssetAsync(10458941);
-			var tinyAu = await client.FetchAssetAsync(21582981);
+			var createAsset1Tx = GetAssetCreateTransaction(asset1Name, account.Address, txParams);
+			var createAsset2Tx = GetAssetCreateTransaction(asset2Name, account.Address, txParams);
 
-			// Get the pool - TinyAU <-> ALGO
-			var pool1 = await client.FetchPoolAsync(algo, tinyAu);
-			var balance1 = await client.GetBalanceAsync(account.Address, pool1.LiquidityAsset);
+			// Create and sign the asset creation transactions
+			var createAssetsGroup = new TransactionGroup(new[] { createAsset1Tx, createAsset2Tx });
+			
+			createAssetsGroup.Sign(account);
 
-			// Get the pool - KLTR <-> ALGO
-			//var pool2 = await client.FetchPoolAsync(algo, kollektor);
-			//var balance2 = await client.GetBalanceAsync(account.Address, pool2.LiquidityAsset);
+			// Submit the asset creation transactions
+			Console.WriteLine("Creating assets...");
+			var createAssetsTxResult = await client.SubmitAsync(createAssetsGroup);
+			Console.WriteLine($"Creation complete; tx {createAssetsTxResult.Txid}");
 
-			var input1 = new AssetAmount(tinyAu, 500); // 0.005
-			var input2 = new AssetAmount(algo, 500_000); // 0.5
-			var result = pool1.CalculateFlexibleMintQuote(
-				new Tuple<AssetAmount, AssetAmount>(input1, input2), 0.005);
-			//var quote2 = pool1.CalculateFlexibleMintQuote(, 0.0d);
+			// Get the asset IDs
+			var accountInfo = await client.DefaultApi
+				.AccountInformationAsync(account.Address.EncodeAsString(), null, Format.Json);
 
+			var asset1Id = accountInfo
+				.CreatedAssets
+				.FirstOrDefault(s => String.Equals(s.Params.Name, asset1Name, StringComparison.Ordinal))?
+				.Index;
 
-			//var mintQuote = pool1.CalculateSingleAssetMintQuote(new AssetAmount(algo, 410_010), 0.0d);
+			var asset2Id = accountInfo
+				.CreatedAssets
+				.FirstOrDefault(s => String.Equals(s.Params.Name, asset2Name, StringComparison.Ordinal))?
+				.Index;
 
-			//Console.WriteLine(
-			//	$"Minting with {mintQuote.AmountIn} will receive {mintQuote.LiquidityAssetAmount}.");
+			var asset1 = await client.FetchAssetAsync(asset1Id.Value);
+			var asset2 = await client.FetchAssetAsync(asset2Id.Value);
 
-			//Console.WriteLine("Press enter to execute ...");
-			//Console.ReadLine();
-			//Console.WriteLine("Executing ...");
+			Console.WriteLine($"\t ->{asset1}");
+			Console.WriteLine($"\t ->{asset2}");
 
-			//var bResult = await client.MintAsync(account, mintQuote, true);
+			Console.WriteLine($"Bootstrapping {asset1} <-> {asset2} pool...");
+			var bootstrapResult = await client.BootstrapAsync(account, asset1, asset2);
+			Console.WriteLine($"Bootstrap complete; tx {bootstrapResult.Txid}.");
 
-			//Console.WriteLine($"Tx ID: {bResult.Txid}");
+			Console.WriteLine($"Fetching pool info...");
+			var pool = await client.FetchPoolAsync(asset1, asset2);
+			Console.WriteLine($"Fetched pool info.");
 
-			//var quote = pool.CalculateMintQuote(new AssetAmount(algo, 1_110_000));
-			//var result = await client.MintAsync(account, quote, true);
+			Console.WriteLine($"Opting in to pool liquidity asset...");
+			var optInResult = await client.OptInToAssetAsync(account, pool.LiquidityAsset);
+			Console.WriteLine($"Opted in to pool liquidity asset.");
+
+			var mintQuote = pool.CalculateMintQuote(new Tuple<AssetAmount, AssetAmount>(
+				new AssetAmount(asset1, 1_000_000_000_000),
+				new AssetAmount(asset2, 500_000_000_000)));
+
+			Console.WriteLine($"Minting initial liquidity...");
+			var mintResult = await client.MintAsync(account, mintQuote);
+			Console.WriteLine($"Mint complete; tx {mintResult.Txid}.");
 
 			Console.WriteLine("Press any key to continue ...");
 			Console.ReadKey();
@@ -73,6 +100,25 @@ namespace Tinyman.IntegrationTestConsole {
 			}
 
 			return found?.Replace(",", "") ?? String.Empty;
+		}
+
+		static Transaction GetAssetCreateTransaction(
+			string name, 
+			Address address,
+			TransactionParametersResponse txParams) {
+
+			return TxnFactory.AssetCreate(new AssetParams {
+				Clawback = address,
+				Creator = address,
+				Decimals = 6,
+				DefaultFrozen = false,
+				Freeze = null,
+				Manager = address,
+				Name = name,
+				UnitName = "GUID",
+				Reserve = address,
+				Total = 10_000_000_000_000_000
+			}, txParams);
 		}
 
 	}

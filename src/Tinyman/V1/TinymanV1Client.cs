@@ -328,6 +328,23 @@ namespace Tinyman.V1 {
 		}
 
 		/// <inheritdoc />
+		public override TransactionGroup PrepareBootstrapTransactions(
+			Address sender,
+			TransactionParametersResponse txParams,
+			Asset asset1,
+			Asset asset2) {
+
+			var result = TinymanV1Transaction.PrepareBootstrapTransactions(
+				mValidatorAppId,
+				asset1, 
+				asset2, 
+				sender,
+				txParams);
+
+			return result;
+		}
+
+		/// <inheritdoc />
 		public override TransactionGroup PrepareBurnTransactions(
 			Address sender,
 			TransactionParametersResponse txParams,
