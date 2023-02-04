@@ -15,7 +15,7 @@ using Algorand.Algod.Model.Transactions;
 namespace Tinyman.V1 {
 
     /// <summary>
-    /// Usefule utility methods
+    /// Useful utility methods
     /// </summary>
 	public static class Util {
                
@@ -51,7 +51,7 @@ namespace Tinyman.V1 {
 
         public static byte[] EncodeValue(object value, string type) {
 
-            if (String.Equals(type, "int", StringComparison.OrdinalIgnoreCase)) {
+            if (String.Equals(type, "int", StringComparison.InvariantCultureIgnoreCase)) {
                 return EncodeInt(value);
             }
 

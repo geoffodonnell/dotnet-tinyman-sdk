@@ -49,12 +49,12 @@ namespace Tinyman.IntegrationTestConsole {
 
 			var asset1Id = accountInfo
 				.CreatedAssets
-				.FirstOrDefault(s => String.Equals(s.Params.Name, asset1Name, StringComparison.Ordinal))?
+				.FirstOrDefault(s => String.Equals(s.Params.Name, asset1Name, StringComparison.InvariantCulture))?
 				.Index;
 
 			var asset2Id = accountInfo
 				.CreatedAssets
-				.FirstOrDefault(s => String.Equals(s.Params.Name, asset2Name, StringComparison.Ordinal))?
+				.FirstOrDefault(s => String.Equals(s.Params.Name, asset2Name, StringComparison.InvariantCulture))?
 				.Index;
 
 			var asset1 = await client.FetchAssetAsync(asset1Id.Value);
