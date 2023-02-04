@@ -60,8 +60,8 @@ namespace Tinyman.IntegrationTestConsole {
 			var asset1 = await client.FetchAssetAsync(asset1Id.Value);
 			var asset2 = await client.FetchAssetAsync(asset2Id.Value);
 
-			Console.WriteLine($"\t ->{asset1}");
-			Console.WriteLine($"\t ->{asset2}");
+			Console.WriteLine($"\t-> {asset1}");
+			Console.WriteLine($"\t-> {asset2}");
 
 			Console.WriteLine($"Bootstrapping {asset1} <-> {asset2} pool...");
 			var bootstrapResult = await client.BootstrapAsync(account, asset1, asset2);
@@ -82,6 +82,37 @@ namespace Tinyman.IntegrationTestConsole {
 			Console.WriteLine($"Minting initial liquidity...");
 			var mintResult = await client.MintAsync(account, mintQuote);
 			Console.WriteLine($"Mint complete; tx {mintResult.Txid}.");
+
+			Console.WriteLine($"Swapping [fixed input] {asset1} <-> {asset2}...");
+			pool = await client.FetchPoolAsync(pool.Address);
+			var swapQuote1 = pool.CalculateFixedInputSwapQuote(new AssetAmount(asset1, 10_000), 0.00);
+			var swapResult1 = await client.SwapAsync(account, swapQuote1);
+			Console.WriteLine($"Swap complete; tx {swapResult1.Txid}.");
+
+			Console.WriteLine($"Swapping [fixed input] {asset2} <-> {asset1}...");
+			pool = await client.FetchPoolAsync(pool.Address);
+			var swapQuote2 = pool.CalculateFixedInputSwapQuote(new AssetAmount(asset2, 11_000), 0.00);
+			var swapResult2 = await client.SwapAsync(account, swapQuote2);
+			Console.WriteLine($"Swap complete; tx {swapResult2.Txid}.");
+
+			Console.WriteLine($"Swapping [fixed output] {asset1} <-> {asset2}...");
+			pool = await client.FetchPoolAsync(pool.Address);
+			var swapQuote3 = pool.CalculateFixedOutputSwapQuote(new AssetAmount(asset2, 13_000), 0.00);
+			var swapResult3 = await client.SwapAsync(account, swapQuote3);
+			Console.WriteLine($"Swap complete; tx {swapResult3.Txid}.");
+
+			Console.WriteLine($"Swapping [fixed output] {asset2} <-> {asset1}...");
+			pool = await client.FetchPoolAsync(pool.Address);
+			var swapQuote4 = pool.CalculateFixedOutputSwapQuote(new AssetAmount(asset1, 14_000), 0.00);
+			var swapResult4 = await client.SwapAsync(account, swapQuote4);
+			Console.WriteLine($"Swap complete; tx {swapResult4.Txid}.");
+
+			Console.WriteLine($"Burning liquidity...");
+			var liquidityAssetBalance = await client.GetBalanceAsync(account.Address, pool.LiquidityAsset);
+			pool = await client.FetchPoolAsync(pool.Address);
+			var burnQuote = pool.CalculateBurnQuote(liquidityAssetBalance, 0.00);
+			var burnResult = await client.BurnAsync(account, burnQuote);
+			Console.WriteLine($"Burned liquidity; tx {burnResult.Txid}");
 
 			Console.WriteLine("Press any key to continue ...");
 			Console.ReadKey();
