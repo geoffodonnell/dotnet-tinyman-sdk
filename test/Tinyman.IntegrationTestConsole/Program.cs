@@ -2,8 +2,8 @@
 using Algorand.Algod.Model;
 using Algorand.Algod.Model.Transactions;
 using Algorand.Common;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Tinyman.Model;
@@ -15,12 +15,19 @@ namespace Tinyman.IntegrationTestConsole {
 
 	internal class Program {
 
+		const int DEFAULT_VERSION = 2;
 		const string ACCOUNT_ENV_NAME = "ALGORAND_INTEGRATION_TESTNET_ACCOUNT";
 
 		static async Task Main(string[] args) {
 
 			var mnemonic = GetMnemonic();
+			var version = GetVersionToRun(args);
 			var account = new Account(mnemonic);
+
+			if (version == 0) {
+				await Scratchpad.PerformSteps(account);
+				return;
+			}
 
 			// Initialize the client
 			var client = new TinymanV2TestnetClient();
@@ -63,56 +70,13 @@ namespace Tinyman.IntegrationTestConsole {
 			Console.WriteLine($"\t-> {asset1}");
 			Console.WriteLine($"\t-> {asset2}");
 
-			Console.WriteLine($"Bootstrapping {asset1} <-> {asset2} pool...");
-			var bootstrapResult = await client.BootstrapAsync(account, asset1, asset2);
-			Console.WriteLine($"Bootstrap complete; tx {bootstrapResult.Txid}.");
-
-			Console.WriteLine($"Fetching pool info...");
-			var pool = await client.FetchPoolAsync(asset1, asset2);
-			Console.WriteLine($"Fetched pool info.");
-
-			Console.WriteLine($"Opting in to pool liquidity asset...");
-			var optInResult = await client.OptInToAssetAsync(account, pool.LiquidityAsset);
-			Console.WriteLine($"Opted in to pool liquidity asset.");
-
-			var mintQuote = pool.CalculateMintQuote(new Tuple<AssetAmount, AssetAmount>(
-				new AssetAmount(asset1, 1_000_000_000_000),
-				new AssetAmount(asset2, 500_000_000_000)));
-
-			Console.WriteLine($"Minting initial liquidity...");
-			var mintResult = await client.MintAsync(account, mintQuote);
-			Console.WriteLine($"Mint complete; tx {mintResult.Txid}.");
-
-			Console.WriteLine($"Swapping [fixed input] {asset1} <-> {asset2}...");
-			pool = await client.FetchPoolAsync(pool.Address);
-			var swapQuote1 = pool.CalculateFixedInputSwapQuote(new AssetAmount(asset1, 10_000), 0.00);
-			var swapResult1 = await client.SwapAsync(account, swapQuote1);
-			Console.WriteLine($"Swap complete; tx {swapResult1.Txid}.");
-
-			Console.WriteLine($"Swapping [fixed input] {asset2} <-> {asset1}...");
-			pool = await client.FetchPoolAsync(pool.Address);
-			var swapQuote2 = pool.CalculateFixedInputSwapQuote(new AssetAmount(asset2, 11_000), 0.00);
-			var swapResult2 = await client.SwapAsync(account, swapQuote2);
-			Console.WriteLine($"Swap complete; tx {swapResult2.Txid}.");
-
-			Console.WriteLine($"Swapping [fixed output] {asset1} <-> {asset2}...");
-			pool = await client.FetchPoolAsync(pool.Address);
-			var swapQuote3 = pool.CalculateFixedOutputSwapQuote(new AssetAmount(asset2, 13_000), 0.00);
-			var swapResult3 = await client.SwapAsync(account, swapQuote3);
-			Console.WriteLine($"Swap complete; tx {swapResult3.Txid}.");
-
-			Console.WriteLine($"Swapping [fixed output] {asset2} <-> {asset1}...");
-			pool = await client.FetchPoolAsync(pool.Address);
-			var swapQuote4 = pool.CalculateFixedOutputSwapQuote(new AssetAmount(asset1, 14_000), 0.00);
-			var swapResult4 = await client.SwapAsync(account, swapQuote4);
-			Console.WriteLine($"Swap complete; tx {swapResult4.Txid}.");
-
-			Console.WriteLine($"Burning liquidity...");
-			var liquidityAssetBalance = await client.GetBalanceAsync(account.Address, pool.LiquidityAsset);
-			pool = await client.FetchPoolAsync(pool.Address);
-			var burnQuote = pool.CalculateBurnQuote(liquidityAssetBalance, 0.00);
-			var burnResult = await client.BurnAsync(account, burnQuote);
-			Console.WriteLine($"Burned liquidity; tx {burnResult.Txid}");
+			if (version == 1) {
+				await V1Integration.PerformSteps(account, asset1, asset2);
+			} else if (version == 2) {
+				await V2Integration.PerformSteps(account, asset1, asset2);
+			} else {
+				Console.WriteLine("Provided version is not valid.");
+			}
 
 			Console.WriteLine("Press any key to continue ...");
 			Console.ReadKey();
@@ -150,6 +114,34 @@ namespace Tinyman.IntegrationTestConsole {
 				Reserve = address,
 				Total = 10_000_000_000_000_000
 			}, txParams);
+		}
+
+		static int GetVersionToRun(string[] args) {
+
+			if (args == null || args.Length == 0) {
+				return DEFAULT_VERSION;
+			}
+
+			if (String.Equals(args[0], "v0", StringComparison.InvariantCultureIgnoreCase) ||
+				String.Equals(args[0], "-v0", StringComparison.InvariantCultureIgnoreCase)) {
+
+				return 0;
+			}
+
+			if (String.Equals(args[0], "v1", StringComparison.InvariantCultureIgnoreCase) ||
+				String.Equals(args[0], "-v1", StringComparison.InvariantCultureIgnoreCase)) {
+
+				return 1;
+			}
+
+			if (String.Equals(args[0], "v2", StringComparison.InvariantCultureIgnoreCase) ||
+				String.Equals(args[0], "-v2", StringComparison.InvariantCultureIgnoreCase)) {
+
+				return 2;
+			}
+
+			return DEFAULT_VERSION;
+
 		}
 
 	}
