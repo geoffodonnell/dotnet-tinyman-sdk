@@ -7,7 +7,7 @@ trigger: none
 variables:
   buildConfiguration: 'Release'
   nugetPackageId: 'Tinyman'
-  majorVersion: '1'
+  majorVersion: '2'
   minorVersion: '0'
   patchVersion: '0'
 
