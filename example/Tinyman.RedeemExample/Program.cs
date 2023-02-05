@@ -3,7 +3,6 @@ using System;
 using System.Configuration;
 using System.Threading.Tasks;
 using Tinyman.V1;
-using Tinyman.V1.Action;
 
 namespace Tinyman.RedeemExample {
 
@@ -21,7 +20,7 @@ namespace Tinyman.RedeemExample {
 			var account = new Account(mnemonic);
 
 			// Initialize the client
-			var client = new TinymanTestnetClient();
+			var client = new TinymanV1TestnetClient();
 
 			// Ensure the account is opted in
 			var isOptedIn = await client.IsOptedInAsync(account.Address);
@@ -43,8 +42,7 @@ namespace Tinyman.RedeemExample {
 				// Redeem each amount
 				foreach (var quote in excessAmounts) {
 
-					var action = Redeem.FromQuote(quote);
-					var result = await client.RedeemAsync(account, action);
+					var result = await client.RedeemAsync(account, quote);
 
 					Console.WriteLine(
 						$"Redeemed {quote.Amount} from {quote.PoolAddress.EncodeAsString()}; transaction ID: {result.Txid}");

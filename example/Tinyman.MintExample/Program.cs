@@ -2,9 +2,8 @@
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
-using Tinyman.V1;
-using Tinyman.V1.Action;
-using Tinyman.V1.Model;
+using Tinyman.Model;
+using Tinyman.V2;
 
 namespace Tinyman.MintExample {
 
@@ -22,14 +21,7 @@ namespace Tinyman.MintExample {
 			var account = new Account(mnemonic);
 
 			// Initialize the client
-			var client = new TinymanTestnetClient();
-
-			// Ensure the account is opted in
-			var isOptedIn = await client.IsOptedInAsync(account.Address);
-
-			if (!isOptedIn) {
-				await client.OptInAsync(account);
-			}
+			var client = new TinymanV2TestnetClient();
 
 			// Get the assets
 			var tinyUsdc = await client.FetchAssetAsync(21582668);
@@ -40,16 +32,14 @@ namespace Tinyman.MintExample {
 
 			// Get a quote to add 1 Algo and the corresponding tinyUsdc amount to the pool
 			var amountIn = Algorand.Utils.Utils.AlgosToMicroalgos(1.0);
-			var quote = pool.CalculateMintQuote(new AssetAmount(algo, amountIn), 0.05);
+			var quote = pool.CalculateMintQuote(new AssetAmount(algo, amountIn), 0.005);
 
 			// Check the quote, ensure it's something that you want to execute
-
-			// Convert to action
-			var action = Mint.FromQuote(quote);
+			//
 
 			// Perform the minting
 			try {
-				var result = await client.MintAsync(account, action);
+				var result = await client.MintAsync(account, quote);
 
 				Console.WriteLine($"Mint complete, transaction ID: {result.Txid}");
 

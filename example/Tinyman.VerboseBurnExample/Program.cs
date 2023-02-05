@@ -3,8 +3,7 @@ using Algorand.Algod.Model;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
-using Tinyman.V1;
-using Tinyman.V1.Model;
+using Tinyman.V2;
 
 namespace Tinyman.VerboseBurnExample {
 
@@ -22,40 +21,11 @@ namespace Tinyman.VerboseBurnExample {
 			var account = new Account(mnemonic);
 
 			// Initialize the client
-			var appId = Constant.TestnetValidatorAppId;
-			var url = Constant.AlgodTestnetHost;
+			var appId = TinymanV2Constant.TestnetValidatorAppIdV2_0;
+			var url = TinymanV2Constant.AlgodTestnetHost;
 			var token = String.Empty;
 			var httpClient = HttpClientConfigurator.ConfigureHttpClient(url, token);
-			var client = new TinymanClient(httpClient, url, appId);
-
-			// Ensure the account is opted in
-			var isOptedIn = await client.IsOptedInAsync(account.Address);
-
-			if (!isOptedIn) {
-
-				var txParams = await client.FetchTransactionParamsAsync();
-
-				// Use utility method to create the transaction group
-				var optInTxGroup = TinymanTransaction
-					.PrepareAppOptinTransactions(appId, account.Address, txParams);
-
-				// Sign the transactions sent from the account,
-				// the LogicSig transactions will already be signed
-				for (var i = 0; i < optInTxGroup.Transactions.Length; i++) {
-					var tx = optInTxGroup.Transactions[i];
-
-					// Inspect transaction
-
-					// Sign transaction
-					if (tx.Sender.Equals(account.Address)) {
-						optInTxGroup.SignedTransactions[i] = tx.Sign(account);
-					}
-				}
-
-				var optInResult = await client.SubmitAsync(optInTxGroup);
-
-				Console.WriteLine($"Opt-in successful, transaction ID: {optInResult.Txid}");
-			}
+			var client = new TinymanV2Client(httpClient, url, appId);
 
 			// Get the assets
 			var tinyUsdc = await client.FetchAssetAsync(21582668);
@@ -66,7 +36,7 @@ namespace Tinyman.VerboseBurnExample {
 
 			// Get a quote to swap the entire liquidity pool asset balance for pooled assets
 			var amount = await client.GetBalanceAsync(account.Address, pool.LiquidityAsset);
-			var quote = pool.CalculateBurnQuote(amount, 0.05);
+			var quote = pool.CalculateBurnQuote(amount, 0.005);
 
 			// Check the quote, ensure it's something that you want to execute
 			
@@ -76,7 +46,7 @@ namespace Tinyman.VerboseBurnExample {
 				var txParams = await client.FetchTransactionParamsAsync();
 
 				// Use utility method to create the transaction group
-				var burnTxGroup = TinymanTransaction.PrepareBurnTransactions(
+				var burnTxGroup = TinymanV2Transaction.PrepareBurnTransactions(
 						appId,
 						quote.AmountsOutWithSlippage.Item1,
 						quote.AmountsOutWithSlippage.Item2,

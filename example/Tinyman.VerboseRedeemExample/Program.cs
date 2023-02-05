@@ -4,7 +4,6 @@ using System;
 using System.Configuration;
 using System.Threading.Tasks;
 using Tinyman.V1;
-using Tinyman.V1.Model;
 
 namespace Tinyman.VerboseRedeemExample {
 
@@ -22,11 +21,11 @@ namespace Tinyman.VerboseRedeemExample {
 			var account = new Account(mnemonic);
 
 			// Initialize the client
-			var appId = Constant.TestnetValidatorAppId;
-			var url = Constant.AlgodTestnetHost;
+			var appId = TinymanV1Constant.TestnetValidatorAppIdV1_1;
+			var url = TinymanV1Constant.AlgodTestnetHost;
 			var token = String.Empty;
 			var httpClient = HttpClientConfigurator.ConfigureHttpClient(url, token);
-			var client = new TinymanClient(httpClient, url, appId);
+			var client = new TinymanV1Client(httpClient, url, appId);
 
 			// Ensure the account is opted in
 			var isOptedIn = await client.IsOptedInAsync(account.Address);
@@ -36,7 +35,7 @@ namespace Tinyman.VerboseRedeemExample {
 				var txParams = await client.FetchTransactionParamsAsync();
 
 				// Use utility method to create the transaction group
-				var optInTxGroup = TinymanTransaction
+				var optInTxGroup = TinymanV1Transaction
 					.PrepareAppOptinTransactions(appId, account.Address, txParams);
 
 				// Sign the transactions sent from the account,
@@ -74,7 +73,7 @@ namespace Tinyman.VerboseRedeemExample {
 					var pool = await client.FetchPoolAsync(quote.PoolAddress);
 
 					// Use utility method to create the transaction group
-					var redeemTxGroup = TinymanTransaction.PrepareRedeemTransactions(
+					var redeemTxGroup = TinymanV1Transaction.PrepareRedeemTransactions(
 							appId,
 							pool.Asset1,
 							pool.Asset2,

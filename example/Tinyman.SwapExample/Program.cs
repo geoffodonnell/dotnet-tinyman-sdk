@@ -2,9 +2,8 @@
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
-using Tinyman.V1;
-using Tinyman.V1.Action;
-using Tinyman.V1.Model;
+using Tinyman.Model;
+using Tinyman.V2;
 
 namespace Tinyman.SwapExample {
 
@@ -22,14 +21,7 @@ namespace Tinyman.SwapExample {
 			var account = new Account(mnemonic);
 
 			// Initialize the client
-			var client = new TinymanTestnetClient();
-
-			// Ensure the account is opted in
-			var isOptedIn = await client.IsOptedInAsync(account.Address);
-
-			if (!isOptedIn) {
-				await client.OptInAsync(account);
-			}
+			var client = new TinymanV2TestnetClient();
 
 			// Get the assets
 			var tinyUsdc = await client.FetchAssetAsync(21582668);
@@ -40,16 +32,14 @@ namespace Tinyman.SwapExample {
 
 			// Get a quote to swap 1 Algo for tinyUsdc
 			var amountIn = Algorand.Utils.Utils.AlgosToMicroalgos(1.0);
-			var quote = pool.CalculateFixedInputSwapQuote(new AssetAmount(algo, amountIn), 0.05);
+			var quote = pool.CalculateFixedInputSwapQuote(new AssetAmount(algo, amountIn), 0.005);
 
 			// Check the quote, ensure it's something that you want to execute
-
-			// Convert to action
-			var action = Swap.FromQuote(quote);
+			//
 
 			// Perform the swap
 			try {
-				var result = await client.SwapAsync(account, action);
+				var result = await client.SwapAsync(account, quote);
 
 				Console.WriteLine($"Swap complete, transaction ID: {result.Txid}");
 

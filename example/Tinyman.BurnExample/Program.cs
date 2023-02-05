@@ -2,9 +2,7 @@
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
-using Tinyman.V1;
-using Tinyman.V1.Action;
-using Tinyman.V1.Model;
+using Tinyman.V2;
 
 namespace Tinyman.BurnExample {
 
@@ -22,14 +20,7 @@ namespace Tinyman.BurnExample {
 			var account = new Account(mnemonic);
 
 			// Initialize the client
-			var client = new TinymanTestnetClient();
-
-			// Ensure the account is opted in
-			var isOptedIn = await client.IsOptedInAsync(account.Address);
-
-			if (!isOptedIn) {
-				await client.OptInAsync(account);
-			}
+			var client = new TinymanV2TestnetClient();
 
 			// Get the assets
 			var tinyUsdc = await client.FetchAssetAsync(21582668);
@@ -40,16 +31,14 @@ namespace Tinyman.BurnExample {
 
 			// Get a quote to swap the entire liquidity pool asset balance for pooled assets
 			var amount = await client.GetBalanceAsync(account.Address, pool.LiquidityAsset);
-			var quote = pool.CalculateBurnQuote(amount, 0.05);
+			var quote = pool.CalculateBurnQuote(amount, 0.005);
 
 			// Check the quote, ensure it's something that you want to execute
-
-			// Convert to action
-			var action = Burn.FromQuote(quote);
+			//
 
 			// Perform the burning
 			try {
-				var result = await client.BurnAsync(account, action);
+				var result = await client.BurnAsync(account, quote);
 
 				Console.WriteLine($"Burn complete, transaction ID: {result.Txid}");
 
