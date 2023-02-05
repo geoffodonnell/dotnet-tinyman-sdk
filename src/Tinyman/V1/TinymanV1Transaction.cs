@@ -28,7 +28,7 @@ namespace Tinyman.V1 {
 			ulong validatorAppId, Address sender, TransactionParametersResponse txParams) {
 
 			var transaction = TxnFactory.AppOptIn(
-				sender, Convert.ToUInt64(validatorAppId), txParams);
+				sender, validatorAppId, txParams);
 
 			return new TransactionGroup(new[] { transaction });
 		}
@@ -44,7 +44,7 @@ namespace Tinyman.V1 {
 			ulong validatorAppId, Address sender, TransactionParametersResponse txParams) {
 
 			var transaction = TxnFactory.AppCall(
-				sender, Convert.ToUInt64(validatorAppId), txParams, onCompletion: OnCompletion.Clear);
+				sender, validatorAppId, txParams, onCompletion: OnCompletion.Clear);
 
 			return new TransactionGroup(new[] { transaction });
 		}
@@ -97,7 +97,7 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 					sender, 
 					poolAddress,
-					Convert.ToUInt64(asset2.Id > 0 ? 961000 : 860000),
+					asset2.Id > 0 ? 961000ul : 860000ul,
 					txParams,
 					note: Strings.ToUtf8ByteArray("fee")));
 
@@ -116,7 +116,7 @@ namespace Tinyman.V1 {
 
 			var appOptinTx = TxnFactory.AppCall(
 				poolAddress,
-				Convert.ToUInt64(validatorAppId),
+				validatorAppId,
 				txParams, 
 				onCompletion: OnCompletion.Optin,
 				applicationArgs: applicationArgs,
@@ -232,19 +232,19 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 				poolAddress,
 				sender,
-				Convert.ToUInt64(assetAmount1.Amount),
+				assetAmount1.Amount,
 				assetAmount1.Asset.Id,
 				txParams));
 
 			// AssetTransferTxn
 			if (assetAmount2.Asset.Id == 0) {
 				transactions.Add(TxnFactory.Pay(
-					poolAddress, sender, Convert.ToUInt64(assetAmount2.Amount), txParams));
+					poolAddress, sender, assetAmount2.Amount, txParams));
 			} else {
 				transactions.Add(TxnFactory.Pay(
 					poolAddress,
 					sender,
-					Convert.ToUInt64(assetAmount2.Amount),
+					assetAmount2.Amount,
 					assetAmount2.Asset.Id,
 					txParams));
 			}
@@ -253,7 +253,7 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 				sender,
 				poolAddress,
-				Convert.ToUInt64(assetAmountLiquidity.Amount),
+				assetAmountLiquidity.Amount,
 				assetAmountLiquidity.Asset.Id,
 				txParams));
 
@@ -321,7 +321,7 @@ namespace Tinyman.V1 {
 
 			var callTx = TxnFactory.AppCall(
 				poolAddress,
-				Convert.ToUInt64(validatorAppId),
+				validatorAppId,
 				txParams,
 				accounts: accounts,
 				applicationArgs: applicationArgs,
@@ -333,19 +333,19 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 				sender,
 				poolAddress,
-				Convert.ToUInt64(assetAmount1.Amount),
+				assetAmount1.Amount,
 				assetAmount1.Asset.Id,
 				txParams));
 
 			// AssetTransferTxn
 			if (assetAmount2.Asset.Id == 0) {
 				transactions.Add(TxnFactory.Pay(
-					sender, poolAddress, Convert.ToUInt64(assetAmount2.Amount), txParams));
+					sender, poolAddress, assetAmount2.Amount, txParams));
 			} else {
 				transactions.Add(TxnFactory.Pay(
 					sender,
 					poolAddress,
-					Convert.ToUInt64(assetAmount2.Amount),
+					assetAmount2.Amount,
 					assetAmount2.Asset.Id,
 					txParams));
 			}
@@ -354,7 +354,7 @@ namespace Tinyman.V1 {
 			transactions.Add(TxnFactory.Pay(
 				poolAddress,
 				sender,
-				Convert.ToUInt64(assetAmountLiquidity.Amount),
+				assetAmountLiquidity.Amount,
 				assetAmountLiquidity.Asset.Id,
 				txParams));
 
@@ -420,7 +420,7 @@ namespace Tinyman.V1 {
 
 			var callTx = TxnFactory.AppCall(
 				poolAddress,
-				Convert.ToUInt64(validatorAppId),
+				validatorAppId,
 				txParams,
 				accounts: accounts,
 				applicationArgs: applicationArgs,
@@ -431,7 +431,7 @@ namespace Tinyman.V1 {
 			// AssetTransferTxn
 			if (assetAmount.Asset.Id == 0) {
 				transactions.Add(TxnFactory.Pay(
-					poolAddress, sender, Convert.ToUInt64(assetAmount.Amount), txParams));
+					poolAddress, sender, assetAmount.Amount, txParams));
 			} else {
 				transactions.Add(TxnFactory.Pay(
 					poolAddress,
@@ -511,7 +511,7 @@ namespace Tinyman.V1 {
 
 			var callTx = TxnFactory.AppCall(
 				poolAddress,
-				Convert.ToUInt64(validatorAppId),
+				validatorAppId,
 				txParams,
 				accounts: accounts,
 				applicationArgs: applicationArgs,
@@ -600,7 +600,7 @@ namespace Tinyman.V1 {
 
 			// ApplicationNoOpTxn			
 			var callTx = TxnFactory.AppCall(
-				poolAddress, Convert.ToUInt64(validatorAppId), txParams);
+				poolAddress, validatorAppId, txParams);
 
 			if (callTx is ApplicationNoopTransaction noopTx) {
 				noopTx.ApplicationArgs = new List<byte[]> {

@@ -24,11 +24,6 @@ namespace Tinyman.IntegrationTestConsole {
 			var version = GetVersionToRun(args);
 			var account = new Account(mnemonic);
 
-			if (version == 0) {
-				await Scratchpad.PerformSteps(account);
-				return;
-			}
-
 			// Initialize the client
 			var client = new TinymanV2TestnetClient();
 			var txParams = await client.FetchTransactionParamsAsync();

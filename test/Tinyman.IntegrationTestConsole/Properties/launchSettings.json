@@ -2,7 +2,7 @@
   "profiles": {
     "Tinyman.IntegrationTestConsole": {
       "commandName": "Project",
-      "commandLineArgs": "-v0",
+      "commandLineArgs": "-v1",
       "environmentVariables": {
         "ALGORAND_INTEGRATION_TESTNET_ACCOUNT": ""
       }

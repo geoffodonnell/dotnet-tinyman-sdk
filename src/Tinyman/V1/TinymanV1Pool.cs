@@ -237,8 +237,8 @@ namespace Tinyman.V1 {
 					throw new Exception("Amounts required for both assets for first mint!");
 				}
 
-				liquidityAssetAmount = System.Convert.ToUInt64(
-					Math.Sqrt((double)BigInteger.Multiply(amount1.Amount, amount2.Amount)) - 1000);
+				liquidityAssetAmount = (ulong)BigInteger.Subtract(
+					(ulong)Math.Sqrt((double)BigInteger.Multiply(amount1.Amount, amount2.Amount)), 1000);
 				slippage = 0;
 			}
 
