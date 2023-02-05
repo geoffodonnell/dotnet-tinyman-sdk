@@ -136,7 +136,6 @@ namespace Tinyman.IntegrationTestConsole {
 			}
 
 			return DEFAULT_VERSION;
-
 		}
 
 	}
