@@ -40,7 +40,7 @@ Swap one asset for another in an existing pool.
 
 ```C#
 // Initialize the client
-var client = new TinymanTestnetClient();
+var client = new TinymanV2TestnetClient(); // or TinymanV1TestnetClient();
 
 // Get the assets
 var tinyUsdc = await client.FetchAssetAsync(21582668);
@@ -50,14 +50,11 @@ var algo = await client.FetchAssetAsync(0);
 var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 // Get a quote to swap 1 Algo for tinyUsdc
-var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
-var quote = pool.CalculateFixedInputSwapQuote(new AssetAmount(algo, amountIn), 0.05);
-
-// Convert to action
-var action = Swap.FromQuote(quote);
+var amountIn = Algorand.Utils.Utils.AlgosToMicroalgos(1.0);
+var quote = pool.CalculateFixedInputSwapQuote(new AssetAmount(algo, amountIn), 0.005);
 
 // Perform the swap
-var result = await client.SwapAsync(account, action);
+var result = await client.SwapAsync(account, quote);
 ```
 
 ## Minting
@@ -65,7 +62,7 @@ Add assets to an existing pool in exchange for the liquidity pool asset.
 
 ```C#
 // Initialize the client
-var client = new TinymanTestnetClient();
+var client = new TinymanV2TestnetClient(); // or TinymanV1TestnetClient();
 
 // Get the assets
 var tinyUsdc = await client.FetchAssetAsync(21582668);
@@ -75,14 +72,11 @@ var algo = await client.FetchAssetAsync(0);
 var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 // Get a quote to add 1 Algo and the corresponding tinyUsdc amount to the pool
-var amountIn = Algorand.Utils.AlgosToMicroalgos(1.0);
-var quote = pool.CalculateMintQuote(new AssetAmount(algo, amountIn), 0.05);
-
-// Convert to action
-var action = Mint.FromQuote(quote);
+var amountIn = Algorand.Utils.Utils.AlgosToMicroalgos(1.0);
+var quote = pool.CalculateMintQuote(new AssetAmount(algo, amountIn), 0.005);
 
 // Perform the minting
-var result = await client.MintAsync(account, action);
+var result = await client.MintAsync(account, quote);
 ```
 
 ## Burning
@@ -90,7 +84,7 @@ Exchange the liquidity pool asset for the pool assets.
 
 ```C#
 // Initialize the client
-var client = new TinymanTestnetClient();
+var client = new TinymanV2TestnetClient(); // or TinymanV1TestnetClient();
 
 // Get the assets
 var tinyUsdc = await client.FetchAssetAsync(21582668);
@@ -101,30 +95,25 @@ var pool = await client.FetchPoolAsync(algo, tinyUsdc);
 
 // Get a quote to swap the entire liquidity pool asset balance for pooled assets
 var amount = client.GetBalance(account.Address, pool.LiquidityAsset);
-var quote = pool.CalculateBurnQuote(amount, 0.05);
-
-// Convert to action
-var action = Burn.FromQuote(quote);
+var quote = pool.CalculateBurnQuote(amount, 0.005);
 
 // Perform the burning
-var result = await client.BurnAsync(account, action);
+var result = await client.BurnAsync(account, quote);
 ```
 
-## Redeeming
+## Redeeming (V1 only)
 Redeem excess amounts from previous transactions.
 
 ```C#
 // Initialize the client
-var client = new TinymanTestnetClient();
+var client = new TinymanV1TestnetClient();
 
 // Fetch the amounts
 var excessAmounts = await client.FetchExcessAmountsAsync(account.Address);
 
 // Redeem each amount
 foreach (var quote in excessAmounts) {
-
-	var action = Redeem.FromQuote(quote);
-	var result = await client.RedeemAsync(account, action);
+	var result = await client.RedeemAsync(account, quote);
 }
 ```
 
