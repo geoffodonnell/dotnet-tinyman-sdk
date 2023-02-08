@@ -12,7 +12,7 @@ using Asset = Tinyman.Model.Asset;
 namespace Tinyman.UnitTest.V1 {
 
 	[TestClass]
-	public class V1_TinymanTransaction_TestCases {
+	public class V1_Transaction_TestCases {
 
 		public static readonly ulong AppId = TinymanV1Constant.MainnetValidatorAppIdV1_1;
 
