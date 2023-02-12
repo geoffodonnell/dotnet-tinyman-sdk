@@ -7,9 +7,11 @@
 This library provides access to the [Tinyman AMM](https://docs.tinyman.org/) on the Algorand blockchain.
 
 ## Release Notes
-v2.0.0.1 - Adds support for Tinyman V2
-         - Significant refactor; removes 'Action' classes 
-v1.0.0.2 - Updates Algorand SDK to 1.0.0.15; target net6.0
+* v2.0.0.1
+	* Adds support for Tinyman V2
+    * Significant refactor; removes 'Action' classes 
+* v1.0.0.2
+	* Updates Algorand SDK to 1.0.0.15; target net6.0
 
 ## Known Issues
 
