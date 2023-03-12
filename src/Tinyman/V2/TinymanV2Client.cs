@@ -95,13 +95,34 @@ namespace Tinyman.V2 {
 		public virtual async Task<PostTransactionsResponse> BurnAsync(
 			Account account,
 			SingleAssetBurnQuote quote,
+			bool wait) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await BurnAsync(account, quote, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Burn quote</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> BurnAsync(
+			Account account,
+			SingleAssetBurnQuote quote,
+			Address sender = null,
 			bool wait = true) {
 
 			ValidQuoteOrThrow(quote);
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return await BurnAsync(account, quote, txParams, wait);
+			return await BurnAsync(account, quote, txParams, sender, wait);
 		}
 
 		/// <summary>
@@ -116,14 +137,35 @@ namespace Tinyman.V2 {
 			Account account,
 			SingleAssetBurnQuote quote,
 			TransactionParametersResponse txParams,
+			bool wait) {
+
+			ValidQuoteOrThrow(quote);
+
+			return await BurnAsync(account, quote, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Burn the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Burn quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> BurnAsync(
+			Account account,
+			SingleAssetBurnQuote quote,
+			TransactionParametersResponse txParams,
+			Address sender = null,
 			bool wait = true) {
 
 			ValidQuoteOrThrow(quote);
 
-			var txs = PrepareBurnTransactions(
-				account.Address, txParams, quote);
+			var snd = sender ?? account.Address;
+			var txs = PrepareBurnTransactions(snd, txParams, quote);
 
-			txs.Sign(account);
+			txs.Sign(account, sender);
 
 			return await SubmitAsync(txs, wait);
 		}
@@ -138,13 +180,34 @@ namespace Tinyman.V2 {
 		public virtual async Task<PostTransactionsResponse> MintAsync(
 			Account account,
 			FlexibleMintQuote quote,
+			bool wait) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await MintAsync(account, quote, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			FlexibleMintQuote quote,
+			Address sender = null,
 			bool wait = true) {
 
 			ValidQuoteOrThrow(quote);
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return await MintAsync(account, quote, txParams, wait);
+			return await MintAsync(account, quote, txParams, sender, wait);
 		}
 
 		/// <summary>
@@ -159,14 +222,35 @@ namespace Tinyman.V2 {
 			Account account,
 			FlexibleMintQuote quote,
 			TransactionParametersResponse txParams,
+			bool wait) {
+
+			ValidQuoteOrThrow(quote);
+
+			return await MintAsync(account, quote, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			FlexibleMintQuote quote,
+			TransactionParametersResponse txParams,
+			Address sender = null,
 			bool wait = true) {
 
 			ValidQuoteOrThrow(quote);
 
-			var txs = PrepareMintTransactions(
-				account.Address, txParams, quote);
+			var snd = sender ?? account.Address;
+			var txs = PrepareMintTransactions(snd, txParams, quote);
 
-			txs.Sign(account);
+			txs.Sign(account, sender);
 
 			return await SubmitAsync(txs, wait);
 		}
@@ -181,13 +265,34 @@ namespace Tinyman.V2 {
 		public virtual async Task<PostTransactionsResponse> MintAsync(
 			Account account,
 			SingleAssetMintQuote quote,
+			bool wait) {
+
+			ValidQuoteOrThrow(quote);
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await MintAsync(account, quote, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			SingleAssetMintQuote quote,
+			Address sender = null,
 			bool wait = true) {
 
 			ValidQuoteOrThrow(quote);
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return await MintAsync(account, quote, txParams, wait);
+			return await MintAsync(account, quote, txParams, sender, wait);
 		}
 
 		/// <summary>
@@ -202,14 +307,35 @@ namespace Tinyman.V2 {
 			Account account,
 			SingleAssetMintQuote quote,
 			TransactionParametersResponse txParams,
+			bool wait) {
+
+			ValidQuoteOrThrow(quote);
+
+			return await MintAsync(account, quote, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Mint the liquidity pool asset amount in exchange for pool assets.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Mint quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> MintAsync(
+			Account account,
+			SingleAssetMintQuote quote,
+			TransactionParametersResponse txParams,
+			Address sender = null,
 			bool wait = true) {
 
 			ValidQuoteOrThrow(quote);
 
-			var txs = PrepareMintTransactions(
-				account.Address, txParams, quote);
+			var snd = sender ?? account.Address;
+			var txs = PrepareMintTransactions(snd, txParams, quote);
 
-			txs.Sign(account);
+			txs.Sign(account, sender);
 
 			return await SubmitAsync(txs, wait);
 		}

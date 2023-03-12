@@ -164,11 +164,28 @@ namespace Tinyman.V1 {
 		/// <returns>Response from node</returns>
 		public virtual async Task<PostTransactionsResponse> OptInAsync(
 			Account account,
+			bool wait) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await OptInAsync(account, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Opt-in to Tinyman.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> OptInAsync(
+			Account account,
+			Address sender = null,
 			bool wait = true) {
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return await OptInAsync(account, txParams, wait);
+			return await OptInAsync(account, txParams, sender, wait);
 		}
 
 		/// <summary>
@@ -181,12 +198,29 @@ namespace Tinyman.V1 {
 		public virtual async Task<PostTransactionsResponse> OptInAsync(
 			Account account,
 			TransactionParametersResponse txParams,
+			bool wait) {
+
+			return await OptInAsync(account, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Opt-in to Tinyman.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> OptInAsync(
+			Account account,
+			TransactionParametersResponse txParams,
+			Address sender = null,
 			bool wait = true) {
 
-			var txs = PrepareOptInTransactions(
-				account.Address, txParams);
+			var snd = sender ?? account.Address;
+			var txs = PrepareOptInTransactions(snd, txParams);
 
-			txs.Sign(account);
+			txs.Sign(account, sender);
 
 			return await SubmitAsync(txs, wait);
 		}
@@ -199,11 +233,28 @@ namespace Tinyman.V1 {
 		/// <returns>Response from node</returns>
 		public virtual async Task<PostTransactionsResponse> OptOutAsync(
 			Account account,
+			bool wait) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await OptOutAsync(account, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Opt-out of Tinyman.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> OptOutAsync(
+			Account account,
+			Address sender = null,
 			bool wait = true) {
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return await OptOutAsync(account, txParams, wait);
+			return await OptOutAsync(account, txParams, sender, wait);
 		}
 
 		/// <summary>
@@ -216,12 +267,29 @@ namespace Tinyman.V1 {
 		public virtual async Task<PostTransactionsResponse> OptOutAsync(
 			Account account,
 			TransactionParametersResponse txParams,
+			bool wait) {
+
+			return await OptOutAsync(account, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Opt-out of Tinyman.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> OptOutAsync(
+			Account account,
+			TransactionParametersResponse txParams,
+			Address sender = null,
 			bool wait = true) {
 
-			var txs = PrepareOptOutTransactions(
-				account.Address, txParams);
+			var snd = sender ?? account.Address;
+			var txs = PrepareOptOutTransactions(snd, txParams);
 
-			txs.Sign(account);
+			txs.Sign(account, sender);
 
 			return await SubmitAsync(txs, wait);
 		}
@@ -236,11 +304,30 @@ namespace Tinyman.V1 {
 		public virtual async Task<PostTransactionsResponse> RedeemAsync(
 			Account account,
 			RedeemQuote quote,
+			bool wait) {
+
+			var txParams = await mDefaultApi.TransactionParamsAsync();
+
+			return await RedeemAsync(account, quote, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Redeem a specified excess asset amount from a pool.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Redeem quote</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> RedeemAsync(
+			Account account,
+			RedeemQuote quote,
+			Address sender = null,
 			bool wait = true) {
 
 			var txParams = await mDefaultApi.TransactionParamsAsync();
 
-			return await RedeemAsync(account, quote, txParams, wait);
+			return await RedeemAsync(account, quote, txParams, sender, wait);
 		}
 
 		/// <summary>
@@ -255,12 +342,31 @@ namespace Tinyman.V1 {
 			Account account,
 			RedeemQuote quote,
 			TransactionParametersResponse txParams,
+			bool wait) {
+
+			return await RedeemAsync(account, quote, txParams, null, wait);
+		}
+
+		/// <summary>
+		/// Redeem a specified excess asset amount from a pool.
+		/// </summary>
+		/// <param name="account">Account to perform the action</param>
+		/// <param name="quote">Redeem quote</param>
+		/// <param name="txParams">Network parameters</param>
+		/// <param name="sender">Sender address (if different than account)</param>
+		/// <param name="wait">Whether or not to wait for the transaction to be confirmed</param>
+		/// <returns>Response from node</returns>
+		public virtual async Task<PostTransactionsResponse> RedeemAsync(
+			Account account,
+			RedeemQuote quote,
+			TransactionParametersResponse txParams,
+			Address sender = null,
 			bool wait = true) {
 
-			var txs = PrepareRedeemTransactions(
-				account.Address, txParams, quote);
+			var snd = sender ?? account.Address;
+			var txs = PrepareRedeemTransactions(snd, txParams, quote);
 
-			txs.Sign(account);
+			txs.Sign(account, sender);
 
 			return await SubmitAsync(txs, wait);
 		}

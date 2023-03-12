@@ -1,12 +1,14 @@
 ﻿using Algorand;
+using Algorand.Algod;
 using Algorand.Algod.Model;
 using Algorand.Algod.Model.Transactions;
 using Algorand.Common;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
-using Tinyman.Model;
 using Tinyman.V2;
 using Account = Algorand.Algod.Model.Account;
 using AssetParams = Algorand.Algod.Model.AssetParams;
@@ -17,28 +19,34 @@ namespace Tinyman.IntegrationTestConsole {
 
 		const int DEFAULT_VERSION = 2;
 		const string ACCOUNT_ENV_NAME = "ALGORAND_INTEGRATION_TESTNET_ACCOUNT";
-
+		const string ADDRESS_ENV_NAME = "ALGORAND_INTEGRATION_TESTNET_ADDRESS";
+		
 		static async Task Main(string[] args) {
 
 			var mnemonic = GetMnemonic();
 			var version = GetVersionToRun(args);
 			var account = new Account(mnemonic);
+			var sender = GetAddress(account);
 
 			// Initialize the client
 			var client = new TinymanV2TestnetClient();
+
+			//SEE: https://github.com/FrankSzendzielarz/dotnet-algorand-sdk/issues/11
+			ByteArrayConverter.Attach(client.DefaultApi);
+
 			var txParams = await client.FetchTransactionParamsAsync();
 			
 			// Create assets for testing
 			var asset1Name = Guid.NewGuid().ToString().Replace("-", "");
 			var asset2Name = Guid.NewGuid().ToString().Replace("-", "");
 
-			var createAsset1Tx = GetAssetCreateTransaction(asset1Name, account.Address, txParams);
-			var createAsset2Tx = GetAssetCreateTransaction(asset2Name, account.Address, txParams);
+			var createAsset1Tx = GetAssetCreateTransaction(asset1Name, sender, txParams);
+			var createAsset2Tx = GetAssetCreateTransaction(asset2Name, sender, txParams);
 
 			// Create and sign the asset creation transactions
 			var createAssetsGroup = new TransactionGroup(new[] { createAsset1Tx, createAsset2Tx });
 			
-			createAssetsGroup.Sign(account);
+			createAssetsGroup.Sign(account, sender);
 
 			// Submit the asset creation transactions
 			Console.WriteLine("Creating assets...");
@@ -47,7 +55,7 @@ namespace Tinyman.IntegrationTestConsole {
 
 			// Get the asset IDs
 			var accountInfo = await client.DefaultApi
-				.AccountInformationAsync(account.Address.EncodeAsString(), null, Format.Json);
+				.AccountInformationAsync(sender.EncodeAsString(), null, Format.Json);
 
 			var asset1Id = accountInfo
 				.CreatedAssets
@@ -66,9 +74,9 @@ namespace Tinyman.IntegrationTestConsole {
 			Console.WriteLine($"\t-> {asset2}");
 
 			if (version == 1) {
-				await V1Integration.PerformSteps(account, asset1, asset2);
+				await V1Integration.PerformSteps(account, sender, asset1, asset2);
 			} else if (version == 2) {
-				await V2Integration.PerformSteps(account, asset1, asset2);
+				await V2Integration.PerformSteps(account, sender, asset1, asset2);
 			} else {
 				Console.WriteLine("Provided version is not valid.");
 			}
@@ -79,17 +87,20 @@ namespace Tinyman.IntegrationTestConsole {
 
 		static string GetMnemonic() {
 
-			var found = Environment.GetEnvironmentVariable(ACCOUNT_ENV_NAME, EnvironmentVariableTarget.Process);
+			var found = GetEnvironmentVariable(ACCOUNT_ENV_NAME);
 
-			if (String.IsNullOrWhiteSpace(found)) { 
-				found = Environment.GetEnvironmentVariable(ACCOUNT_ENV_NAME, EnvironmentVariableTarget.User);
+			return found?.Replace(",", "");
+		}
+
+		static Address GetAddress(Account account) {
+
+			var address =  GetEnvironmentVariable(ADDRESS_ENV_NAME);
+
+			if (!String.IsNullOrWhiteSpace(address)) {
+				return new Address(address);
 			}
 
-			if (String.IsNullOrWhiteSpace(found)) {
-				found = Environment.GetEnvironmentVariable(ACCOUNT_ENV_NAME, EnvironmentVariableTarget.Machine);
-			}
-
-			return found?.Replace(",", "") ?? String.Empty;
+			return account.Address;
 		}
 
 		static Transaction GetAssetCreateTransaction(
@@ -138,6 +149,20 @@ namespace Tinyman.IntegrationTestConsole {
 			return DEFAULT_VERSION;
 		}
 
+		static string GetEnvironmentVariable(string variable) {
+
+			var found = Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.Process);
+
+			if (String.IsNullOrWhiteSpace(found)) {
+				found = Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.User);
+			}
+
+			if (String.IsNullOrWhiteSpace(found)) {
+				found = Environment.GetEnvironmentVariable(variable, EnvironmentVariableTarget.Machine);
+			}
+
+			return found ?? String.Empty;
+		}
 	}
 
 }
