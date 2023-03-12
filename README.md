@@ -7,6 +7,8 @@
 This library provides access to the [Tinyman AMM](https://docs.tinyman.org/) on the Algorand blockchain.
 
 ## Release Notes
+* v2.1.0.1
+	* Addss support for re-keyed accounts
 * v2.0.0.1
 	* Adds support for Tinyman V2
     * Significant refactor; removes 'Action' classes 
