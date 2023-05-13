@@ -442,8 +442,8 @@ namespace Tinyman.V1 {
 			}
 			
 			foreach (var tx in transactions) {
-				if (String.IsNullOrWhiteSpace(tx.GenesisID)) {
-					tx.GenesisID = txParams.GenesisId;
+				if (String.IsNullOrWhiteSpace(tx.GenesisId)) {
+					tx.GenesisId = txParams.GenesisId;
 				}
 			}
 
@@ -546,8 +546,8 @@ namespace Tinyman.V1 {
 			}
 
 			foreach (var tx in transactions) {
-				if (String.IsNullOrWhiteSpace(tx.GenesisID)) {
-					tx.GenesisID = txParams.GenesisId;
+				if (String.IsNullOrWhiteSpace(tx.GenesisId)) {
+					tx.GenesisId = txParams.GenesisId;
 				}
 			}
 
@@ -629,8 +629,8 @@ namespace Tinyman.V1 {
 				txParams));
 
 			foreach (var tx in transactions) {
-				if (String.IsNullOrWhiteSpace(tx.GenesisID)) {
-					tx.GenesisID = txParams.GenesisId;
+				if (String.IsNullOrWhiteSpace(tx.GenesisId)) {
+					tx.GenesisId = txParams.GenesisId;
 				}
 			}
 
